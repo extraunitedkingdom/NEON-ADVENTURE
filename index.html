@@ -85,18 +85,7 @@ let attackCooldown = 0;
 const attackPower = 1;
 const attackRange = 65;
 
-let isAttacking = false;
-// ===== プレイヤーデータ復元 =====
-if (savedGame && savedGame.player) {
-  player.x = savedGame.player.x ?? player.x;
-  player.y = savedGame.player.y ?? player.y;
-  player.jumps = savedGame.player.jumps ?? 0;
-
-  player.vx = 0;
-  player.vy = 0;
-  playerHP = savedGame.playerHP ?? maxHP;
-}
-const platforms = [
+let isAttacking = false;const platforms = [
   {x:0,y:430,w:500,h:70},
   {x:560,y:380,w:180,h:25},
   {x:800,y:330,w:180,h:25},
@@ -839,6 +828,17 @@ if (savedGame) {
   coinCount = savedGame.coinCount ?? coinCount;
   bestTime = savedGame.bestTime ?? bestTime;
   timeRecords = savedGame.timeRecords ?? timeRecords;
+
+  // プレイヤーデータ復元
+  if (savedGame.player) {
+    player.x = savedGame.player.x ?? player.x;
+    player.y = savedGame.player.y ?? player.y;
+    player.jumps = savedGame.player.jumps ?? 0;
+
+    player.vx = 0;
+    player.vy = 0;
+    playerHP = savedGame.playerHP ?? maxHP;
+  }
 }
 
 // ゲームデータを保存する
