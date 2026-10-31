@@ -534,16 +534,34 @@ coins.forEach(coin => {
   }
 });
 
-// ゴール判定
+// ゴール判定・タイム記録
 if (
+  !gameClear &&
   player.x < goal.x + goal.w &&
   player.x + player.w > goal.x &&
   player.y < goal.y + goal.h &&
   player.y + player.h > goal.y
 ) {
   gameClear = true;
-}
 
+  currentTime = (Date.now() - gameStart) / 1000;
+
+  if (bestTime === null || currentTime < bestTime) {
+    bestTime = currentTime;
+    localStorage.setItem("bestTime", bestTime);
+  }
+
+  timeRecords.push(currentTime);
+  timeRecords.sort((a, b) => a - b);
+  timeRecords = timeRecords.slice(0, 5);
+
+  localStorage.setItem(
+    "timeRecords",
+    JSON.stringify(timeRecords)
+  );
+
+  alert("CLEAR! TIME: " + currentTime.toFixed(2) + "秒");
+}
   // カメラ追従
   camera = Math.max(0, player.x - 250);
 
@@ -581,7 +599,7 @@ function draw() {
     ctx.fillStyle = "#16e0bd";
     ctx.fillRect(p.x,p.y,p.w,5);
   }
-  
+
 // 隠しステージの入口
 if (player.x >= 1700) {
   hiddenStageUnlocked = true;
@@ -724,34 +742,7 @@ coins.forEach(coin => {
   }
 });
 
-// ゴール判定・タイム記録・ランキング
-if (
-  !gameClear &&
-  player.x < goal.x + goal.w &&
-  player.x + player.w > goal.x &&
-  player.y < goal.y + goal.h &&
-  player.y + player.h > goal.y
-) {
-  gameClear = true;
 
-  currentTime = (Date.now() - gameStart) / 1000;
-
-  if (bestTime === null || currentTime < bestTime) {
-    bestTime = currentTime;
-    localStorage.setItem("bestTime", bestTime);
-  }
-
-  timeRecords.push(currentTime);
-  timeRecords.sort((a, b) => a - b);
-  timeRecords = timeRecords.slice(0, 5);
-
-  localStorage.setItem(
-    "timeRecords",
-    JSON.stringify(timeRecords)
-  );
-
-  alert("CLEAR! TIME: " + currentTime.toFixed(2) + "秒");
-}
 // HP表示
 ctx.fillStyle = "white";
 ctx.font = "22px Arial";
