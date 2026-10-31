@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEON ADVENTURE</title>
+<style>
+{ box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #101329;
+  color: white;
+  font-family: sans-serif;
+  text-align: center;
+}
+h1 { color: #16e0bd; }
+canvas {
+  width: 100%;
+  max-width: 900px;
+  background: #171b3a;
+  border: 2px solid #16e0bd;
+  border-radius: 10px;
+  touch-action: none;
+}
+button {
+  background: #7b61ff;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 15px 20px;
+  margin: 5px;
+  font-size: 18px;
+  font-weight: bold;
+  touch-action: none;
+}
+</style>
+</head>
+<body>
+
+<h1>NEON ADVENTURE</h1>
+<p>WORLD 1 : GREEN FOREST</p>
+
+<canvas id="game" width="900" height="500"></canvas>
+
+<p>移動：矢印キー / A・D　ジャンプ：Space</p>
+
+<button id="left">◀</button>
+<button id="jump">JUMP ▲</button>
+<button id="right">▶</button>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+const W = canvas.width;
+const H = canvas.height;
+
+let keys = {};
+let touch = {left:false,right:false};
+
+let camera = 0;
+let frame = 0;
+
+const player = {
+  x: 80,
+  y: 200,
+  w: 30,
+  h: 42,
+  vx: 0,
+  vy: 0,
+  speed: 4,
+  jumpPower: 11,
+  jumps: 0,
+  maxJumps: 2,
+  grounded: false
+};
+// プレイヤーのHP・攻撃設定
+let playerHP = 3;
+const maxHP = 3;
+
+let attackCooldown = 0;
+const attackPower = 1;
+const attackRange = 65;
+
+let isAttacking = false;
+// ===== プレイヤーデータ復元 =====
+if (savedGame && savedGame.player) {
+  player.x = savedGame.player.x ?? player.x;
+  player.y = savedGame.player.y ?? player.y;
+  player.jumps = savedGame.player.jumps ?? 0;
+
+  player.vx = 0;
+  player.vy = 0;
+  playerHP = savedGame.playerHP ?? maxHP;
+}
+const platforms = [
+  {x:0,y:430,w:500,h:70},
+  {x:560,y:380,w:180,h:25},
+  {x:800,y:330,w:180,h:25},
+  {x:1050,y:390,w:180,h:25},
+  {x:1300,y:330,w:180,h:25},
+  {x:1550,y:280,w:180,h:25},
+  {x:1800,y:350,w:250,h:100},
+  {x:2150,y:300,w:180,h:25},
+  {x:2450,y:350,w:350,h:100}
+];
+// ===== 隠しステージ専用マップ =====
+const mainPlatforms = platforms.map(p => ({...p}));
+
+const hiddenPlatforms = [
+  {x:0,y:430,w:350,h:70},
+  {x:420,y:370,w:150,h:25},
+  {x:650,y:310,w:150,h:25},
+  {x:900,y:370,w:150,h:25},
+  {x:1150,y:300,w:150,h:25},
+  {x:1400,y:350,w:350,h:100}
+];
+
+const hiddenExit = {
+  x:1550,
+  y:270,
+  w:50,
+  h:80
+};
+// ダメージ・無敵時間
+let invincibleTimer = 0;
+const invincibleDuration = 60;
+// 攻撃処理
+function attack() {
+  if (attackCooldown > 0 || gameClear) return;
+
+  attackCooldown = 20;
+
+  const px = player.x + player.w / 2;
+  const py = player.y + player.h / 2;
+
+  enemies.forEach(enemy => {
+    if (!enemy.alive) return;
+
+    const ex = enemy.x + enemy.w / 2;
+    const ey = enemy.y + enemy.h / 2;
+
+    const distance = Math.hypot(px - ex, py - ey);
+
+    if (distance < attackRange) {
+      enemy.alive = false;
+    }
+  });
+  // ボスへの攻撃判定
+if (boss.alive) {
+  const bx = boss.x + boss.w / 2;
+  const by = boss.y + boss.h / 2;
+
+  const distance = Math.hypot(px - bx, py - by);
+
+  if (distance < attackRange + 35) {
+    boss.hp--;
+
+    if (boss.hp <= 0) {
+      boss.hp = 0;
+      boss.alive = false;
+      bossDefeated = true;
+    }
+  }
+}
+}
+
+// マウス左クリック
+canvas.addEventListener("mousedown", e => {
+  if (e.button === 0) {
+    attack();
+  }
+});
+function jump() {
+  if (player.jumps < player.maxJumps) {
+    player.vy = -player.jumpPower;
+    player.jumps++;
+    player.grounded = false;
+  }
+}
+
+window.addEventListener("keydown", e => {
+  keys[e.code] = true;
+
+  if (e.code === "Space" && !e.repeat) {
+    e.preventDefault();
+    jump();
+  }
+});
+
+window.addEventListener("keyup", e => {
+  keys[e.code] = false;
+});
+
+function bindButton(id, action) {
+  const button = document.getElementById(id);
+
+  button.addEventListener("pointerdown", e => {
+    e.preventDefault();
+    action(true);
+  });
+
+  button.addEventListener("pointerup", () => action(false));
+  button.addEventListener("pointerleave", () => action(false));
+  button.addEventListener("pointercancel", () => action(false));
+}
+
+bindButton("left", v => touch.left = v);
+bindButton("right", v => touch.right = v);
+
+document.getElementById("jump").addEventListener(
+  "pointerdown", e => {
+    e.preventDefault();
+    jump();
+  }
+);
+let playerSkin = "#9b8aff";
+// ===== ステージ6：スキル =====
+let dashTimer = 0;
+let invincibleSkillTimer = 0;
+
+const normalSpeed = player.speed;
+
+// ダッシュスキル
+function useDash() {
+  if (dashTimer > 0  gameClear) return;
+
+  dashTimer = 120;
+}
+
+// 無敵スキル
+function useInvincibleSkill() {
+  if (invincibleSkillTimer > 0  gameClear) return;
+
+  invincibleSkillTimer = 120;
+}
+
+// スキルボタン
+const dashButton = document.createElement("button");
+dashButton.textContent = "DASH";
+dashButton.style.cssText =
+  "position:fixed;bottom:100px;right:20px;z-index:1000;padding:12px;background:#00bfff;color:white;border:2px solid white;border-radius:10px;";
+document.body.appendChild(dashButton);
+dashButton.onclick = useDash;
+
+const skillButton = document.createElement("button");
+skillButton.textContent = "INVINCIBLE";
+skillButton.style.cssText =
+  "position:fixed;bottom:45px;right:20px;z-index:1000;padding:12px;background:#9b61ff;color:white;border:2px solid white;border-radius:10px;";
+document.body.appendChild(skillButton);
+skillButton.onclick = useInvincibleSkill;
+// ===== スキンショップ =====
+let ownedSkins = ["#9b8aff"];
+
+const skinShop = [
+  { name: "NEON BLUE", color: "#00cfff", price: 5 },
+  { name: "FIRE RED", color: "#ff4545", price: 10 },
+  { name: "GOLD", color: "#ffd700", price: 20 },
+  { name: "MINT", color: "#16e0bd", price: 30 }
+];
+
+const shopButton = document.createElement("button");
+shopButton.textContent = "SKIN SHOP";
+shopButton.style.cssText =
+  "position:fixed;top:15px;right:15px;z-index:1000;padding:12px;background:#292044;color:white;border:2px solid #9b8aff;border-radius:10px;font-weight:bold;";
+document.body.appendChild(shopButton);
+// ===== リスタートボタン =====
+const restartButton = document.createElement("button");
+restartButton.textContent = "RESTART";
+restartButton.style.cssText =
+  "position:fixed;top:15px;left:15px;z-index:1000;padding:12px;background:#292044;color:white;border:2px solid #00ffff;border-radius:10px;font-weight:bold;";
+
+document.body.appendChild(restartButton);
+
+restartButton.onclick = () => {
+  player.x = 80;
+  player.y = 200;
+  player.vx = 0;
+  player.vy = 0;
+  player.jumps = 0;
+
+  playerHP = maxHP;
+  coinCount = 0;
+
+  gameStart = Date.now();
+  gameClear = false;
+  currentTime = 0;
+
+  hiddenStageActive = false;
+  platforms.splice(0, platforms.length, ...mainPlatforms);
+
+  enemies.forEach(enemy => enemy.alive = true);
+
+  alert("RESTART!");
+};
+// ===== 手動セーブボタン =====
+const saveButton = document.createElement("button");
+saveButton.textContent = "SAVE";
+saveButton.style.cssText =
+  "position:fixed;top:115px;left:15px;z-index:1000;padding:12px;background:#292044;color:white;border:2px solid #00ff99;border-radius:10px;font-weight:bold;";
+
+document.body.appendChild(saveButton);
+
+saveButton.onclick = () => {
+  saveGame();
+  alert("GAME SAVED!");
+};
+// ===== ランキング表示 =====
+const rankingButton = document.createElement("button");
+rankingButton.textContent = "RANKING";
+rankingButton.style.cssText =
+  "position:fixed;top:65px;left:15px;z-index:1000;padding:12px;background:#292044;color:white;border:2px solid #ffd700;border-radius:10px;font-weight:bold;";
+
+document.body.appendChild(rankingButton);
+
+rankingButton.onclick = () => {
+  const rankingText = timeRecords.length
+    ? timeRecords.map((time, i) =>
+        (i + 1) + "位 : " + time.toFixed(2) + "秒"
+      ).join("\n")
+    : "まだ記録がありません";
+
+  alert("TIME RANKING TOP 5\n\n" + rankingText);
+};
+const shopPanel = document.createElement("div");
+shopPanel.style.cssText =
+  "display:none;position:fixed;top:65px;right:15px;z-index:1000;padding:15px;background:#201a38;color:white;border:2px solid #9b8aff;border-radius:12px;";
+document.body.appendChild(shopPanel);
+
+shopPanel.innerHTML = "<b>SKIN SHOP</b><br>";
+
+skinShop.forEach(skin => {
+  const button = document.createElement("button");
+  button.textContent =
+    skin.name + " - " + skin.price + " COINS";
+  button.style.cssText =
+    "display:block;margin:8px 0;padding:9px;width:180px;";
+
+  button.onclick = () => {
+    if (ownedSkins.includes(skin.color)) {
+      playerSkin = skin.color;
+      alert("スキンを装備した！");
+    } else if (coinCount >= skin.price) {
+      coinCount -= skin.price;
+      ownedSkins.push(skin.color);
+      playerSkin = skin.color;
+      alert("スキンを購入した！");
+    } else {
+      alert("コインが足りない！");
+    }
+  };
+
+  shopPanel.appendChild(button);
+});
+
+shopButton.onclick = () => {
+  shopPanel.style.display =
+    shopPanel.style.display === "none" ? "block" : "none";
+};
+// ===== 隠しステージ =====
+let hiddenStageUnlocked = false;
+let hiddenStageActive = false;
+
+const hiddenPortal = {
+  x: 1800,
+  y: 250,
+  w: 50,
+  h: 70
+};
+function update() {
+  frame++;
+  // スキルの効果時間
+if (dashTimer > 0) {
+  dashTimer--;
+  player.speed = normalSpeed * 2;
+} else {
+  player.speed = normalSpeed;
+}
+
+if (invincibleSkillTimer > 0) {
+  invincibleSkillTimer--;
+  invincibleTimer = Math.max(invincibleTimer, 2);
+}
+  // 無敵時間のカウント
+if (invincibleTimer > 0) {
+  invincibleTimer--;
+}
+// 攻撃クールタイム
+if (attackCooldown > 0) {
+  attackCooldown--;
+}
+  // 左右移動
+  let left = keys.ArrowLeft  keys.KeyA 
+ touch.left;
+  let right = keys.ArrowRight  keys.KeyD 
+ touch.right;
+
+  player.vx = 0;
+
+  if (left) player.vx -= player.speed;
+  if (right) player.vx += player.speed;
+
+  player.x += player.vx;
+// 隠しステージへの入口
+if (
+  hiddenStageUnlocked &&
+  !hiddenStageActive &&
+  player.x < hiddenPortal.x + hiddenPortal.w &&
+  player.x + player.w > hiddenPortal.x &&
+  player.y < hiddenPortal.y + hiddenPortal.h &&
+  player.y + player.h > hiddenPortal.y
+) {
+  hiddenStageActive = true;
+
+  platforms.splice(0, platforms.length, ...hiddenPlatforms);
+
+  player.x = 80;
+  player.y = 200;
+  player.vx = 0;
+  player.vy = 0;
+
+  alert("HIDDEN STAGE!");
+}
+// 通常ステージへ戻る
+if (
+  hiddenStageActive &&
+  player.x < hiddenExit.x + hiddenExit.w &&
+  player.x + player.w > hiddenExit.x &&
+  player.y < hiddenExit.y + hiddenExit.h &&
+  player.y + player.h > hiddenExit.y
+) {
+  hiddenStageActive = false;
+
+  platforms.splice(0, platforms.length, ...mainPlatforms);
+
+  player.x = 1700;
+  player.y = 200;
+  player.vx = 0;
+  player.vy = 0;
+
+  alert("BACK TO MAIN STAGE!");
+}
+// 隠しステージの出口
+if (hiddenStageActive) {
+  ctx.fillStyle = "#00ff99";
+  ctx.shadowColor = "#00ff99";
+  ctx.shadowBlur = 20;
+
+  ctx.fillRect(
+    hiddenExit.x - camera,
+    hiddenExit.y,
+    hiddenExit.w,
+    hiddenExit.h
+  );
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "white";
+  ctx.font = "14px sans-serif";
+  ctx.fillText("EXIT", hiddenExit.x - camera, hiddenExit.y - 10);
+}
+  // 重力
+  player.vy += 0.5;
+
+  let oldY = player.y;
+  player.y += player.vy;
+
+  player.grounded = false;
+
+  // 足場との衝突判定
+  for (const p of platforms) {
+    if (
+      player.vy >= 0 &&
+      oldY + player.h <= p.y &&
+      player.y + player.h >= p.y &&
+      player.x + player.w > p.x &&
+      player.x < p.x + p.w
+    ) {
+      player.y = p.y - player.h;
+      player.vy = 0;
+      player.grounded = true;
+      player.jumps = 0;
+    }
+  }
+
+  // 落下時のリスポーン
+  if (player.y > 650) {
+    player.x = 80;
+    player.y = 200;
+    player.vy = 0;
+    player.jumps = 0;
+  }
+// 敵の移動
+enemies.forEach(enemy => {
+  if (!enemy.alive) return;
+
+  enemy.x += enemy.dir * 1.5;
+
+  if (enemy.x < enemy.min || enemy.x > enemy.max) {
+    enemy.dir *= -1;
+  }
+
+  // プレイヤーとの接触判定
+  if (
+    player.x < enemy.x + enemy.w &&
+    player.x + player.w > enemy.x &&
+    player.y < enemy.y + enemy.h &&
+    player.y + player.h > enemy.y
+  ) {
+    if (player.vy > 0 && player.y + player.h < enemy.y + 20) {
+      enemy.alive = false;
+      player.vy = -8;
+    } else {
+  if (invincibleTimer <= 0) {
+    playerHP--;
+    invincibleTimer = invincibleDuration;
+
+    player.vy = -5;
+
+    if (playerHP <= 0) {
+      playerHP = maxHP;
+      player.x = 80;
+      player.y = 200;
+      player.vy = 0;
+      player.jumps = 0;
+    }
+  }
+}
+  }
+});
+
+// コイン取得
+coins.forEach(coin => {
+  if (coin.taken) return;
+
+  if (
+    player.x < coin.x + 15 &&
+    player.x + player.w > coin.x - 15 &&
+    player.y < coin.y + 15 &&
+    player.y + player.h > coin.y - 15
+  ) {
+    coin.taken = true;
+    coinCount++;
+  }
+});
+
+// ゴール判定
+if (
+  player.x < goal.x + goal.w &&
+  player.x + player.w > goal.x &&
+  player.y < goal.y + goal.h &&
+  player.y + player.h > goal.y
+) {
+  gameClear = true;
+}
+// ボスの移動・攻撃
+if (boss.alive && !gameClear) {
+  boss.x += boss.direction * boss.speed;
+
+  if (boss.x < 2450 || boss.x > 2650) {
+    boss.direction *= -1;
+  }
+
+  boss.attackTimer++;
+
+  if (boss.attackTimer >= 120) {
+    boss.attackTimer = 0;
+
+    if (
+      player.x < boss.x + boss.w &&
+      player.x + player.w > boss.x &&
+      player.y < boss.y + boss.h &&
+      player.y + player.h > boss.y &&
+      invincibleTimer <= 0
+    ) {
+      playerHP--;
+      invincibleTimer = invincibleDuration;
+
+      if (playerHP <= 0) {
+        playerHP = maxHP;
+        player.x = 80;
+        player.y = 200;
+      }
+    }
+  }
+}
+  // カメラ追従
+  camera = Math.max(0, player.x - 250);
+
+  draw();
+  requestAnimationFrame(update);
+}
+function draw() {
+  ctx.clearRect(0,0,W,H);
+
+  // 背景
+  const bg = ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,"#171b3a");
+  bg.addColorStop(1,"#0c1024");
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,W,H);
+
+  ctx.save();
+  ctx.translate(-camera,0);
+
+  // 背景の星
+  ctx.fillStyle = "#444b79";
+
+  for (let i=0;i<50;i++) {
+    let x = i90;
+    let y = (i47)%300;
+    ctx.fillRect(x,y,3,3);
+  }
+
+  // 足場
+  for (const p of platforms) {
+    ctx.fillStyle = "#29305c";
+    ctx.fillRect(p.x,p.y,p.w,p.h);
+
+    ctx.fillStyle = "#16e0bd";
+    ctx.fillRect(p.x,p.y,p.w,5);
+  }
+// 隠しステージの入口
+if (player.x >= 1700) {
+  hiddenStageUnlocked = true;
+}
+
+if (hiddenStageUnlocked && !hiddenStageActive) {
+  ctx.fillStyle = "#b000ff";
+  ctx.shadowColor = "#d000ff";
+  ctx.shadowBlur = 25;
+
+  ctx.fillRect(
+    hiddenPortal.x - camera,
+    hiddenPortal.y,
+    hiddenPortal.w,
+    hiddenPortal.h
+  );
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "white";
+  ctx.font = "14px sans-serif";
+  ctx.fillText(
+    "HIDDEN",
+    hiddenPortal.x - camera - 2,
+    hiddenPortal.y - 10
+  );
+}
+  // プレイヤー
+  ctx.shadowColor = "#7b61ff";
+  ctx.shadowBlur = 15;
+// スキンの色
+
+  ctx.fillStyle = playerSkin;
+  ctx.fillRect(
+    player.x,
+    player.y,
+    player.w,
+    player.h
+  );
+
+  ctx.shadowBlur = 0;
+
+  // 目
+  ctx.fillStyle = "white";
+  ctx.fillRect(player.x+19,player.y+9,5,5);
+
+  // 足
+  ctx.fillStyle = "#16e0bd";
+  ctx.fillRect(
+    player.x+4,
+    player.y+player.h-5,
+    22,
+    5
+  );
+
+  ctx.restore();
+
+  // HUD
+  ctx.fillStyle = "white";
+  ctx.font = "bold 20px sans-serif";
+  ctx.fillText("WORLD 1",20,35);
+// コイン数表示
+ctx.fillStyle = "#ffd700";
+ctx.font = "bold 18px sans-serif";
+ctx.fillText("COINS: " + coinCount, 20, 95);
+// タイム表示
+const displayTime = gameClear
+  ? currentTime
+  : (Date.now() - gameStart) / 1000;
+
+ctx.fillStyle = "#00ffff";
+ctx.font = "bold 18px sans-serif";
+ctx.fillText("TIME: " + displayTime.toFixed(2), 20, 120);
+
+// ベストタイム表示
+ctx.fillStyle = "#ffd700";
+ctx.fillText(
+  "BEST: " + (bestTime === null ? "--" : bestTime.toFixed(2) + "s"),
+  20, 155
+);
+// ===== TOP5ランキング表示 =====
+ctx.fillStyle = "#ffffff";
+ctx.font = "bold 14px sans-serif";
+
+ctx.fillText("TIME RANKING TOP 5", 20, 190);
+
+timeRecords.forEach((time, index) => {
+  ctx.fillText(
+    (index + 1) + ". " + time.toFixed(2) + "s",
+    20,
+    215 + index * 22
+  );
+});
+  ctx.font = "14px sans-serif";
+  ctx.fillText(
+    "DOUBLE JUMP : " +
+    (player.jumps < 2 ? "READY" : "USED"),
+    20,60
+  );
+// 敵の移動
+enemies.forEach(enemy => {
+  if (!enemy.alive) return;
+
+  enemy.x += enemy.dir * 1.5;
+
+  if (enemy.x < enemy.min || enemy.x > enemy.max) {
+    enemy.dir *= -1;
+  }
+
+  // プレイヤーとの接触判定
+  if (
+    player.x < enemy.x + enemy.w &&
+    player.x + player.w > enemy.x &&
+    player.y < enemy.y + enemy.h &&
+    player.y + player.h > enemy.y
+  ) {
+    if (player.vy > 0 && player.y + player.h < enemy.y + 20) {
+      enemy.alive = false;
+      player.vy = -8;
+    } else {
+      player.x = 80;
+      player.y = 200;
+      player.vy = 0;
+      player.jumps = 0;
+    }
+  }
+});
+
+// コイン取得
+coins.forEach(coin => {
+  if (coin.taken) return;
+
+  if (
+    player.x < coin.x + 15 &&
+    player.x + player.w > coin.x - 15 &&
+    player.y < coin.y + 15 &&
+    player.y + player.h > coin.y - 15
+  ) {
+    coin.taken = true;
+    coinCount++;
+  }
+});
+
+// ゴール判定・タイム記録・ランキング
+if (
+  !gameClear &&
+  player.x < goal.x + goal.w &&
+  player.x + player.w > goal.x &&
+  player.y < goal.y + goal.h &&
+  player.y + player.h > goal.y
+) {
+  gameClear = true;
+
+  currentTime = (Date.now() - gameStart) / 1000;
+
+  if (bestTime === null || currentTime < bestTime) {
+    bestTime = currentTime;
+    localStorage.setItem("bestTime", bestTime);
+  }
+
+  timeRecords.push(currentTime);
+  timeRecords.sort((a, b) => a - b);
+  timeRecords = timeRecords.slice(0, 5);
+
+  localStorage.setItem(
+    "timeRecords",
+    JSON.stringify(timeRecords)
+  );
+
+  alert("CLEAR! TIME: " + currentTime.toFixed(2) + "秒");
+}
+// HP表示
+ctx.fillStyle = "white";
+ctx.font = "22px Arial";
+ctx.fillText("HP: " + "❤".repeat(playerHP), 20, 130);
+// ボスの描画
+if (boss.alive) {
+  ctx.fillStyle = "#9b35ff";
+  ctx.fillRect(
+    boss.x - camera,
+    boss.y,
+    boss.w,
+    boss.h
+  );
+
+  // ボスHPゲージ
+  ctx.fillStyle = "gray";
+  ctx.fillRect(300, 30, 300, 20);
+
+  ctx.fillStyle = "red";
+  ctx.fillRect(
+    300,
+    30,
+    300 * (boss.hp / boss.maxHP),
+    20
+  );
+
+  ctx.fillStyle = "white";
+  ctx.font = "18px Arial";
+  ctx.fillText("BOSS", 300, 22);
+}
+
+// ボス撃破表示
+if (bossDefeated) {
+  ctx.fillStyle = "gold";
+  ctx.font = "36px Arial";
+  ctx.fillText("BOSS DEFEATED!", 300, 180);
+}
+}
+// 敵キャラ
+const enemies = [
+  { x: 650, y: 340, w: 30, h: 30, min: 600, max: 700, dir: 1, alive: true },
+  { x: 1100, y: 350, w: 30, h: 30, min: 1050, max: 1200, dir: -1, alive: true },
+  { x: 1900, y: 300, w: 30, h: 30, min: 1850, max: 2000, dir: 1, alive: true }
+];
+
+// コイン
+const coins = [
+  { x: 300, y: 380, taken: false },
+  { x: 650, y: 330, taken: false },
+  { x: 900, y: 280, taken: false },
+  { x: 1150, y: 340, taken: false },
+  { x: 1400, y: 280, taken: false },
+  { x: 1650, y: 230, taken: false },
+  { x: 2250, y: 250, taken: false }
+];
+
+let coinCount = 0;
+let gameStart = Date.now();
+let gameClear = false;
+// ===== タイムアタック =====
+let bestTime = Number(localStorage.getItem("bestTime")) || null;
+// タイムランキング TOP5
+let timeRecords = JSON.parse(
+  localStorage.getItem("timeRecords") || "[]"
+);
+let currentTime = 0;
+let timeAttackActive = true;
+// ===== オートセーブ =====
+
+// 保存データを読み込む
+const savedGame = JSON.parse(
+  localStorage.getItem("gameSave") || "null"
+);
+
+if (savedGame) {
+  coinCount = savedGame.coinCount ?? coinCount;
+  bestTime = savedGame.bestTime ?? bestTime;
+  timeRecords = savedGame.timeRecords ?? timeRecords;
+}
+
+// ゲームデータを保存する
+function saveGame() {
+
+    const saveData = {
+  coinCount: coinCount,
+  bestTime: bestTime,
+  timeRecords: timeRecords,
+
+  player: {
+    x: player.x,
+    y: player.y,
+    jumps: player.jumps
+  },
+
+  playerHP: playerHP
+};
+
+  localStorage.setItem(
+    "gameSave",
+    JSON.stringify(saveData)
+  );
+}
+
+// 3秒ごとに自動保存
+setInterval(saveGame, 3000);
+// ゴール
+const goal = {
+  x: 2650,
+  y: 270,
+  w: 45,
+  h: 80
+};
+// ボス設定
+const boss = {
+  x: 2500,
+  y: 270,
+  w: 80,
+  h: 80,
+  hp: 10,
+  maxHP: 10,
+  speed: 1.5,
+  direction: -1,
+  alive: true,
+  attackTimer: 0
+};
+
+let bossDefeated = false;
+// スマホ用攻撃ボタン
+const attackButton = document.createElement("button");
+
+attackButton.textContent = "ATTACK";
+attackButton.style.position = "fixed";
+attackButton.style.right = "25px";
+attackButton.style.bottom = "100px";
+attackButton.style.width = "85px";
+attackButton.style.height = "85px";
+attackButton.style.borderRadius = "50%";
+attackButton.style.background = "#ff477e";
+attackButton.style.color = "white";
+attackButton.style.border = "3px solid white";
+attackButton.style.fontWeight = "bold";
+attackButton.style.zIndex = "1000";
+
+attackButton.addEventListener("pointerdown", e => {
+  e.preventDefault();
+  attack();
+});
+
+document.body.appendChild(attackButton);
+update();
+</script>
+</body>
+</html>
+
