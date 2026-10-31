@@ -5,7 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NEON ADVENTURE</title>
 <style>
-{ box-sizing: border-box; }
+＊{
+box-sizing: border-box;
+}
+
 body {
   margin: 0;
   background: #101329;
@@ -223,14 +226,14 @@ const normalSpeed = player.speed;
 
 // ダッシュスキル
 function useDash() {
-  if (dashTimer > 0  gameClear) return;
+  if (dashTimer > 0 || gameClear) return;
 
   dashTimer = 120;
 }
 
 // 無敵スキル
 function useInvincibleSkill() {
-  if (invincibleSkillTimer > 0  gameClear) return;
+  if (invincibleSkillTimer > 0 || gameClear) return;
 
   invincibleSkillTimer = 120;
 }
@@ -390,9 +393,9 @@ if (attackCooldown > 0) {
   attackCooldown--;
 }
   // 左右移動
-  let left = keys.ArrowLeft  keys.KeyA 
+  let left = keys.ArrowLeft || keys.KeyA 
  touch.left;
-  let right = keys.ArrowRight  keys.KeyD 
+  let right = keys.ArrowRight || keys.KeyD 
  touch.right;
 
   player.vx = 0;
