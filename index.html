@@ -12,7 +12,7 @@ p{margin:8px}
 canvas{display:block;width:100%;max-width:900px;height:auto;margin:12px auto;background:#171b3a;border:2px solid #16e0bd;border-radius:10px;touch-action:none}
 button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12px;padding:12px 16px;margin:4px;font-size:16px;font-weight:bold;touch-action:manipulation}
 .controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-#actions{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;max-width:900px;margin:8px auto}
+#actions{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;max-width:900px;margin:8px auto}\n#home{max-width:520px;margin:35px auto;padding:22px;background:#201a38;border:2px solid #16e0bd;border-radius:18px}\n#home button{display:block;width:100%;margin:10px 0}\n#stage{display:none}\n@media(max-width:700px){#actions{gap:3px}#actions button{padding:10px 12px;font-size:14px}.controls button{min-width:28%;padding:14px 8px}}
 #shopPanel{display:none;max-width:360px;margin:10px auto;padding:12px;background:#201a38;border:2px solid #9b8aff;border-radius:12px}
 #shopPanel button{display:block;width:100%;margin:6px 0}
 .small{font-size:13px;color:#c8c9df}
@@ -20,25 +20,34 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 </head>
 <body>
 <h1>NEON ADVENTURE</h1>
+<div id="home">
+<h2>HOME</h2>
+<p>WORLD 1 : GREEN FOREST</p>
+<button id="startGame">START GAME</button>
+<button id="shopToggle">SKIN SHOP</button>
+<button id="save">SAVE</button>
+<button id="ranking">RANKING</button>
+<div id="shopPanel"><b>SKIN SHOP</b><div id="skinItems"></div></div>
+</div>
+<div id="stage">
 <p>WORLD 1 : GREEN FOREST</p>
 <canvas id="game" width="900" height="500"></canvas>
-<p>移動：← → / A・D　ジャンプ：Space（2段ジャンプ）</p>
+<p class="small">移動：← → / A・D　ジャンプ：Space　ダッシュ：左Ctrl</p>
 <div class="controls">
 <button id="left">◀ LEFT</button><button id="jump">JUMP ▲</button><button id="right">RIGHT ▶</button>
 </div>
 <div id="actions">
-<button id="attack">ATTACK</button><button id="dash">DASH</button><button id="shield">INVINCIBLE</button>
-<button id="shopToggle">SKIN SHOP</button><button id="save">SAVE</button><button id="ranking">RANKING</button><button id="restart">RESTART</button>
+<button id="attack">ATTACK</button><button id="dash">DASH</button><button id="restart">RESTART</button>
 </div>
-<div id="shopPanel"><b>SKIN SHOP</b><div id="skinItems"></div></div>
 <p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p>
+</div>
 <script>
 "use strict";
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 const W=canvas.width,H=canvas.height;
 const player={x:80,y:200,w:30,h:42,vx:0,vy:0,speed:4,jumpPower:11,jumps:0,maxJumps:2,grounded:false};
 let playerHP=3,invincibleTimer=0,attackCooldown=0,dashTimer=0,shieldTimer=0;
-let facing=1,attackTimer=0;
+let facing=1,attackTimer=0,gameStarted=false;
 let playerSkin="#9b8aff",coinCount=0,camera=0,gameClear=false,bossDefeated=false;
 let gameStart=Date.now(),currentTime=0;
 let bestTime=Number(localStorage.getItem("bestTime"))||null;
@@ -93,7 +102,7 @@ function attack(){
   boss.hp=Math.max(0,boss.hp-1);if(boss.hp===0){boss.alive=false;bossDefeated=true;saveGame()}
  }
 }
-function useDash(){if(!gameClear&&dashTimer===0)dashTimer=90}
+function useDash(){if(gameStarted&&!gameClear&&dashTimer===0)dashTimer=90}
 function useShield(){if(!gameClear&&shieldTimer===0){shieldTimer=120;invincibleTimer=Math.max(invincibleTimer,120)}}
 function bindHold(id,side){
  const el=document.getElementById(id);
@@ -104,8 +113,8 @@ bindHold("left","left");bindHold("right","right");
 document.getElementById("jump").addEventListener("pointerdown",e=>{e.preventDefault();jump()});
 document.getElementById("attack").addEventListener("pointerdown",e=>{e.preventDefault();attack()});
 document.getElementById("dash").onclick=useDash;
-document.getElementById("shield").onclick=useShield;
-window.addEventListener("keydown",e=>{keys[e.code]=true;if(e.code==="Space"&&!e.repeat){e.preventDefault();jump()}});
+
+window.addEventListener("keydown",e=>{keys[e.code]=true;if(e.code==="Space"&&!e.repeat){e.preventDefault();jump()}if(e.code==="ControlLeft"&&!e.repeat){e.preventDefault();useDash()}});
 window.addEventListener("keyup",e=>keys[e.code]=false);
 canvas.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button===0)attack()});
 function finishGame(){
@@ -181,9 +190,9 @@ function draw(){
 function restart(){
  player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;coinCount=0;
  coins.forEach(c=>c.taken=false);enemies.forEach(e=>e.alive=true);boss.hp=boss.maxHP;boss.alive=true;bossDefeated=false;
- gameClear=false;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;saveGame();
+ gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
-document.getElementById("restart").onclick=()=>{restart()};
+document.getElementById("restart").onclick=()=>{restart()};\ndocument.getElementById("startGame").onclick=()=>{gameStarted=true;document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";gameStart=Date.now()-currentTime*1000};
 document.getElementById("save").onclick=()=>{saveGame();alert("GAME SAVED!")};
 document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\n\n"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("\n"):"まだ記録がありません"));
 document.getElementById("shopToggle").onclick=()=>{const p=document.getElementById("shopPanel");p.style.display=p.style.display==="block"?"none":"block"};
@@ -192,7 +201,7 @@ function renderShop(){
  for(const s of skins){const b=document.createElement("button");b.textContent=s.name+" - "+s.price+" COINS";
  b.onclick=()=>{if(ownedSkins.includes(s.color)){playerSkin=s.color;saveGame();alert("スキンを装備した！")}else if(coinCount>=s.price){coinCount-=s.price;ownedSkins.push(s.color);playerSkin=s.color;saveGame();alert("スキンを購入した！")}else alert("コインが足りない！")};area.appendChild(b)}
 }
-renderShop();loadGame();setInterval(saveGame,5000);update();
+renderShop();loadGame();setInterval(()=>{if(gameStarted)saveGame()},5000);update();
 </script>
 </body>
 </html>
