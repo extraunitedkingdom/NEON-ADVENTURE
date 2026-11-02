@@ -176,10 +176,29 @@ function update(){
 }
 function draw(){
  ctx.clearRect(0,0,W,H);
- const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#16294b");bg.addColorStop(1,"#0c1024");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+ // GREEN FOREST の空・山・雲
+ const bg=ctx.createLinearGradient(0,0,0,H);
+ bg.addColorStop(0,"#55c9f5");bg.addColorStop(.58,"#b5f0dc");bg.addColorStop(1,"#e5f7c4");
+ ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+ // 遠くの雲
+ ctx.fillStyle="rgba(255,255,255,.72)";
+ for(let i=0;i<7;i++){const x=((i*173-camera*.12)%(W+180)+W+180)%(W+180)-90,y=65+(i%3)*42;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.arc(x+25,y-10,29,0,Math.PI*2);ctx.arc(x+55,y,21,0,Math.PI*2);ctx.fill()}
+ ctx.save();ctx.translate(-camera*.22,0);
+ // 山並み
+ for(let i=0;i<9;i++){const x=i*260-80;ctx.fillStyle=i%2?"#70b9a0":"#579e91";ctx.beginPath();ctx.moveTo(x,355);ctx.lineTo(x+125,125+(i%3)*35);ctx.lineTo(x+270,355);ctx.closePath();ctx.fill();
+  ctx.fillStyle="rgba(239,255,235,.8)";ctx.beginPath();ctx.moveTo(x+91,190+(i%3)*35);ctx.lineTo(x+125,125+(i%3)*35);ctx.lineTo(x+164,190+(i%3)*35);ctx.closePath();ctx.fill()}
+ ctx.restore();
  ctx.save();ctx.translate(-camera,0);
- // 遠景の森
- for(let i=0;i<24;i++){const x=i*150;ctx.fillStyle=i%2?"#173d42":"#1c5147";ctx.beginPath();ctx.arc(x+45,370,85,Math.PI,0);ctx.fill()}
+ // 奥の森と大きな木々
+ for(let i=0;i<30;i++){const x=i*145-30;ctx.fillStyle=i%2?"#287b59":"#328b5c";ctx.beginPath();ctx.arc(x+45,370,82,Math.PI,0);ctx.fill();ctx.fillRect(x+35,365,20,55)}
+ // 滝のある城
+ ctx.fillStyle="#526b79";ctx.fillRect(2070,205,155,145);
+ ctx.fillStyle="#718c99";ctx.fillRect(2055,185,185,24);
+ ctx.fillStyle="#526b79";ctx.fillRect(2090,155,30,52);ctx.fillRect(2170,155,30,52);
+ ctx.fillStyle="#e8f3e8";ctx.beginPath();ctx.moveTo(2080,155);ctx.lineTo(2105,120);ctx.lineTo(2130,155);ctx.fill();ctx.beginPath();ctx.moveTo(2160,155);ctx.lineTo(2185,120);ctx.lineTo(2210,155);ctx.fill();
+ ctx.fillStyle="#263e59";ctx.fillRect(2128,260,38,90);ctx.fillStyle="#ffd56b";ctx.fillRect(2090,225,22,28);ctx.fillRect(2180,225,22,28);
+ ctx.fillStyle="#65d9ee";ctx.fillRect(2048,350,28,80);ctx.fillRect(2215,350,28,80);
+ ctx.fillStyle="#d5fbff";ctx.fillRect(2057,350,8,80);ctx.fillRect(2224,350,8,80);
  for(const p of platforms){ctx.fillStyle="#294b3c";ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle="#42d68b";ctx.fillRect(p.x,p.y,p.w,6)}
  for(const c of coins){if(c.taken)continue;ctx.fillStyle="#ffd700";ctx.beginPath();ctx.arc(c.x,c.y,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#fff0a0";ctx.stroke()}
  for(const e of enemies){if(!e.alive)continue;ctx.fillStyle="#ff477e";ctx.fillRect(e.x,e.y,e.w,e.h);ctx.fillStyle="white";ctx.fillRect(e.x+6,e.y+8,5,5);ctx.fillRect(e.x+19,e.y+8,5,5)}
