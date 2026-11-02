@@ -5,906 +5,177 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>NEON ADVENTURE</title>
 <style>
-＊{
-box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #101329;
-  color: white;
-  font-family: sans-serif;
-  text-align: center;
-}
-h1 { color: #16e0bd; }
-canvas {
-  width: 100%;
-  max-width: 900px;
-  background: #171b3a;
-  border: 2px solid #16e0bd;
-  border-radius: 10px;
-  touch-action: none;
-}
-button {
-  background: #7b61ff;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 15px 20px;
-  margin: 5px;
-  font-size: 18px;
-  font-weight: bold;
-  touch-action: none;
-}
+*{box-sizing:border-box}
+body{margin:0;padding:12px;background:#101329;color:#fff;font-family:sans-serif;text-align:center}
+h1{color:#16e0bd;margin:8px 0}
+p{margin:8px}
+canvas{display:block;width:100%;max-width:900px;height:auto;margin:12px auto;background:#171b3a;border:2px solid #16e0bd;border-radius:10px;touch-action:none}
+button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12px;padding:12px 16px;margin:4px;font-size:16px;font-weight:bold;touch-action:manipulation}
+.controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
+#actions{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;max-width:900px;margin:8px auto}
+#shopPanel{display:none;max-width:360px;margin:10px auto;padding:12px;background:#201a38;border:2px solid #9b8aff;border-radius:12px}
+#shopPanel button{display:block;width:100%;margin:6px 0}
+.small{font-size:13px;color:#c8c9df}
 </style>
 </head>
 <body>
-
 <h1>NEON ADVENTURE</h1>
 <p>WORLD 1 : GREEN FOREST</p>
-
 <canvas id="game" width="900" height="500"></canvas>
-
-<p>移動：矢印キー / A・D　ジャンプ：Space</p>
-
-<button id="left">◀</button>
-<button id="jump">JUMP ▲</button>
-<button id="right">▶</button>
-
+<p>移動：← → / A・D　ジャンプ：Space（2段ジャンプ）</p>
+<div class="controls">
+<button id="left">◀ LEFT</button><button id="jump">JUMP ▲</button><button id="right">RIGHT ▶</button>
+</div>
+<div id="actions">
+<button id="attack">ATTACK</button><button id="dash">DASH</button><button id="shield">INVINCIBLE</button>
+<button id="shopToggle">SKIN SHOP</button><button id="save">SAVE</button><button id="ranking">RANKING</button><button id="restart">RESTART</button>
+</div>
+<div id="shopPanel"><b>SKIN SHOP</b><div id="skinItems"></div></div>
+<p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p>
 <script>
-const canvas = document.getElementById("game");
-const ctx = canvas.getContext("2d");
-
-const W = canvas.width;
-const H = canvas.height;
-
-let keys = {};
-let touch = {left:false,right:false};
-
-let camera = 0;
-
-
-const player = {
-  x: 80,
-  y: 200,
-  w: 30,
-  h: 42,
-  vx: 0,
-  vy: 0,
-  speed: 4,
-  jumpPower: 11,
-  jumps: 0,
-  maxJumps: 2,
-  grounded: false
-};
-// プレイヤーのHP・攻撃設定
-let playerHP = 3;
-const maxHP = 3;
-
-let attackCooldown = 0;
-const attackPower = 1;
-const attackRange = 65;
-
-let isAttacking = false;const platforms = [
-  {x:0,y:430,w:500,h:70},
-  {x:560,y:380,w:180,h:25},
-  {x:800,y:330,w:180,h:25},
-  {x:1050,y:390,w:180,h:25},
-  {x:1300,y:330,w:180,h:25},
-  {x:1550,y:280,w:180,h:25},
-  {x:1800,y:350,w:250,h:100},
-  {x:2150,y:300,w:180,h:25},
-  {x:2450,y:350,w:350,h:100}
+"use strict";
+const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
+const W=canvas.width,H=canvas.height;
+const player={x:80,y:200,w:30,h:42,vx:0,vy:0,speed:4,jumpPower:11,jumps:0,maxJumps:2,grounded:false};
+let playerHP=3,invincibleTimer=0,attackCooldown=0,dashTimer=0,shieldTimer=0;
+let playerSkin="#9b8aff",coinCount=0,camera=0,gameClear=false,bossDefeated=false;
+let gameStart=Date.now(),currentTime=0;
+let bestTime=Number(localStorage.getItem("bestTime"))||null;
+let timeRecords=[];
+try{timeRecords=JSON.parse(localStorage.getItem("timeRecords")||"[]");if(!Array.isArray(timeRecords))timeRecords=[]}catch(e){timeRecords=[]}
+const keys={},touch={left:false,right:false};
+const platforms=[
+{x:0,y:430,w:500,h:70},{x:560,y:380,w:180,h:25},{x:800,y:330,w:180,h:25},
+{x:1050,y:390,w:180,h:25},{x:1300,y:330,w:180,h:25},{x:1550,y:280,w:180,h:25},
+{x:1800,y:350,w:250,h:100},{x:2150,y:300,w:180,h:25},{x:2450,y:350,w:350,h:100}
 ];
-// ===== 隠しステージ専用マップ =====
-const mainPlatforms = platforms.map(p => ({...p}));
-
-const hiddenPlatforms = [
-  {x:0,y:430,w:350,h:70},
-  {x:420,y:370,w:150,h:25},
-  {x:650,y:310,w:150,h:25},
-  {x:900,y:370,w:150,h:25},
-  {x:1150,y:300,w:150,h:25},
-  {x:1400,y:350,w:350,h:100}
+const enemies=[
+{x:650,y:350,w:30,h:30,min:600,max:700,dir:1,alive:true},
+{x:1100,y:360,w:30,h:30,min:1050,max:1200,dir:-1,alive:true},
+{x:1900,y:320,w:30,h:30,min:1850,max:2000,dir:1,alive:true}
 ];
-
-const hiddenExit = {
-  x:1550,
-  y:270,
-  w:50,
-  h:80
-};
-// ダメージ・無敵時間
-let invincibleTimer = 0;
-const invincibleDuration = 60;
-// 攻撃処理
-function attack() {
-  if (attackCooldown > 0 || gameClear) return;
-
-  attackCooldown = 20;
-
-  const px = player.x + player.w / 2;
-  const py = player.y + player.h / 2;
-
-  enemies.forEach(enemy => {
-    if (!enemy.alive) return;
-
-    const ex = enemy.x + enemy.w / 2;
-    const ey = enemy.y + enemy.h / 2;
-
-    const distance = Math.hypot(px - ex, py - ey);
-
-    if (distance < attackRange) {
-      enemy.alive = false;
-    }
-  });
-  // ボスへの攻撃判定
-if (boss.alive) {
-  const bx = boss.x + boss.w / 2;
-  const by = boss.y + boss.h / 2;
-
-  const distance = Math.hypot(px - bx, py - by);
-
-  if (distance < attackRange + 35) {
-    boss.hp--;
-
-    if (boss.hp <= 0) {
-      boss.hp = 0;
-      boss.alive = false;
-      bossDefeated = true;
-    }
-  }
-}
-}
-
-// マウス左クリック
-canvas.addEventListener("mousedown", e => {
-  if (e.button === 0) {
-    attack();
-  }
-});
-function jump() {
-  if (player.jumps < player.maxJumps) {
-    player.vy = -player.jumpPower;
-    player.jumps++;
-    player.grounded = false;
-  }
-}
-
-window.addEventListener("keydown", e => {
-  keys[e.code] = true;
-
-  if (e.code === "Space" && !e.repeat) {
-    e.preventDefault();
-    jump();
-  }
-});
-
-window.addEventListener("keyup", e => {
-  keys[e.code] = false;
-});
-
-function bindButton(id, action) {
-  const button = document.getElementById(id);
-
-  button.addEventListener("pointerdown", e => {
-    e.preventDefault();
-    action(true);
-  });
-
-  button.addEventListener("pointerup", () => action(false));
-  button.addEventListener("pointerleave", () => action(false));
-  button.addEventListener("pointercancel", () => action(false));
-}
-
-bindButton("left", v => touch.left = v);
-bindButton("right", v => touch.right = v);
-
-document.getElementById("jump").addEventListener(
-  "pointerdown", e => {
-    e.preventDefault();
-    jump();
-  }
-);
-let playerSkin = "#9b8aff";
-// ===== ステージ6：スキル =====
-let dashTimer = 0;
-let invincibleSkillTimer = 0;
-
-const normalSpeed = player.speed;
-
-// ダッシュスキル
-function useDash() {
-  if (dashTimer > 0 || gameClear) return;
-
-  dashTimer = 120;
-}
-
-// 無敵スキル
-function useInvincibleSkill() {
-  if (invincibleSkillTimer > 0 || gameClear) return;
-
-  invincibleSkillTimer = 120;
-}
-
-// スキルボタン
-const dashButton = document.createElement("button");
-dashButton.textContent = "DASH";
-dashButton.style.cssText =
-  "position:fixed;bottom:100px;right:20px;z-index:1000;padding:12px;background:#00bfff;color:white;border:2px solid white;border-radius:10px;";
-document.body.appendChild(dashButton);
-dashButton.onclick = useDash;
-
-const skillButton = document.createElement("button");
-skillButton.textContent = "INVINCIBLE";
-skillButton.style.cssText =
-  "position:fixed;bottom:45px;right:20px;z-index:1000;padding:12px;background:#9b61ff;color:white;border:2px solid white;border-radius:10px;";
-document.body.appendChild(skillButton);
-skillButton.onclick = useInvincibleSkill;
-// ===== スキンショップ =====
-let ownedSkins = ["#9b8aff"];
-
-const skinShop = [
-  { name: "NEON BLUE", color: "#00cfff", price: 5 },
-  { name: "FIRE RED", color: "#ff4545", price: 10 },
-  { name: "GOLD", color: "#ffd700", price: 20 },
-  { name: "MINT", color: "#16e0bd", price: 30 }
+const coins=[
+{x:300,y:395,taken:false},{x:650,y:340,taken:false},{x:900,y:290,taken:false},
+{x:1150,y:350,taken:false},{x:1400,y:290,taken:false},{x:1650,y:240,taken:false},{x:2250,y:260,taken:false}
 ];
-
-const shopButton = document.createElement("button");
-shopButton.textContent = "SKIN SHOP";
-shopButton.style.cssText =
-  "position:fixed;top:15px;right:15px;z-index:1000;padding:12px;background:#292044;color:white;border:2px solid #9b8aff;border-radius:10px;font-weight:bold;";
-document.body.appendChild(shopButton);
-// ===== リスタートボタン =====
-const restartButton = document.createElement("button");
-restartButton.textContent = "RESTART";
-restartButton.style.cssText =
-  "position:fixed;top:15px;left:15px;z-index:1000;padding:12px;background:#292044;color:white;border:2px solid #00ffff;border-radius:10px;font-weight:bold;";
-
-document.body.appendChild(restartButton);
-
-restartButton.onclick = () => {
-  player.x = 80;
-  player.y = 200;
-  player.vx = 0;
-  player.vy = 0;
-  player.jumps = 0;
-
-  playerHP = maxHP;
-  coinCount = 0;
-
-  gameStart = Date.now();
-  gameClear = false;
-  currentTime = 0;
-
-  hiddenStageActive = false;
-  platforms.splice(0, platforms.length, ...mainPlatforms);
-
-  enemies.forEach(enemy => enemy.alive = true);
-
-  alert("RESTART!");
-};
-// ===== 手動セーブボタン =====
-const saveButton = document.createElement("button");
-saveButton.textContent = "SAVE";
-saveButton.style.cssText =
-  "position:fixed;top:115px;left:15px;z-index:1000;padding:12px;background:#292044;color:white;border:2px solid #00ff99;border-radius:10px;font-weight:bold;";
-
-document.body.appendChild(saveButton);
-
-saveButton.onclick = () => {
-  saveGame();
-  alert("GAME SAVED!");
-};
-// ===== ランキング表示 =====
-const rankingButton = document.createElement("button");
-rankingButton.textContent = "RANKING";
-rankingButton.style.cssText =
-  "position:fixed;top:65px;left:15px;z-index:1000;padding:12px;background:#292044;color:white;border:2px solid #ffd700;border-radius:10px;font-weight:bold;";
-
-document.body.appendChild(rankingButton);
-
-rankingButton.onclick = () => {
-  const rankingText = timeRecords.length
-    ? timeRecords.map((time, i) =>
-        (i + 1) + "位 : " + time.toFixed(2) + "秒"
-      ).join("\n")
-    : "まだ記録がありません";
-
-  alert("TIME RANKING TOP 5\n\n" + rankingText);
-};
-const shopPanel = document.createElement("div");
-shopPanel.style.cssText =
-  "display:none;position:fixed;top:65px;right:15px;z-index:1000;padding:15px;background:#201a38;color:white;border:2px solid #9b8aff;border-radius:12px;";
-document.body.appendChild(shopPanel);
-
-shopPanel.innerHTML = "<b>SKIN SHOP</b><br>";
-
-skinShop.forEach(skin => {
-  const button = document.createElement("button");
-  button.textContent =
-    skin.name + " - " + skin.price + " COINS";
-  button.style.cssText =
-    "display:block;margin:8px 0;padding:9px;width:180px;";
-
-  button.onclick = () => {
-    if (ownedSkins.includes(skin.color)) {
-      playerSkin = skin.color;
-      alert("スキンを装備した！");
-    } else if (coinCount >= skin.price) {
-      coinCount -= skin.price;
-      ownedSkins.push(skin.color);
-      playerSkin = skin.color;
-      alert("スキンを購入した！");
-    } else {
-      alert("コインが足りない！");
-    }
-  };
-
-  shopPanel.appendChild(button);
-});
-
-shopButton.onclick = () => {
-  shopPanel.style.display =
-    shopPanel.style.display === "none" ? "block" : "none";
-};
-// ===== 隠しステージ =====
-let hiddenStageUnlocked = false;
-let hiddenStageActive = false;
-
-const hiddenPortal = {
-  x: 1800,
-  y: 250,
-  w: 50,
-  h: 70
-};
-let frame = 0;
-function update() {
-  frame++;
-  // スキルの効果時間
-if (dashTimer > 0) {
-  dashTimer--;
-  player.speed = normalSpeed * 2;
-} else {
-  player.speed = normalSpeed;
-}
-
-if (invincibleSkillTimer > 0) {
-  invincibleSkillTimer--;
-  invincibleTimer = Math.max(invincibleTimer, 2);
-}
-  // 無敵時間のカウント
-if (invincibleTimer > 0) {
-  invincibleTimer--;
-}
-// 攻撃クールタイム
-if (attackCooldown > 0) {
-  attackCooldown--;
-}
-  // 左右移動
-  let left = keys.ArrowLeft || keys.KeyA || touch.left;
-  let right = keys.ArrowRight || keys.KeyD || touch.right;
-
-  player.vx = 0;
-
-  if (left) player.vx -= player.speed;
-  if (right) player.vx += player.speed;
-
-  player.x += player.vx;
-// 隠しステージへの入口
-if (
-  hiddenStageUnlocked &&
-  !hiddenStageActive &&
-  player.x < hiddenPortal.x + hiddenPortal.w &&
-  player.x + player.w > hiddenPortal.x &&
-  player.y < hiddenPortal.y + hiddenPortal.h &&
-  player.y + player.h > hiddenPortal.y
-) {
-  hiddenStageActive = true;
-
-  platforms.splice(0, platforms.length, ...hiddenPlatforms);
-
-  player.x = 80;
-  player.y = 200;
-  player.vx = 0;
-  player.vy = 0;
-
-  alert("HIDDEN STAGE!");
-}
-// 通常ステージへ戻る
-if (
-  hiddenStageActive &&
-  player.x < hiddenExit.x + hiddenExit.w &&
-  player.x + player.w > hiddenExit.x &&
-  player.y < hiddenExit.y + hiddenExit.h &&
-  player.y + player.h > hiddenExit.y
-) {
-  hiddenStageActive = false;
-
-  platforms.splice(0, platforms.length, ...mainPlatforms);
-
-  player.x = 1700;
-  player.y = 200;
-  player.vx = 0;
-  player.vy = 0;
-
-  alert("BACK TO MAIN STAGE!");
-}
-// 隠しステージの出口
-if (hiddenStageActive) {
-  ctx.fillStyle = "#00ff99";
-  ctx.shadowColor = "#00ff99";
-  ctx.shadowBlur = 20;
-
-  ctx.fillRect(
-    hiddenExit.x - camera,
-    hiddenExit.y,
-    hiddenExit.w,
-    hiddenExit.h
-  );
-
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = "white";
-  ctx.font = "14px sans-serif";
-  ctx.fillText("EXIT", hiddenExit.x - camera, hiddenExit.y - 10);
-}
-  // 重力
-  player.vy += 0.5;
-
-  let oldY = player.y;
-  player.y += player.vy;
-
-  player.grounded = false;
-
-  // 足場との衝突判定
-  for (const p of platforms) {
-    if (
-      player.vy >= 0 &&
-      oldY + player.h <= p.y &&
-      player.y + player.h >= p.y &&
-      player.x + player.w > p.x &&
-      player.x < p.x + p.w
-    ) {
-      player.y = p.y - player.h;
-      player.vy = 0;
-      player.grounded = true;
-      player.jumps = 0;
-    }
-  }
-
-  // 落下時のリスポーン
-  if (player.y > 650) {
-    player.x = 80;
-    player.y = 200;
-    player.vy = 0;
-    player.jumps = 0;
-  }
-// 敵の移動
-enemies.forEach(enemy => {
-  if (!enemy.alive) return;
-
-  enemy.x += enemy.dir * 1.5;
-
-  if (enemy.x < enemy.min || enemy.x > enemy.max) {
-    enemy.dir *= -1;
-  }
-
-  // プレイヤーとの接触判定
-  if (
-    player.x < enemy.x + enemy.w &&
-    player.x + player.w > enemy.x &&
-    player.y < enemy.y + enemy.h &&
-    player.y + player.h > enemy.y
-  ) {
-    if (player.vy > 0 && player.y + player.h < enemy.y + 20) {
-      enemy.alive = false;
-      player.vy = -8;
-    } else {
-  if (invincibleTimer <= 0) {
-    playerHP--;
-    invincibleTimer = invincibleDuration;
-
-    player.vy = -5;
-
-    if (playerHP <= 0) {
-      playerHP = maxHP;
-      player.x = 80;
-      player.y = 200;
-      player.vy = 0;
-      player.jumps = 0;
-    }
-  }
-}
-  }
-});
-
-// コイン取得
-coins.forEach(coin => {
-  if (coin.taken) return;
-
-  if (
-    player.x < coin.x + 15 &&
-    player.x + player.w > coin.x - 15 &&
-    player.y < coin.y + 15 &&
-    player.y + player.h > coin.y - 15
-  ) {
-    coin.taken = true;
-    coinCount++;
-  }
-});
-
-// ゴール判定・タイム記録
-if (
-  !gameClear &&
-  player.x < goal.x + goal.w &&
-  player.x + player.w > goal.x &&
-  player.y < goal.y + goal.h &&
-  player.y + player.h > goal.y
-) {
-  gameClear = true;
-
-  currentTime = (Date.now() - gameStart) / 1000;
-
-  if (bestTime === null || currentTime < bestTime) {
-    bestTime = currentTime;
-    localStorage.setItem("bestTime", bestTime);
-  }
-
-  timeRecords.push(currentTime);
-  timeRecords.sort((a, b) => a - b);
-  timeRecords = timeRecords.slice(0, 5);
-
-  localStorage.setItem(
-    "timeRecords",
-    JSON.stringify(timeRecords)
-  );
-
-  alert("CLEAR! TIME: " + currentTime.toFixed(2) + "秒");
-}
-  // カメラ追従
-  camera = Math.max(0, player.x - 250);
-
-  draw();
-  requestAnimationFrame(update);
-}
-function draw() {
-  ctx.clearRect(0,0,W,H);
-
-  // 背景
-  const bg = ctx.createLinearGradient(0,0,0,H);
-  bg.addColorStop(0,"#171b3a");
-  bg.addColorStop(1,"#0c1024");
-
-  ctx.fillStyle = bg;
-  ctx.fillRect(0,0,W,H);
-
-  ctx.save();
-  ctx.translate(-camera,0);
-
-  // 背景の星
-  ctx.fillStyle = "#444b79";
-
-  for (let i=0;i<50;i++) {
-    let x = i*90;
-    let y = (i*47)%300;
-    ctx.fillRect(x,y,3,3);
-  }
-
-  // 足場
-  for (const p of platforms) {
-    ctx.fillStyle = "#29305c";
-    ctx.fillRect(p.x,p.y,p.w,p.h);
-
-    ctx.fillStyle = "#16e0bd";
-    ctx.fillRect(p.x,p.y,p.w,5);
-  }
-
-// 隠しステージの入口
-if (player.x >= 1700) {
-  hiddenStageUnlocked = true;
-}
-
-if (hiddenStageUnlocked && !hiddenStageActive) {
-  ctx.fillStyle = "#b000ff";
-  ctx.shadowColor = "#d000ff";
-  ctx.shadowBlur = 25;
-
-  ctx.fillRect(
-    hiddenPortal.x - camera,
-    hiddenPortal.y,
-    hiddenPortal.w,
-    hiddenPortal.h
-  );
-
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = "white";
-  ctx.font = "14px sans-serif";
-  ctx.fillText(
-    "HIDDEN",
-    hiddenPortal.x - camera - 2,
-    hiddenPortal.y - 10
-  );
-}
-  // プレイヤー
-  ctx.shadowColor = "#7b61ff";
-  ctx.shadowBlur = 15;
-// スキンの色
-
-  ctx.fillStyle = playerSkin;
-  ctx.fillRect(
-    player.x,
-    player.y,
-    player.w,
-    player.h
-  );
-
-  ctx.shadowBlur = 0;
-
-  // 目
-  ctx.fillStyle = "white";
-  ctx.fillRect(player.x+19,player.y+9,5,5);
-
-  // 足
-  ctx.fillStyle = "#16e0bd";
-  ctx.fillRect(
-    player.x+4,
-    player.y+player.h-5,
-    22,
-    5
-  );
-
-  ctx.restore();
-
-  // HUD
-  ctx.fillStyle = "white";
-  ctx.font = "bold 20px sans-serif";
-  ctx.fillText("WORLD 1",20,35);
-// コイン数表示
-ctx.fillStyle = "#ffd700";
-ctx.font = "bold 18px sans-serif";
-ctx.fillText("COINS: " + coinCount, 20, 95);
-// タイム表示
-const displayTime = gameClear
-  ? currentTime
-  : (Date.now() - gameStart) / 1000;
-
-ctx.fillStyle = "#00ffff";
-ctx.font = "bold 18px sans-serif";
-ctx.fillText("TIME: " + displayTime.toFixed(2), 20, 120);
-
-// ベストタイム表示
-ctx.fillStyle = "#ffd700";
-ctx.fillText(
-  "BEST: " + (bestTime === null ? "--" : bestTime.toFixed(2) + "s"),
-  20, 155
-);
-// ===== TOP5ランキング表示 =====
-ctx.fillStyle = "#ffffff";
-ctx.font = "bold 14px sans-serif";
-
-ctx.fillText("TIME RANKING TOP 5", 20, 190);
-
-timeRecords.forEach((time, index) => {
-  ctx.fillText(
-    (index + 1) + ". " + time.toFixed(2) + "s",
-    20,
-    215 + index * 22
-  );
-});
-  ctx.font = "14px sans-serif";
-  ctx.fillText(
-    "DOUBLE JUMP : " +
-    (player.jumps < 2 ? "READY" : "USED"),
-    20,60
-  );
-// 敵の移動
-enemies.forEach(enemy => {
-  if (!enemy.alive) return;
-
-  enemy.x += enemy.dir * 1.5;
-
-  if (enemy.x < enemy.min || enemy.x > enemy.max) {
-    enemy.dir *= -1;
-  }
-
-  // プレイヤーとの接触判定
-  if (
-    player.x < enemy.x + enemy.w &&
-    player.x + player.w > enemy.x &&
-    player.y < enemy.y + enemy.h &&
-    player.y + player.h > enemy.y
-  ) {
-    if (player.vy > 0 && player.y + player.h < enemy.y + 20) {
-      enemy.alive = false;
-      player.vy = -8;
-    } else {
-      player.x = 80;
-      player.y = 200;
-      player.vy = 0;
-      player.jumps = 0;
-    }
-  }
-});
-
-// コイン取得
-coins.forEach(coin => {
-  if (coin.taken) return;
-
-  if (
-    player.x < coin.x + 15 &&
-    player.x + player.w > coin.x - 15 &&
-    player.y < coin.y + 15 &&
-    player.y + player.h > coin.y - 15
-  ) {
-    coin.taken = true;
-    coinCount++;
-  }
-});
-
-
-// HP表示
-ctx.fillStyle = "white";
-ctx.font = "22px Arial";
-ctx.fillText("HP: " + "❤".repeat(playerHP), 20, 130);
-// ボスの描画
-if (boss.alive) {
-  ctx.fillStyle = "#9b35ff";
-  ctx.fillRect(
-    boss.x - camera,
-    boss.y,
-    boss.w,
-    boss.h
-  );
-
-  // ボスHPゲージ
-  ctx.fillStyle = "gray";
-  ctx.fillRect(300, 30, 300, 20);
-
-  ctx.fillStyle = "red";
-  ctx.fillRect(
-    300,
-    30,
-    300 * (boss.hp / boss.maxHP),
-    20
-  );
-
-  ctx.fillStyle = "white";
-  ctx.font = "18px Arial";
-  ctx.fillText("BOSS", 300, 22);
-}
-
-// ボス撃破表示
-if (bossDefeated) {
-  ctx.fillStyle = "gold";
-  ctx.font = "36px Arial";
-  ctx.fillText("BOSS DEFEATED!", 300, 180);
-}
-}
-// 敵キャラ
-const enemies = [
-  { x: 650, y: 340, w: 30, h: 30, min: 600, max: 700, dir: 1, alive: true },
-  { x: 1100, y: 350, w: 30, h: 30, min: 1050, max: 1200, dir: -1, alive: true },
-  { x: 1900, y: 300, w: 30, h: 30, min: 1850, max: 2000, dir: 1, alive: true }
+const goal={x:2650,y:270,w:45,h:80};
+const boss={x:2500,y:270,w:80,h:80,hp:10,maxHP:10,alive:true};
+const skins=[
+{name:"NEON BLUE",color:"#00cfff",price:5},{name:"FIRE RED",color:"#ff4545",price:10},
+{name:"GOLD",color:"#ffd700",price:20},{name:"MINT",color:"#16e0bd",price:30}
 ];
-
-// コイン
-const coins = [
-  { x: 300, y: 380, taken: false },
-  { x: 650, y: 330, taken: false },
-  { x: 900, y: 280, taken: false },
-  { x: 1150, y: 340, taken: false },
-  { x: 1400, y: 280, taken: false },
-  { x: 1650, y: 230, taken: false },
-  { x: 2250, y: 250, taken: false }
-];
-
-let coinCount = 0;
-let gameStart = Date.now();
-let gameClear = false;
-// ===== タイムアタック =====
-let bestTime = Number(localStorage.getItem("bestTime")) || null;
-// タイムランキング TOP5
-let timeRecords = JSON.parse(
-  localStorage.getItem("timeRecords") || "[]"
-);
-let currentTime = 0;
-let timeAttackActive = true;
-// ===== オートセーブ =====
-
-// 保存データを読み込む
-const savedGame = JSON.parse(
-  localStorage.getItem("gameSave") || "null"
-);
-
-if (savedGame) {
-  coinCount = savedGame.coinCount ?? coinCount;
-  bestTime = savedGame.bestTime ?? bestTime;
-  timeRecords = savedGame.timeRecords ?? timeRecords;
-
-  // プレイヤーデータ復元
-  if (savedGame.player) {
-    player.x = savedGame.player.x ?? player.x;
-    player.y = savedGame.player.y ?? player.y;
-    player.jumps = savedGame.player.jumps ?? 0;
-
-    player.vx = 0;
-    player.vy = 0;
-    playerHP = savedGame.playerHP ?? maxHP;
+let ownedSkins=["#9b8aff"];
+function saveGame(){
+ const data={coinCount,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,coins:coins.map(c=>c.taken),enemyAlive:enemies.map(e=>e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ try{localStorage.setItem("gameSave",JSON.stringify(data))}catch(e){}
+}
+function loadGame(){
+ try{
+  const d=JSON.parse(localStorage.getItem("gameSave")||"null");if(!d)return;
+  coinCount=d.coinCount??coinCount;bestTime=d.bestTime??bestTime;timeRecords=Array.isArray(d.timeRecords)?d.timeRecords:timeRecords;
+  if(d.player){player.x=d.player.x??player.x;player.y=d.player.y??player.y}
+  playerHP=d.playerHP??playerHP;playerSkin=d.playerSkin??playerSkin;
+  ownedSkins=Array.isArray(d.ownedSkins)?d.ownedSkins:ownedSkins;
+  if(Array.isArray(d.coins))coins.forEach((c,i)=>c.taken=!!d.coins[i]);
+  if(Array.isArray(d.enemyAlive))enemies.forEach((e,i)=>e.alive=d.enemyAlive[i]!==false);
+  boss.hp=d.bossHP??boss.hp;boss.alive=d.bossAlive??boss.alive;bossDefeated=!!d.bossDefeated;
+  gameClear=!!d.gameClear;currentTime=d.currentTime??0;
+  if(gameClear)gameStart=Date.now()-currentTime*1000;
+ }catch(e){console.warn("セーブデータを読み込めませんでした",e)}
+}
+function jump(){if(!gameClear&&player.jumps<player.maxJumps){player.vy=-player.jumpPower;player.jumps++;player.grounded=false}}
+function attack(){
+ if(gameClear||attackCooldown>0)return;
+ attackCooldown=20;
+ for(const e of enemies){if(e.alive&&Math.hypot(player.x+player.w/2-(e.x+e.w/2),player.y+player.h/2-(e.y+e.h/2))<75)e.alive=false}
+ if(boss.alive&&Math.hypot(player.x+player.w/2-(boss.x+boss.w/2),player.y+player.h/2-(boss.y+boss.h/2))<115){
+  boss.hp=Math.max(0,boss.hp-1);if(boss.hp===0){boss.alive=false;bossDefeated=true;saveGame()}
+ }
+}
+function useDash(){if(!gameClear&&dashTimer===0)dashTimer=90}
+function useShield(){if(!gameClear&&shieldTimer===0){shieldTimer=120;invincibleTimer=Math.max(invincibleTimer,120)}}
+function bindHold(id,side){
+ const el=document.getElementById(id);
+ el.addEventListener("pointerdown",e=>{e.preventDefault();touch[side]=true});
+ for(const ev of ["pointerup","pointerleave","pointercancel"])el.addEventListener(ev,()=>touch[side]=false);
+}
+bindHold("left","left");bindHold("right","right");
+document.getElementById("jump").addEventListener("pointerdown",e=>{e.preventDefault();jump()});
+document.getElementById("attack").addEventListener("pointerdown",e=>{e.preventDefault();attack()});
+document.getElementById("dash").onclick=useDash;
+document.getElementById("shield").onclick=useShield;
+window.addEventListener("keydown",e=>{keys[e.code]=true;if(e.code==="Space"&&!e.repeat){e.preventDefault();jump()}});
+window.addEventListener("keyup",e=>keys[e.code]=false);
+canvas.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button===0)attack()});
+function finishGame(){
+ if(gameClear)return;
+ gameClear=true;currentTime=(Date.now()-gameStart)/1000;
+ if(bestTime===null||currentTime<bestTime){bestTime=currentTime;localStorage.setItem("bestTime",String(bestTime))}
+ timeRecords.push(currentTime);timeRecords.sort((a,b)=>a-b);timeRecords=timeRecords.slice(0,5);
+ localStorage.setItem("timeRecords",JSON.stringify(timeRecords));saveGame();
+ setTimeout(()=>alert("WORLD 1 CLEAR! TIME: "+currentTime.toFixed(2)+"秒"),50);
+}
+function update(){
+ if(!gameClear){
+  if(dashTimer>0)dashTimer--;if(shieldTimer>0)shieldTimer--;if(invincibleTimer>0)invincibleTimer--;if(attackCooldown>0)attackCooldown--;
+  const speed=dashTimer>0?player.speed*2:player.speed;
+  const left=keys.ArrowLeft||keys.KeyA||touch.left,right=keys.ArrowRight||keys.KeyD||touch.right;
+  player.vx=(right?speed:0)-(left?speed:0);player.x=Math.max(0,player.x+player.vx);
+  const oldY=player.y;player.vy+=0.5;player.y+=player.vy;player.grounded=false;
+  for(const p of platforms){if(player.vy>=0&&oldY+player.h<=p.y&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0}}
+  if(player.y>650){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
+  for(const e of enemies){
+   if(!e.alive)continue;e.x+=e.dir*1.5;if(e.x<e.min||e.x>e.max)e.dir*=-1;
+   if(player.x<e.x+e.w&&player.x+player.w>e.x&&player.y<e.y+e.h&&player.y+player.h>e.y){
+    if(player.vy>0&&oldY+player.h<=e.y+16){e.alive=false;player.vy=-8;player.jumps=1}
+    else if(invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
+   }
   }
+  for(const c of coins){if(!c.taken&&player.x<c.x+15&&player.x+player.w>c.x-15&&player.y<c.y+15&&player.y+player.h>c.y-15){c.taken=true;coinCount++}}
+  if(boss.alive&&player.x<boss.x+boss.w&&player.x+player.w>boss.x&&player.y<boss.y+boss.h&&player.y+player.h>boss.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
+  if(bossDefeated&&player.x<goal.x+goal.w&&player.x+player.w>goal.x&&player.y<goal.y+goal.h&&player.y+player.h>goal.y)finishGame();
+  camera=Math.max(0,Math.min(1900,player.x-250));
+ }
+ draw();requestAnimationFrame(update);
 }
-
-// ゲームデータを保存する
-function saveGame() {
-
-    const saveData = {
-  coinCount: coinCount,
-  bestTime: bestTime,
-  timeRecords: timeRecords,
-
-  player: {
-    x: player.x,
-    y: player.y,
-    jumps: player.jumps
-  },
-
-  playerHP: playerHP
-};
-
-  localStorage.setItem(
-    "gameSave",
-    JSON.stringify(saveData)
-  );
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#16294b");bg.addColorStop(1,"#0c1024");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+ ctx.save();ctx.translate(-camera,0);
+ // 遠景の森
+ for(let i=0;i<24;i++){const x=i*150;ctx.fillStyle=i%2?"#173d42":"#1c5147";ctx.beginPath();ctx.arc(x+45,370,85,Math.PI,0);ctx.fill()}
+ for(const p of platforms){ctx.fillStyle="#294b3c";ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle="#42d68b";ctx.fillRect(p.x,p.y,p.w,6)}
+ for(const c of coins){if(c.taken)continue;ctx.fillStyle="#ffd700";ctx.beginPath();ctx.arc(c.x,c.y,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#fff0a0";ctx.stroke()}
+ for(const e of enemies){if(!e.alive)continue;ctx.fillStyle="#ff477e";ctx.fillRect(e.x,e.y,e.w,e.h);ctx.fillStyle="white";ctx.fillRect(e.x+6,e.y+8,5,5);ctx.fillRect(e.x+19,e.y+8,5,5)}
+ if(boss.alive){ctx.fillStyle="#9b35ff";ctx.fillRect(boss.x,boss.y,boss.w,boss.h);ctx.fillStyle="#fff";ctx.fillRect(boss.x+18,boss.y+20,10,10);ctx.fillRect(boss.x+52,boss.y+20,10,10)}
+ if(bossDefeated){ctx.fillStyle="#ffd700";ctx.fillRect(goal.x,goal.y,goal.w,goal.h);ctx.fillStyle="#fff";ctx.font="16px sans-serif";ctx.fillText("GOAL",goal.x-4,goal.y-10)}
+ ctx.shadowColor=playerSkin;ctx.shadowBlur=15;ctx.fillStyle=playerSkin;ctx.fillRect(player.x,player.y,player.w,player.h);ctx.shadowBlur=0;
+ ctx.fillStyle="white";ctx.fillRect(player.x+19,player.y+9,5,5);ctx.fillStyle="#16e0bd";ctx.fillRect(player.x+4,player.y+player.h-5,22,5);
+ ctx.restore();
+ ctx.fillStyle="white";ctx.font="bold 19px sans-serif";ctx.fillText("WORLD 1 : GREEN FOREST",18,28);
+ ctx.font="16px sans-serif";ctx.fillStyle="#ffd700";ctx.fillText("COINS: "+coinCount,18,58);
+ ctx.fillStyle="#00ffff";ctx.fillText("TIME: "+(gameClear?currentTime:(Date.now()-gameStart)/1000).toFixed(2),18,84);
+ ctx.fillStyle="#ffd700";ctx.fillText("BEST: "+(bestTime===null?"--":bestTime.toFixed(2)+"s"),18,110);
+ ctx.fillStyle="white";ctx.fillText("HP: "+"♥".repeat(playerHP),18,138);
+ ctx.fillStyle="#fff";ctx.font="14px sans-serif";ctx.fillText("DOUBLE JUMP: "+(player.jumps<2?"READY":"USED"),18,164);
+ if(boss.alive){ctx.fillStyle="#555";ctx.fillRect(300,20,300,16);ctx.fillStyle="#ff477e";ctx.fillRect(300,20,300*(boss.hp/boss.maxHP),16);ctx.fillStyle="white";ctx.fillText("BOSS",300,15)}
+ if(gameClear){ctx.fillStyle="rgba(0,0,0,.65)";ctx.fillRect(0,0,W,H);ctx.fillStyle="#ffd700";ctx.font="bold 42px sans-serif";ctx.fillText("WORLD 1 CLEAR!",W/2-165,H/2);ctx.font="20px sans-serif";ctx.fillStyle="white";ctx.fillText("TIME "+currentTime.toFixed(2)+"s",W/2-65,H/2+40)}
 }
-
-// 3秒ごとに自動保存
-setInterval(saveGame, 3000);
-// ゴール
-const goal = {
-  x: 2650,
-  y: 270,
-  w: 45,
-  h: 80
-};
-// ボス設定
-const boss = {
-  x: 2500,
-  y: 270,
-  w: 80,
-  h: 80,
-  hp: 10,
-  maxHP: 10,
-  speed: 1.5,
-  direction: -1,
-  alive: true,
-  attackTimer: 0
-};
-
-let bossDefeated = false;
-// スマホ用攻撃ボタン
-const attackButton = document.createElement("button");
-
-attackButton.textContent = "ATTACK";
-attackButton.style.position = "fixed";
-attackButton.style.right = "25px";
-attackButton.style.bottom = "100px";
-attackButton.style.width = "85px";
-attackButton.style.height = "85px";
-attackButton.style.borderRadius = "50%";
-attackButton.style.background = "#ff477e";
-attackButton.style.color = "white";
-attackButton.style.border = "3px solid white";
-attackButton.style.fontWeight = "bold";
-attackButton.style.zIndex = "1000";
-
-attackButton.addEventListener("pointerdown", e => {
-  e.preventDefault();
-  attack();
-});
-
-document.body.appendChild(attackButton);
-update();
+function restart(){
+ player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;coinCount=0;
+ coins.forEach(c=>c.taken=false);enemies.forEach(e=>e.alive=true);boss.hp=boss.maxHP;boss.alive=true;bossDefeated=false;
+ gameClear=false;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;saveGame();
+}
+document.getElementById("restart").onclick=()=>{restart()};
+document.getElementById("save").onclick=()=>{saveGame();alert("GAME SAVED!")};
+document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\n\n"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("\n"):"まだ記録がありません"));
+document.getElementById("shopToggle").onclick=()=>{const p=document.getElementById("shopPanel");p.style.display=p.style.display==="block"?"none":"block"};
+function renderShop(){
+ const area=document.getElementById("skinItems");area.innerHTML="";
+ for(const s of skins){const b=document.createElement("button");b.textContent=s.name+" - "+s.price+" COINS";
+ b.onclick=()=>{if(ownedSkins.includes(s.color)){playerSkin=s.color;saveGame();alert("スキンを装備した！")}else if(coinCount>=s.price){coinCount-=s.price;ownedSkins.push(s.color);playerSkin=s.color;saveGame();alert("スキンを購入した！")}else alert("コインが足りない！")};area.appendChild(b)}
+}
+renderShop();loadGame();setInterval(saveGame,5000);update();
 </script>
 </body>
 </html>
-
