@@ -241,6 +241,7 @@ function draw(){
   const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#263b83");sky.addColorStop(.55,"#75c9ef");sky.addColorStop(1,"#e7f8ff");ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
   ctx.fillStyle="rgba(255,255,255,.72)";for(let i=0;i<12;i++){const x=((i*137-camera*.18)%(W+220)+W+220)%(W+220)-100,y=90+(i%4)*75;ctx.beginPath();ctx.arc(x,y,28,0,Math.PI*2);ctx.arc(x+34,y-12,38,0,Math.PI*2);ctx.arc(x+72,y,30,0,Math.PI*2);ctx.fill()}
   ctx.save();ctx.translate(-camera*.22,0);for(let i=0;i<8;i++){const x=i*420;ctx.fillStyle="#7188bb";ctx.beginPath();ctx.moveTo(x,390);ctx.lineTo(x+100,250);ctx.lineTo(x+210,330);ctx.lineTo(x+330,210);ctx.lineTo(x+440,390);ctx.fill()}ctx.fillStyle="#e8faff";ctx.fillRect(3070,175,180,175);ctx.fillRect(3050,155,220,25);ctx.fillRect(3100,100,35,60);ctx.fillRect(3190,100,35,60);ctx.fillStyle="#ffe78a";ctx.fillRect(3135,235,48,115);ctx.restore();
+  ctx.save();ctx.translate(-camera,0);
  }
  for(const w of windZones){ctx.fillStyle="rgba(100,245,255,.18)";ctx.fillRect(w.x,w.y,w.w,w.h);ctx.strokeStyle="#b8fbff";ctx.lineWidth=3;for(let yy=w.y+25;yy<w.y+w.h;yy+=42){ctx.beginPath();ctx.moveTo(w.x+15,yy);ctx.quadraticCurveTo(w.x+w.w/2,yy-18,w.x+w.w-15,yy);ctx.stroke()}}
  for(const m of movingPlatforms){ctx.fillStyle="#9feeff";ctx.fillRect(m.x,m.y,m.w,m.h);ctx.fillStyle="#fff";ctx.fillRect(m.x+8,m.y+3,m.w-16,4)}
