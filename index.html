@@ -262,7 +262,7 @@ function renderShop(){
  for(const s of skins){const b=document.createElement("button");b.textContent=s.name+" - "+s.price+" COINS";
  b.onclick=()=>{if(ownedSkins.includes(s.color)){playerSkin=s.color;saveGame();alert("スキンを装備した！")}else if(coinCount>=s.price){coinCount-=s.price;ownedSkins.push(s.color);playerSkin=s.color;saveGame();alert("スキンを購入した！")}else alert("コインが足りない！")};area.appendChild(b)}
 }
-renderShop();loadGame();setInterval(()=>{if(gameStarted)saveGame()},5000);update();
+renderShop();loadGame();if(worldNumber===2){const wasClear=gameClear,wasStageCleared=stageCleared,wasTime=currentTime,wasBossHP=boss.hp,wasBossAlive=boss.alive,wasBossDefeated=bossDefeated;loadWorld2();gameClear=wasClear;stageCleared=wasStageCleared;currentTime=wasTime;boss.hp=wasBossHP;boss.alive=wasBossAlive;bossDefeated=wasBossDefeated;if(gameClear)gameStart=Date.now()-currentTime*1000;document.getElementById("startGame").textContent="CONTINUE WORLD 2"}else if(world2Unlocked){document.getElementById("startGame").textContent="START WORLD 2"}setInterval(()=>{if(gameStarted)saveGame()},5000);update();
 </script>
 </body>
 </html>
