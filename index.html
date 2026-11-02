@@ -215,7 +215,7 @@ function draw(){
 }
 function restart(){
  player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;
- if(!stageCleared){coinCount=0;coins.forEach(c=>c.taken=false)}
+ coins.forEach(c=>c.taken=false); // コインを復活させ、所持数は維持
  enemies.forEach(e=>e.alive=true);boss.hp=boss.maxHP;boss.alive=true;bossDefeated=false;
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
