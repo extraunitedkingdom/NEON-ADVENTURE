@@ -51,7 +51,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
-<div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button></div>
+<div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button></div>
 <button id="shopToggle">🛒　SKIN SHOP</button>
 <button id="save">▣　SAVE</button>
 <button id="ranking">🏆　RANKING</button>
@@ -77,7 +77,7 @@ const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 const W=canvas.width,H=canvas.height;
 const player={x:80,y:200,w:30,h:42,vx:0,vy:0,speed:4,jumpPower:11,jumps:0,maxJumps:2,grounded:false};
 let playerHP=3,invincibleTimer=0,attackCooldown=0,dashTimer=0,shieldTimer=0;
-let worldNumber=1,world2Unlocked=false,world2Cleared=false;
+let worldNumber=1,world2Unlocked=false,world2Cleared=false,world3Unlocked=false,world3Cleared=false;
 let facing=1,attackTimer=0,gameStarted=false;
 let playerSkin="#9b8aff",coinCount=0,camera=0,gameClear=false,bossDefeated=false,stageCleared=false;
 let gameStart=Date.now(),currentTime=0;
@@ -104,6 +104,7 @@ let boss={x:2500,y:270,w:80,h:80,hp:10,maxHP:10,alive:true};
 let lavaZones=[];
 let springPads=[];
 let stageWalls=[];
+let windZones=[],movingPlatforms=[],vanishPlatforms=[],lightningZones=[];
 function loadWorld2(){
  worldNumber=2;springPads=[{x:470,y:410,w:54,h:20,power:17},{x:1320,y:410,w:58,h:20,power:21}];stageWalls=[{x:1700,y:170,w:70,h:260}];player.x=80;player.y=350;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;camera=0;
  // 基本は平地。マグマ溜まりをジャンプパッドで越え、最後は高い壁を飛び乗る構成
@@ -120,13 +121,13 @@ const skins=[
 ];
 let ownedSkins=["#9b8aff"];
 function saveGame(){
- const data={worldNumber,world2Unlocked,world2Cleared,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,coins:coins.map(c=>c.taken),enemyAlive:enemies.map(e=>e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ const data={worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,coins:coins.map(c=>c.taken),enemyAlive:enemies.map(e=>e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
  try{localStorage.setItem("gameSave",JSON.stringify(data))}catch(e){}
 }
 function loadGame(){
  try{
   const d=JSON.parse(localStorage.getItem("gameSave")||"null");if(!d)return;
-  coinCount=d.coinCount??coinCount;worldNumber=d.worldNumber??worldNumber;world2Unlocked=!!d.world2Unlocked;world2Cleared=!!d.world2Cleared;stageCleared=!!d.stageCleared;bestTime=d.bestTime??bestTime;timeRecords=Array.isArray(d.timeRecords)?d.timeRecords:timeRecords;
+  coinCount=d.coinCount??coinCount;worldNumber=d.worldNumber??worldNumber;world2Unlocked=!!d.world2Unlocked;world2Cleared=!!d.world2Cleared;world3Unlocked=!!d.world3Unlocked;world3Cleared=!!d.world3Cleared;stageCleared=!!d.stageCleared;bestTime=d.bestTime??bestTime;timeRecords=Array.isArray(d.timeRecords)?d.timeRecords:timeRecords;
   if(d.player){player.x=d.player.x??player.x;player.y=d.player.y??player.y}
   playerHP=d.playerHP??playerHP;playerSkin=d.playerSkin??playerSkin;
   ownedSkins=Array.isArray(d.ownedSkins)?d.ownedSkins:ownedSkins;
@@ -136,6 +137,19 @@ function loadGame(){
   gameClear=!!d.gameClear;currentTime=d.currentTime??0;
   if(gameClear)gameStart=Date.now()-currentTime*1000;
  }catch(e){console.warn("セーブデータを読み込めませんでした",e)}
+}
+function loadWorld3(){
+ worldNumber=3;springPads=[];lavaZones=[];stageWalls=[];
+ windZones=[{x:350,y:150,w:190,h:280,dir:1,power:0.48},{x:1740,y:80,w:190,h:330,dir:-1,power:0.42},{x:2780,y:70,w:210,h:350,dir:1,power:0.5}];
+ movingPlatforms=[{x:650,y:340,w:120,h:18,baseX:650,baseY:340,range:90,speed:0.035,phase:0},{x:1010,y:270,w:120,h:18,baseX:1010,baseY:270,range:85,speed:0.04,phase:1.8},{x:1370,y:335,w:125,h:18,baseX:1370,baseY:335,range:100,speed:0.03,phase:3}];
+ vanishPlatforms=[{x:1980,y:350,w:105,h:18,timer:0,active:true},{x:2110,y:290,w:105,h:18,timer:0,active:true},{x:2240,y:230,w:105,h:18,timer:0,active:true},{x:2370,y:170,w:110,h:18,timer:0,active:true}];
+ lightningZones=[{x:1580,y:250,w:58,h:180,period:180,phase:0},{x:2510,y:100,w:58,h:330,period:150,phase:70},{x:2910,y:80,w:58,h:350,period:165,phase:30}];
+ platforms=[{x:0,y:430,w:430,h:70},{x:520,y:390,w:120,h:20},{x:790,y:330,w:120,h:20},{x:1150,y:390,w:120,h:20},{x:1490,y:350,w:130,h:20},{x:1690,y:430,w:250,h:70},{x:1930,y:430,w:80,h:70},{x:2480,y:430,w:180,h:70},{x:2670,y:350,w:150,h:20},{x:2840,y:430,w:380,h:70}];
+ enemies=[{x:1730,y:395,w:32,h:30,min:1700,max:1880,dir:1,alive:true},{x:2700,y:315,w:32,h:30,min:2670,max:2790,dir:-1,alive:true}];
+ coins=[{x:330,y:370,taken:false},{x:700,y:295,taken:false},{x:1060,y:215,taken:false},{x:1400,y:285,taken:false},{x:1820,y:370,taken:false},{x:2030,y:300,taken:false},{x:2290,y:180,taken:false},{x:2730,y:310,taken:false},{x:3000,y:370,taken:false}];
+ goal={x:3130,y:350,w:45,h:80};boss={x:3000,y:350,w:80,h:80,hp:18,maxHP:18,alive:true};
+ player.x=80;player.y=350;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;camera=0;bossDefeated=false;gameClear=false;stageCleared=false;currentTime=0;gameStart=Date.now();
+ document.querySelector(".stage-top p").textContent="WORLD 3 : SKY KINGDOM";
 }
 function jump(){if(!gameClear&&player.jumps<player.maxJumps){player.vy=-player.jumpPower;player.jumps++;player.grounded=false}}
 function attack(){
@@ -163,11 +177,11 @@ window.addEventListener("keyup",e=>keys[e.code]=false);
 canvas.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button===0)attack()});
 function finishGame(){
  if(gameClear)return;
- gameClear=true;stageCleared=true;if(worldNumber===1)world2Unlocked=true;else world2Cleared=true;currentTime=(Date.now()-gameStart)/1000;
+ gameClear=true;stageCleared=true;if(worldNumber===1)world2Unlocked=true;else if(worldNumber===2){world2Cleared=true;world3Unlocked=true}else world3Cleared=true;currentTime=(Date.now()-gameStart)/1000;
  if(bestTime===null||currentTime<bestTime){bestTime=currentTime;localStorage.setItem("bestTime",String(bestTime))}
  timeRecords.push(currentTime);timeRecords.sort((a,b)=>a-b);timeRecords=timeRecords.slice(0,5);
  localStorage.setItem("timeRecords",JSON.stringify(timeRecords));saveGame();
- saveGame();document.getElementById("clearTitle").textContent="WORLD "+worldNumber+" CLEAR!";document.getElementById("clearPanel").style.display="block";document.getElementById("nextStageButton").style.display=worldNumber===1?"inline-block":"none";
+ saveGame();document.getElementById("clearTitle").textContent="WORLD "+worldNumber+" CLEAR!";document.getElementById("clearPanel").style.display="block";document.getElementById("nextStageButton").style.display=worldNumber<3?"inline-block":"none";
 }
 function update(){
  if(gameStarted&&!gameClear){
@@ -177,8 +191,13 @@ function update(){
   player.vx=(right?speed:0)-(left?speed:0);if(player.vx!==0)facing=player.vx>0?1:-1;
   const oldX=player.x;player.x=Math.max(0,player.x+player.vx);
   for(const wall of stageWalls){if(player.y+player.h>wall.y&&player.y<wall.y+wall.h&&player.x+player.w>wall.x&&player.x<wall.x+wall.w){if(oldX+player.w<=wall.x)player.x=wall.x-player.w;else if(oldX>=wall.x+wall.w)player.x=wall.x+wall.w;player.vx=0}}
-  const oldY=player.y;player.vy+=0.5;player.y+=player.vy;player.grounded=false;
-  for(const p of platforms){if(player.vy>=0&&oldY+player.h<=p.y&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0}}
+  const oldY=player.y;
+  for(const m of movingPlatforms){m.prevX=m.x;m.x=m.baseX+Math.sin(Date.now()*m.speed/1000+m.phase)*m.range;m.y=m.baseY+Math.sin(Date.now()*m.speed/1400+m.phase)*22}
+  for(const v of vanishPlatforms){if(v.timer>0){v.timer--;if(v.timer===0)v.active=false}}
+  player.vy+=0.5;player.y+=player.vy;player.grounded=false;
+  for(const w of windZones){if(player.x+player.w>w.x&&player.x<w.x+w.w&&player.y+player.h>w.y&&player.y<w.y+w.h){player.vx+=w.dir*w.power;player.vy-=0.16;player.vx=Math.max(-7,Math.min(7,player.vx))}}
+  for(const p of [...platforms,...movingPlatforms,...vanishPlatforms.filter(v=>v.active)]){if(player.vy>=0&&oldY+player.h<=p.y&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;if(movingPlatforms.includes(p))player.x+=p.x-p.prevX;if(vanishPlatforms.includes(p))p.timer=55}}
+  for(const l of lightningZones){l.phase=(l.phase+1)%l.period;if(l.phase<48&&player.x<l.x+l.w&&player.x+player.w>l.x&&player.y<l.y+l.h&&player.y+player.h>l.y&&invincibleTimer===0){playerHP--;invincibleTimer=75;player.vy=-6;if(playerHP<=0){playerHP=3;player.x=80;player.y=350;player.vy=0;player.jumps=0}}}
   if(worldNumber>=2&&player.vy>=0){for(const pad of springPads){if(oldY+player.h<=pad.y&&player.y+player.h>=pad.y&&player.x+player.w>pad.x&&player.x<pad.x+pad.w){player.y=pad.y-player.h;player.vy=-pad.power;player.jumps=1;player.grounded=false}}}
   if(player.y>650){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
   for(const z of lavaZones){if(player.x<z.x+z.w&&player.x+player.w>z.x&&player.y<z.y+z.h&&player.y+player.h>z.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-7;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}}
@@ -192,7 +211,7 @@ function update(){
   for(const c of coins){if(!c.taken&&player.x<c.x+15&&player.x+player.w>c.x-15&&player.y<c.y+15&&player.y+player.h>c.y-15){c.taken=true;coinCount++}}
   if(boss.alive&&player.x<boss.x+boss.w&&player.x+player.w>boss.x&&player.y<boss.y+boss.h&&player.y+player.h>boss.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
   if(bossDefeated&&player.x<goal.x+goal.w&&player.x+player.w>goal.x&&player.y<goal.y+goal.h&&player.y+player.h>goal.y)finishGame();
-  camera=Math.max(0,Math.min(1900,player.x-250));
+  camera=Math.max(0,Math.min(worldNumber===3?2400:1900,player.x-250));
  }
  draw();requestAnimationFrame(update);
 }
@@ -205,7 +224,7 @@ function draw(){
   ctx.save();ctx.translate(-camera*.22,0);for(let i=0;i<9;i++){const x=i*260-80;ctx.fillStyle=i%2?"#70b9a0":"#579e91";ctx.beginPath();ctx.moveTo(x,355);ctx.lineTo(x+125,125+(i%3)*35);ctx.lineTo(x+270,355);ctx.closePath();ctx.fill();ctx.fillStyle="rgba(239,255,235,.8)";ctx.beginPath();ctx.moveTo(x+91,190+(i%3)*35);ctx.lineTo(x+125,125+(i%3)*35);ctx.lineTo(x+164,190+(i%3)*35);ctx.closePath();ctx.fill()}ctx.restore();
   ctx.save();ctx.translate(-camera,0);for(let i=0;i<30;i++){const x=i*145-30;ctx.fillStyle=i%2?"#287b59":"#328b5c";ctx.beginPath();ctx.arc(x+45,370,82,Math.PI,0);ctx.fill();ctx.fillRect(x+35,365,20,55)}
   ctx.fillStyle="#526b79";ctx.fillRect(2070,205,155,145);ctx.fillStyle="#718c99";ctx.fillRect(2055,185,185,24);ctx.fillStyle="#526b79";ctx.fillRect(2090,155,30,52);ctx.fillRect(2170,155,30,52);ctx.fillStyle="#e8f3e8";ctx.beginPath();ctx.moveTo(2080,155);ctx.lineTo(2105,120);ctx.lineTo(2130,155);ctx.fill();ctx.beginPath();ctx.moveTo(2160,155);ctx.lineTo(2185,120);ctx.lineTo(2210,155);ctx.fill();ctx.fillStyle="#263e59";ctx.fillRect(2128,260,38,90);ctx.fillStyle="#ffd56b";ctx.fillRect(2090,225,22,28);ctx.fillRect(2180,225,22,28);ctx.fillStyle="#65d9ee";ctx.fillRect(2048,350,28,80);ctx.fillRect(2215,350,28,80);ctx.fillStyle="#d5fbff";ctx.fillRect(2057,350,8,80);ctx.fillRect(2224,350,8,80);
- }else{
+ }else if(worldNumber===2){
   // LAVA LAND：夕焼け、火山群、煙、溶岩の光が広がる灼熱の景色
   const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#251b43");bg.addColorStop(.38,"#71334b");bg.addColorStop(.72,"#e16a3c");bg.addColorStop(1,"#ffb45c");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
   const sun=ctx.createRadialGradient(690,155,8,690,155,125);sun.addColorStop(0,"#fff2b0");sun.addColorStop(.35,"#ffb35c");sun.addColorStop(1,"rgba(255,120,50,0)");ctx.fillStyle=sun;ctx.fillRect(540,5,300,300);ctx.fillStyle="#ffd58a";ctx.beginPath();ctx.arc(690,155,43,0,Math.PI*2);ctx.fill();
@@ -219,6 +238,15 @@ function draw(){
   for(let i=0;i<34;i++){const x=((i*97-camera*.3)%(W+30)+W+30)%(W+30),y=80+(i*67)%320;ctx.fillStyle=i%3?"rgba(255,190,95,.7)":"rgba(255,90,48,.85)";ctx.beginPath();ctx.arc(x,y,1+(i%3),0,Math.PI*2);ctx.fill()}
   ctx.save();ctx.translate(-camera,0);
  }
+ }else{
+  const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#263b83");sky.addColorStop(.55,"#75c9ef");sky.addColorStop(1,"#e7f8ff");ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="rgba(255,255,255,.72)";for(let i=0;i<12;i++){const x=((i*137-camera*.18)%(W+220)+W+220)%(W+220)-100,y=90+(i%4)*75;ctx.beginPath();ctx.arc(x,y,28,0,Math.PI*2);ctx.arc(x+34,y-12,38,0,Math.PI*2);ctx.arc(x+72,y,30,0,Math.PI*2);ctx.fill()}
+  ctx.save();ctx.translate(-camera*.22,0);for(let i=0;i<8;i++){const x=i*420;ctx.fillStyle="#7188bb";ctx.beginPath();ctx.moveTo(x,390);ctx.lineTo(x+100,250);ctx.lineTo(x+210,330);ctx.lineTo(x+330,210);ctx.lineTo(x+440,390);ctx.fill()}ctx.fillStyle="#e8faff";ctx.fillRect(3070,175,180,175);ctx.fillRect(3050,155,220,25);ctx.fillRect(3100,100,35,60);ctx.fillRect(3190,100,35,60);ctx.fillStyle="#ffe78a";ctx.fillRect(3135,235,48,115);ctx.restore();
+ }
+ for(const w of windZones){ctx.fillStyle="rgba(100,245,255,.18)";ctx.fillRect(w.x,w.y,w.w,w.h);ctx.strokeStyle="#b8fbff";ctx.lineWidth=3;for(let yy=w.y+25;yy<w.y+w.h;yy+=42){ctx.beginPath();ctx.moveTo(w.x+15,yy);ctx.quadraticCurveTo(w.x+w.w/2,yy-18,w.x+w.w-15,yy);ctx.stroke()}}
+ for(const m of movingPlatforms){ctx.fillStyle="#9feeff";ctx.fillRect(m.x,m.y,m.w,m.h);ctx.fillStyle="#fff";ctx.fillRect(m.x+8,m.y+3,m.w-16,4)}
+ for(const v of vanishPlatforms){if(v.active){ctx.fillStyle=v.timer>0?"#ffdc78":"#d6c9ff";ctx.fillRect(v.x,v.y,v.w,v.h);ctx.fillStyle="#fff";ctx.fillRect(v.x+6,v.y+3,v.w-12,3)}}
+ for(const l of lightningZones){if(l.phase<48){ctx.fillStyle="rgba(255,245,120,.24)";ctx.fillRect(l.x,l.y,l.w,l.h);ctx.strokeStyle="#fff7a8";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(l.x+l.w/2,l.y);ctx.lineTo(l.x+12,l.y+65);ctx.lineTo(l.x+45,l.y+110);ctx.lineTo(l.x+18,l.y+180);ctx.stroke()}else{ctx.fillStyle="rgba(160,180,255,.12)";ctx.fillRect(l.x,l.y,l.w,l.h)}}
  for(const pad of springPads){ctx.fillStyle="#21e6d1";ctx.fillRect(pad.x,pad.y,pad.w,pad.h);ctx.fillStyle="#eaffff";ctx.fillRect(pad.x+7,pad.y+4,pad.w-14,4);ctx.fillStyle="#21e6d1";ctx.font="bold 13px sans-serif";ctx.fillText("JUMP!",pad.x+5,pad.y-8)}
  for(const wall of stageWalls){ctx.fillStyle="#493c59";ctx.fillRect(wall.x,wall.y,wall.w,wall.h);ctx.fillStyle="#b58aff";ctx.fillRect(wall.x,wall.y,wall.w,9);for(let yy=wall.y+25;yy<wall.y+wall.h;yy+=28){ctx.fillStyle="#6b587b";ctx.fillRect(wall.x+8,yy,wall.w-16,4)}}
  for(const z of lavaZones){ctx.fillStyle="#ff4b16";ctx.fillRect(z.x,z.y,z.w,z.h);ctx.fillStyle="#ffd34e";ctx.fillRect(z.x,z.y,z.w,7)}
@@ -246,7 +274,7 @@ function draw(){
   ctx.stroke();ctx.restore();
  }
  ctx.restore();
- ctx.fillStyle="white";ctx.font="bold 19px sans-serif";ctx.fillText(worldNumber===1?"WORLD 1 : GREEN FOREST":"WORLD 2 : LAVA LAND",18,28);
+ ctx.fillStyle="white";ctx.font="bold 19px sans-serif";ctx.fillText(worldNumber===1?"WORLD 1 : GREEN FOREST":worldNumber===2?"WORLD 2 : LAVA LAND":"WORLD 3 : SKY KINGDOM",18,28);
  ctx.font="16px sans-serif";ctx.fillStyle="#ffd700";ctx.fillText("COINS: "+coinCount,18,58);
  ctx.fillStyle="#00ffff";ctx.fillText("TIME: "+(gameClear?currentTime:(Date.now()-gameStart)/1000).toFixed(2),18,84);
  ctx.fillStyle="#ffd700";ctx.fillText("BEST: "+(bestTime===null?"--":bestTime.toFixed(2)+"s"),18,110);
@@ -263,14 +291,15 @@ function restart(){
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
 document.getElementById("restart").onclick=()=>{restart()};
-function returnHome(){saveGame();document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
+function returnHome(){saveGame();document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";document.getElementById("world3Select").disabled=!world3Unlocked;document.getElementById("world3Select").textContent=world3Unlocked?"☁️ WORLD 3 : SKY KINGDOM":"☁️ WORLD 3 : SKY KINGDOM 🔒";document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
 document.getElementById("homeButton").onclick=returnHome;
 document.getElementById("clearHomeButton").onclick=returnHome;
 document.getElementById("clearRestartButton").onclick=restart;
-document.getElementById("nextStageButton").onclick=()=>{if(worldNumber===1&&world2Unlocked){loadWorld2();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}};
+document.getElementById("nextStageButton").onclick=()=>{if(worldNumber===1&&world2Unlocked){loadWorld2();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}else if(worldNumber===2&&world3Unlocked){loadWorld3();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}};
 document.getElementById("startGame").onclick=()=>{document.getElementById("stageSelect").style.display=document.getElementById("stageSelect").style.display==="block"?"none":"block"};
 document.getElementById("world1Select").onclick=()=>{worldNumber=1;springPads=[];lavaZones=[];platforms=[{x:0,y:430,w:500,h:70},{x:560,y:380,w:180,h:25},{x:800,y:330,w:180,h:25},{x:1050,y:390,w:180,h:25},{x:1300,y:330,w:180,h:25},{x:1550,y:280,w:180,h:25},{x:1800,y:350,w:250,h:100},{x:2150,y:300,w:180,h:25},{x:2450,y:350,w:350,h:100}];enemies=[{x:650,y:350,w:30,h:30,min:600,max:700,dir:1,alive:true},{x:1100,y:360,w:30,h:30,min:1050,max:1200,dir:-1,alive:true},{x:1900,y:320,w:30,h:30,min:1850,max:2000,dir:1,alive:true}];coins=[{x:300,y:395,taken:false},{x:650,y:340,taken:false},{x:900,y:290,taken:false},{x:1150,y:350,taken:false},{x:1400,y:290,taken:false},{x:1650,y:240,taken:false},{x:2250,y:260,taken:false}];goal={x:2650,y:270,w:45,h:80};boss={x:2500,y:270,w:80,h:80,hp:10,maxHP:10,alive:true};bossDefeated=false;gameClear=false;stageCleared=false;player.x=80;player.y=200;player.vx=0;player.vy=0;playerHP=3;camera=0;currentTime=0;document.querySelector(".stage-top p").textContent="WORLD 1 : GREEN FOREST";beginSelectedWorld()};
 document.getElementById("world2Select").onclick=()=>{if(!world2Unlocked)return;loadWorld2();beginSelectedWorld()};
+document.getElementById("world3Select").onclick=()=>{if(!world3Unlocked)return;loadWorld3();beginSelectedWorld()};
 function beginSelectedWorld(){gameStarted=true;gameStart=Date.now();document.getElementById("stageSelect").style.display="none";document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";document.getElementById("clearPanel").style.display="none";saveGame()};
 document.getElementById("save").onclick=()=>{saveGame();alert("GAME SAVED!")};
 document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\\n\\n"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("\\n"):"まだ記録がありません"));
@@ -280,7 +309,7 @@ function renderShop(){
  for(const s of skins){const b=document.createElement("button");b.textContent=s.name+" - "+s.price+" COINS";
  b.onclick=()=>{if(ownedSkins.includes(s.color)){playerSkin=s.color;saveGame();alert("スキンを装備した！")}else if(coinCount>=s.price){coinCount-=s.price;ownedSkins.push(s.color);playerSkin=s.color;saveGame();alert("スキンを購入した！")}else alert("コインが足りない！")};area.appendChild(b)}
 }
-renderShop();loadGame();document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";if(worldNumber===2){const wasClear=gameClear,wasStageCleared=stageCleared,wasTime=currentTime,wasBossHP=boss.hp,wasBossAlive=boss.alive,wasBossDefeated=bossDefeated;loadWorld2();gameClear=wasClear;stageCleared=wasStageCleared;currentTime=wasTime;boss.hp=wasBossHP;boss.alive=wasBossAlive;bossDefeated=wasBossDefeated;if(gameClear)gameStart=Date.now()-currentTime*1000;document.getElementById("startGame").textContent="CONTINUE WORLD 2"}else if(world2Unlocked){document.getElementById("startGame").textContent="START WORLD 2"}setInterval(()=>{if(gameStarted)saveGame()},5000);update();
+renderShop();loadGame();document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";if(worldNumber===2){const wasClear=gameClear,wasStageCleared=stageCleared,wasTime=currentTime,wasBossHP=boss.hp,wasBossAlive=boss.alive,wasBossDefeated=bossDefeated;loadWorld2();gameClear=wasClear;stageCleared=wasStageCleared;currentTime=wasTime;boss.hp=wasBossHP;boss.alive=wasBossAlive;bossDefeated=wasBossDefeated;if(gameClear)gameStart=Date.now()-currentTime*1000;document.getElementById("startGame").textContent="CONTINUE WORLD 2"}else if(world3Unlocked){document.getElementById("startGame").textContent="START WORLD 3"}else if(world2Unlocked){document.getElementById("startGame").textContent="START WORLD 2"}setInterval(()=>{if(gameStarted)saveGame()},5000);update();
 </script>
 </body>
 </html>
