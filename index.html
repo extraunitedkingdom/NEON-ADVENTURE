@@ -12,7 +12,10 @@ p{margin:8px}
 canvas{display:block;width:100%;max-width:900px;height:auto;margin:12px auto;background:#171b3a;border:2px solid #16e0bd;border-radius:10px;touch-action:none}
 button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12px;padding:12px 16px;margin:4px;font-size:16px;font-weight:bold;touch-action:manipulation}
 .controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
-#actions{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;max-width:900px;margin:8px auto}\n#home{max-width:520px;margin:35px auto;padding:22px;background:#201a38;border:2px solid #16e0bd;border-radius:18px}\n#home button{display:block;width:100%;margin:10px 0}\n#stage{display:none}\n@media(max-width:700px){#actions{gap:3px}#actions button{padding:10px 12px;font-size:14px}.controls button{min-width:28%;padding:14px 8px}}
+#actions{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;max-width:900px;margin:8px auto}
+#home{max-width:520px;margin:35px auto;padding:22px;background:#201a38;border:2px solid #16e0bd;border-radius:18px}
+#home button{display:block;width:100%;margin:10px 0}
+#stage{display:none}\n@media(max-width:700px){#actions{gap:3px}#actions button{padding:10px 12px;font-size:14px}.controls button{min-width:28%;padding:14px 8px}}
 #shopPanel{display:none;max-width:360px;margin:10px auto;padding:12px;background:#201a38;border:2px solid #9b8aff;border-radius:12px}
 #shopPanel button{display:block;width:100%;margin:6px 0}
 .small{font-size:13px;color:#c8c9df}
@@ -192,7 +195,8 @@ function restart(){
  coins.forEach(c=>c.taken=false);enemies.forEach(e=>e.alive=true);boss.hp=boss.maxHP;boss.alive=true;bossDefeated=false;
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
-document.getElementById("restart").onclick=()=>{restart()};\ndocument.getElementById("startGame").onclick=()=>{gameStarted=true;document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";gameStart=Date.now()-currentTime*1000};
+document.getElementById("restart").onclick=()=>{restart()};
+document.getElementById("startGame").onclick=()=>{gameStarted=true;document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";gameStart=Date.now()-currentTime*1000};
 document.getElementById("save").onclick=()=>{saveGame();alert("GAME SAVED!")};
 document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\n\n"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("\n"):"まだ記録がありません"));
 document.getElementById("shopToggle").onclick=()=>{const p=document.getElementById("shopPanel");p.style.display=p.style.display==="block"?"none":"block"};
