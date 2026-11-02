@@ -25,7 +25,15 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 #home button:nth-child(3){border-color:#5affd0;background:linear-gradient(90deg,#104d55,#126a59)}
 #home button:nth-child(4){border-color:#ffd85a;background:linear-gradient(90deg,#694312,#856018)}
 @media(max-width:700px){#home{min-height:500px;padding:18px 14px 22px;margin:4px auto}#home .hero-character{margin-top:16px}#home .hero-title{font-size:clamp(34px,10vw,54px)}}
-#stage{display:none}\n.stage-top{max-width:900px;margin:8px auto;display:flex;align-items:center;justify-content:space-between;gap:8px}\n.stage-top p{margin:4px;font-weight:bold}\n#homeButton{padding:7px 12px;margin:0;font-size:13px;border-color:#58efff;background:#112b62;box-shadow:0 0 10px #00dfff55}\n@media(max-width:700px){.stage-top{padding:0 4px}}
+#stage{display:none}
+.stage-top{max-width:900px;margin:8px auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stage-top p{margin:4px;font-weight:bold}
+#homeButton{padding:7px 12px;margin:0;font-size:13px;border-color:#58efff;background:#112b62;box-shadow:0 0 10px #00dfff55}
+@media(max-width:700px){.stage-top{padding:0 4px}}
+.stage-top{max-width:900px;margin:8px auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.stage-top p{margin:4px;font-weight:bold}
+#homeButton{padding:7px 12px;margin:0;font-size:13px;border-color:#58efff;background:#112b62;box-shadow:0 0 10px #00dfff55}
+@media(max-width:700px){.stage-top{padding:0 4px}}
 @media(max-width:700px){#actions{gap:3px}#actions button{padding:10px 12px;font-size:14px}.controls button{min-width:28%;padding:14px 8px}}
 #shopPanel{display:none;max-width:360px;margin:10px auto;padding:12px;background:#201a38;border:2px solid #9b8aff;border-radius:12px}
 #shopPanel button{display:block;width:100%;margin:6px 0}
@@ -48,7 +56,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <div id="shopPanel"><b>SKIN SHOP</b><div id="skinItems"></div></div>
 </div>
 <div id="stage">
-<p>WORLD 1 : GREEN FOREST</p>
+<div class="stage-top"><p>WORLD 1 : GREEN FOREST</p><button id="homeButton" type="button">⌂ HOME</button></div>
 <canvas id="game" width="900" height="500"></canvas>
 <p class="small">移動：← → / A・D　ジャンプ：Space　ダッシュ：左Ctrl</p>
 <div class="controls">
@@ -144,7 +152,7 @@ function finishGame(){
  setTimeout(()=>alert("WORLD 1 CLEAR! TIME: "+currentTime.toFixed(2)+"秒"),50);
 }
 function update(){
- if(!gameClear){
+ if(gameStarted&&!gameClear){
   if(dashTimer>0)dashTimer--;if(shieldTimer>0)shieldTimer--;if(invincibleTimer>0)invincibleTimer--;if(attackCooldown>0)attackCooldown--;if(attackTimer>0)attackTimer--;
   const speed=dashTimer>0?player.speed*2:player.speed;
   const left=keys.ArrowLeft||keys.KeyA||touch.left,right=keys.ArrowRight||keys.KeyD||touch.right;
@@ -206,14 +214,20 @@ function draw(){
  if(gameClear){ctx.fillStyle="rgba(0,0,0,.65)";ctx.fillRect(0,0,W,H);ctx.fillStyle="#ffd700";ctx.font="bold 42px sans-serif";ctx.fillText("WORLD 1 CLEAR!",W/2-165,H/2);ctx.font="20px sans-serif";ctx.fillStyle="white";ctx.fillText("TIME "+currentTime.toFixed(2)+"s",W/2-65,H/2+40)}
 }
 function restart(){
- player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;coinCount=0;
- coins.forEach(c=>c.taken=false);enemies.forEach(e=>e.alive=true);boss.hp=boss.maxHP;boss.alive=true;bossDefeated=false;
+ player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;
+ if(!stageCleared){coinCount=0;coins.forEach(c=>c.taken=false)}
+ enemies.forEach(e=>e.alive=true);boss.hp=boss.maxHP;boss.alive=true;bossDefeated=false;
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
-document.getElementById("restart").onclick=()=>{restart()};\ndocument.getElementById("homeButton").onclick=()=>{saveGame();gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"};
+document.getElementById("restart").onclick=()=>{restart()};
+document.getElementById("homeButton").onclick=()=>{saveGame();gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"};
+document.getElementById("homeButton").onclick=()=>{saveGame();gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"};
 document.getElementById("startGame").onclick=()=>{gameStarted=true;document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";gameStart=Date.now()-currentTime*1000};
 document.getElementById("save").onclick=()=>{saveGame();alert("GAME SAVED!")};
-document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\n\n"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("\n"):"まだ記録がありません"));
+document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5
+
+"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("
+"):"まだ記録がありません"));
 document.getElementById("shopToggle").onclick=()=>{const p=document.getElementById("shopPanel");p.style.display=p.style.display==="block"?"none":"block"};
 function renderShop(){
  const area=document.getElementById("skinItems");area.innerHTML="";
