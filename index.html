@@ -221,13 +221,9 @@ function restart(){
 }
 document.getElementById("restart").onclick=()=>{restart()};
 document.getElementById("homeButton").onclick=()=>{saveGame();gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"};
-document.getElementById("homeButton").onclick=()=>{saveGame();gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"};
 document.getElementById("startGame").onclick=()=>{gameStarted=true;document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";gameStart=Date.now()-currentTime*1000};
 document.getElementById("save").onclick=()=>{saveGame();alert("GAME SAVED!")};
-document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5
-
-"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("
-"):"まだ記録がありません"));
+document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\\n\\n"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("\\n"):"まだ記録がありません"));
 document.getElementById("shopToggle").onclick=()=>{const p=document.getElementById("shopPanel");p.style.display=p.style.display==="block"?"none":"block"};
 function renderShop(){
  const area=document.getElementById("skinItems");area.innerHTML="";
