@@ -13,8 +13,18 @@ canvas{display:block;width:100%;max-width:900px;height:auto;margin:12px auto;bac
 button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12px;padding:12px 16px;margin:4px;font-size:16px;font-weight:bold;touch-action:manipulation}
 .controls{display:flex;justify-content:center;gap:8px;flex-wrap:wrap}
 #actions{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;max-width:900px;margin:8px auto}
-#home{max-width:520px;margin:35px auto;padding:22px;background:#201a38;border:2px solid #16e0bd;border-radius:18px}
-#home button{display:block;width:100%;margin:10px 0}
+#home{position:relative;isolation:isolate;overflow:hidden;max-width:1000px;min-height:560px;margin:12px auto;padding:24px 18px 30px;border:1px solid #27eaff;border-radius:22px;background:radial-gradient(ellipse at 50% 22%,#343b91 0%,#171b48 42%,#080b20 100%);box-shadow:0 0 24px #00d9ff88,inset 0 0 35px #713dff55}
+#home:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 12% 22%,#fff 0 1px,transparent 2px),radial-gradient(circle at 82% 18%,#53f6ff 0 2px,transparent 3px),radial-gradient(circle at 24% 75%,#b54cff 0 3px,transparent 4px),radial-gradient(circle at 91% 68%,#fff 0 1px,transparent 2px),linear-gradient(135deg,transparent 35%,#00d9ff22 50%,transparent 65%)}
+#home h2{margin:4px 0 0;color:#7dfaff;font-size:13px;letter-spacing:5px}
+#home .hero-character{font-size:clamp(76px,14vw,132px);line-height:1.25;margin:4px auto 0;filter:drop-shadow(0 0 16px #27eaff)}
+#home .hero-title{margin:-8px auto 14px;font-size:clamp(34px,7vw,68px);font-weight:1000;font-style:italic;letter-spacing:-2px;line-height:.95;color:#fff;text-shadow:3px 3px 0 #7b2cff,-3px -2px 0 #00dfff,0 0 24px #00dfff}
+#home .hero-subtitle{margin:12px 0 18px;color:#b9faff;letter-spacing:3px;font-size:12px}
+#home .home-buttons{max-width:360px;margin:0 auto}
+#home button{display:block;width:100%;margin:9px 0;padding:13px 16px;border-radius:12px;border:2px solid #58efff;background:linear-gradient(90deg,#112b62,#29206c);box-shadow:0 0 13px #00dfff77;color:#fff;letter-spacing:1px}
+#home button:nth-child(2){border-color:#e17cff;background:linear-gradient(90deg,#3c1b67,#6a267a)}
+#home button:nth-child(3){border-color:#5affd0;background:linear-gradient(90deg,#104d55,#126a59)}
+#home button:nth-child(4){border-color:#ffd85a;background:linear-gradient(90deg,#694312,#856018)}
+@media(max-width:700px){#home{min-height:500px;padding:18px 14px 22px;margin:4px auto}#home .hero-character{margin-top:16px}#home .hero-title{font-size:clamp(34px,10vw,54px)}}
 #stage{display:none}
 @media(max-width:700px){#actions{gap:3px}#actions button{padding:10px 12px;font-size:14px}.controls button{min-width:28%;padding:14px 8px}}
 #shopPanel{display:none;max-width:360px;margin:10px auto;padding:12px;background:#201a38;border:2px solid #9b8aff;border-radius:12px}
@@ -25,12 +35,16 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <body>
 <h1>NEON ADVENTURE</h1>
 <div id="home">
-<h2>HOME</h2>
-<p>WORLD 1 : GREEN FOREST</p>
-<button id="startGame">START GAME</button>
-<button id="shopToggle">SKIN SHOP</button>
-<button id="save">SAVE</button>
-<button id="ranking">RANKING</button>
+<h2>WELCOME TO THE WORLD</h2>
+<div class="hero-character" aria-hidden="true">🧑🏻‍🚀⚔️</div>
+<div class="hero-title">NEON<br>ADVENTURE</div>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p>
+<div class="home-buttons">
+<button id="startGame">▶　START GAME</button>
+<button id="shopToggle">🛒　SKIN SHOP</button>
+<button id="save">▣　SAVE</button>
+<button id="ranking">🏆　RANKING</button>
+</div>
 <div id="shopPanel"><b>SKIN SHOP</b><div id="skinItems"></div></div>
 </div>
 <div id="stage">
