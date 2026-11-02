@@ -198,29 +198,27 @@ function update(){
 }
 function draw(){
  ctx.clearRect(0,0,W,H);
- // GREEN FOREST の空・山・雲
- const bg=ctx.createLinearGradient(0,0,0,H);
- bg.addColorStop(0,"#55c9f5");bg.addColorStop(.58,"#b5f0dc");bg.addColorStop(1,"#e5f7c4");
- ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
- // 遠くの雲
- ctx.fillStyle="rgba(255,255,255,.72)";
- for(let i=0;i<7;i++){const x=((i*173-camera*.12)%(W+180)+W+180)%(W+180)-90,y=65+(i%3)*42;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.arc(x+25,y-10,29,0,Math.PI*2);ctx.arc(x+55,y,21,0,Math.PI*2);ctx.fill()}
- ctx.save();ctx.translate(-camera*.22,0);
- // 山並み
- for(let i=0;i<9;i++){const x=i*260-80;ctx.fillStyle=i%2?"#70b9a0":"#579e91";ctx.beginPath();ctx.moveTo(x,355);ctx.lineTo(x+125,125+(i%3)*35);ctx.lineTo(x+270,355);ctx.closePath();ctx.fill();
-  ctx.fillStyle="rgba(239,255,235,.8)";ctx.beginPath();ctx.moveTo(x+91,190+(i%3)*35);ctx.lineTo(x+125,125+(i%3)*35);ctx.lineTo(x+164,190+(i%3)*35);ctx.closePath();ctx.fill()}
- ctx.restore();
- ctx.save();ctx.translate(-camera,0);
- // 奥の森と大きな木々
- for(let i=0;i<30;i++){const x=i*145-30;ctx.fillStyle=i%2?"#287b59":"#328b5c";ctx.beginPath();ctx.arc(x+45,370,82,Math.PI,0);ctx.fill();ctx.fillRect(x+35,365,20,55)}
- // 滝のある城
- ctx.fillStyle="#526b79";ctx.fillRect(2070,205,155,145);
- ctx.fillStyle="#718c99";ctx.fillRect(2055,185,185,24);
- ctx.fillStyle="#526b79";ctx.fillRect(2090,155,30,52);ctx.fillRect(2170,155,30,52);
- ctx.fillStyle="#e8f3e8";ctx.beginPath();ctx.moveTo(2080,155);ctx.lineTo(2105,120);ctx.lineTo(2130,155);ctx.fill();ctx.beginPath();ctx.moveTo(2160,155);ctx.lineTo(2185,120);ctx.lineTo(2210,155);ctx.fill();
- ctx.fillStyle="#263e59";ctx.fillRect(2128,260,38,90);ctx.fillStyle="#ffd56b";ctx.fillRect(2090,225,22,28);ctx.fillRect(2180,225,22,28);
- ctx.fillStyle="#65d9ee";ctx.fillRect(2048,350,28,80);ctx.fillRect(2215,350,28,80);
- ctx.fillStyle="#d5fbff";ctx.fillRect(2057,350,8,80);ctx.fillRect(2224,350,8,80);
+ if(worldNumber===1){
+  // GREEN FOREST：青空と雲
+  const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#55c9f5");bg.addColorStop(.58,"#b5f0dc");bg.addColorStop(1,"#e5f7c4");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="rgba(255,255,255,.72)";for(let i=0;i<7;i++){const x=((i*173-camera*.12)%(W+180)+W+180)%(W+180)-90,y=65+(i%3)*42;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.arc(x+25,y-10,29,0,Math.PI*2);ctx.arc(x+55,y,21,0,Math.PI*2);ctx.fill()}
+  ctx.save();ctx.translate(-camera*.22,0);for(let i=0;i<9;i++){const x=i*260-80;ctx.fillStyle=i%2?"#70b9a0":"#579e91";ctx.beginPath();ctx.moveTo(x,355);ctx.lineTo(x+125,125+(i%3)*35);ctx.lineTo(x+270,355);ctx.closePath();ctx.fill();ctx.fillStyle="rgba(239,255,235,.8)";ctx.beginPath();ctx.moveTo(x+91,190+(i%3)*35);ctx.lineTo(x+125,125+(i%3)*35);ctx.lineTo(x+164,190+(i%3)*35);ctx.closePath();ctx.fill()}ctx.restore();
+  ctx.save();ctx.translate(-camera,0);for(let i=0;i<30;i++){const x=i*145-30;ctx.fillStyle=i%2?"#287b59":"#328b5c";ctx.beginPath();ctx.arc(x+45,370,82,Math.PI,0);ctx.fill();ctx.fillRect(x+35,365,20,55)}
+  ctx.fillStyle="#526b79";ctx.fillRect(2070,205,155,145);ctx.fillStyle="#718c99";ctx.fillRect(2055,185,185,24);ctx.fillStyle="#526b79";ctx.fillRect(2090,155,30,52);ctx.fillRect(2170,155,30,52);ctx.fillStyle="#e8f3e8";ctx.beginPath();ctx.moveTo(2080,155);ctx.lineTo(2105,120);ctx.lineTo(2130,155);ctx.fill();ctx.beginPath();ctx.moveTo(2160,155);ctx.lineTo(2185,120);ctx.lineTo(2210,155);ctx.fill();ctx.fillStyle="#263e59";ctx.fillRect(2128,260,38,90);ctx.fillStyle="#ffd56b";ctx.fillRect(2090,225,22,28);ctx.fillRect(2180,225,22,28);ctx.fillStyle="#65d9ee";ctx.fillRect(2048,350,28,80);ctx.fillRect(2215,350,28,80);ctx.fillStyle="#d5fbff";ctx.fillRect(2057,350,8,80);ctx.fillRect(2224,350,8,80);
+ }else{
+  // LAVA LAND：夕焼け、火山群、煙、溶岩の光が広がる灼熱の景色
+  const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#251b43");bg.addColorStop(.38,"#71334b");bg.addColorStop(.72,"#e16a3c");bg.addColorStop(1,"#ffb45c");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  const sun=ctx.createRadialGradient(690,155,8,690,155,125);sun.addColorStop(0,"#fff2b0");sun.addColorStop(.35,"#ffb35c");sun.addColorStop(1,"rgba(255,120,50,0)");ctx.fillStyle=sun;ctx.fillRect(540,5,300,300);ctx.fillStyle="#ffd58a";ctx.beginPath();ctx.arc(690,155,43,0,Math.PI*2);ctx.fill();
+  ctx.save();ctx.translate(-camera*.16,0);
+  for(let i=0;i<10;i++){const x=i*330-100;ctx.fillStyle=i%2?"#57334a":"#402b49";ctx.beginPath();ctx.moveTo(x-80,370);ctx.lineTo(x+35,170+(i%3)*30);ctx.lineTo(x+85,225+(i%2)*20);ctx.lineTo(x+155,115+(i%4)*28);ctx.lineTo(x+285,370);ctx.closePath();ctx.fill();ctx.strokeStyle="#ff874d";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x+155,145+(i%4)*28);ctx.lineTo(x+165,225);ctx.lineTo(x+205,300);ctx.stroke()}
+  // 火山の煙
+  for(let i=0;i<7;i++){const x=120+i*390,y=100+(i%3)*24;ctx.fillStyle="rgba(45,35,58,.48)";ctx.beginPath();ctx.arc(x,y,28,0,Math.PI*2);ctx.arc(x+25,y-22,35,0,Math.PI*2);ctx.arc(x+58,y-8,29,0,Math.PI*2);ctx.fill()}ctx.restore();
+  ctx.save();ctx.translate(-camera*.55,0);
+  for(let i=0;i<22;i++){const x=i*175-45;ctx.fillStyle=i%2?"#673747":"#4b3045";ctx.beginPath();ctx.moveTo(x,420);ctx.lineTo(x+28,315);ctx.lineTo(x+62,365);ctx.lineTo(x+105,285);ctx.lineTo(x+150,420);ctx.closePath();ctx.fill();ctx.fillStyle="#ff713c";ctx.fillRect(x+58,365,7,38)}ctx.restore();
+  // 火の粉
+  for(let i=0;i<34;i++){const x=((i*97-camera*.3)%(W+30)+W+30)%(W+30),y=80+(i*67)%320;ctx.fillStyle=i%3?"rgba(255,190,95,.7)":"rgba(255,90,48,.85)";ctx.beginPath();ctx.arc(x,y,1+(i%3),0,Math.PI*2);ctx.fill()}
+  ctx.save();ctx.translate(-camera,0);
+ }
  for(const pad of springPads){ctx.fillStyle="#21e6d1";ctx.fillRect(pad.x,pad.y,pad.w,pad.h);ctx.fillStyle="#eaffff";ctx.fillRect(pad.x+7,pad.y+4,pad.w-14,4);ctx.fillStyle="#21e6d1";ctx.font="bold 13px sans-serif";ctx.fillText("JUMP!",pad.x+5,pad.y-8)}
  for(const wall of stageWalls){ctx.fillStyle="#493c59";ctx.fillRect(wall.x,wall.y,wall.w,wall.h);ctx.fillStyle="#b58aff";ctx.fillRect(wall.x,wall.y,wall.w,9);for(let yy=wall.y+25;yy<wall.y+wall.h;yy+=28){ctx.fillStyle="#6b587b";ctx.fillRect(wall.x+8,yy,wall.w-16,4)}}
  for(const z of lavaZones){ctx.fillStyle="#ff4b16";ctx.fillRect(z.x,z.y,z.w,z.h);ctx.fillStyle="#ffd34e";ctx.fillRect(z.x,z.y,z.w,7)}
