@@ -36,6 +36,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 @media(max-width:700px){.stage-top{padding:0 4px}}
 @media(max-width:700px){#actions{gap:3px}#actions button{padding:10px 12px;font-size:14px}.controls button{min-width:28%;padding:14px 8px}}
 #clearPanel{display:none;max-width:520px;margin:12px auto;padding:14px;background:#171b48;border:2px solid #ffd85a;border-radius:14px;box-shadow:0 0 18px #ffd85a55}#clearPanel h3{margin:4px 0 10px;color:#ffd85a}#clearPanel button{min-width:135px}#nextStageButton{border-color:#5affd0;background:linear-gradient(90deg,#104d55,#126a59)}
+#stageSelect{display:none;max-width:390px;margin:12px auto;padding:12px;background:#171b48;border:2px solid #27eaff;border-radius:14px}#stageSelect button{display:block;width:100%;margin:8px 0}#world2Select{border-color:#ff8a36;background:linear-gradient(90deg,#6b2417,#9b4b20)}
 #shopPanel{display:none;max-width:360px;margin:10px auto;padding:12px;background:#201a38;border:2px solid #9b8aff;border-radius:12px}
 #shopPanel button{display:block;width:100%;margin:6px 0}
 .small{font-size:13px;color:#c8c9df}
@@ -49,7 +50,8 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <div class="hero-title">NEON<br>ADVENTURE</div>
 <p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p>
 <div class="home-buttons">
-<button id="startGame">▶　START GAME</button>
+<button id="startGame">▶　STAGE SELECT</button>
+<div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button></div>
 <button id="shopToggle">🛒　SKIN SHOP</button>
 <button id="save">▣　SAVE</button>
 <button id="ranking">🏆　RANKING</button>
@@ -100,8 +102,9 @@ let coins=[
 let goal={x:2650,y:270,w:45,h:80};
 let boss={x:2500,y:270,w:80,h:80,hp:10,maxHP:10,alive:true};
 let lavaZones=[];
+let springPads=[];
 function loadWorld2(){
- worldNumber=2;player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;camera=0;
+ worldNumber=2;springPads=[{x:455,y:350,w:42,h:20},{x:1080,y:305,w:42,h:20},{x:1780,y:275,w:42,h:20},{x:2260,y:270,w:42,h:20}];player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;camera=0;
  platforms=[{x:0,y:430,w:300,h:70},{x:390,y:370,w:130,h:25},{x:610,y:315,w:125,h:25},{x:830,y:385,w:135,h:25},{x:1060,y:325,w:130,h:25},{x:1290,y:270,w:130,h:25},{x:1510,y:355,w:150,h:25},{x:1760,y:295,w:140,h:25},{x:1990,y:350,w:160,h:25},{x:2240,y:290,w:150,h:25},{x:2490,y:350,w:360,h:100}];
  lavaZones=[{x:300,y:455,w:90,h:45},{x:520,y:455,w:90,h:45},{x:735,y:455,w:95,h:45},{x:965,y:455,w:95,h:45},{x:1190,y:455,w:100,h:45},{x:1420,y:455,w:90,h:45},{x:1660,y:455,w:100,h:45},{x:1900,y:455,w:90,h:45},{x:2150,y:455,w:90,h:45},{x:2390,y:455,w:100,h:45}];
  enemies=[{x:450,y:340,w:30,h:30,min:410,max:490,dir:1,alive:true},{x:900,y:355,w:32,h:30,min:850,max:930,dir:-1,alive:true},{x:1350,y:240,w:34,h:30,min:1300,max:1380,dir:1,alive:true},{x:1810,y:265,w:34,h:30,min:1770,max:1860,dir:-1,alive:true},{x:2280,y:260,w:36,h:30,min:2250,max:2340,dir:1,alive:true}];
@@ -172,6 +175,7 @@ function update(){
   player.vx=(right?speed:0)-(left?speed:0);if(player.vx!==0)facing=player.vx>0?1:-1;player.x=Math.max(0,player.x+player.vx);
   const oldY=player.y;player.vy+=0.5;player.y+=player.vy;player.grounded=false;
   for(const p of platforms){if(player.vy>=0&&oldY+player.h<=p.y&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0}}
+  if(worldNumber>=2&&player.vy>=0){for(const pad of springPads){if(oldY+player.h<=pad.y&&player.y+player.h>=pad.y&&player.x+player.w>pad.x&&player.x<pad.x+pad.w){player.y=pad.y-player.h;player.vy=-16;player.jumps=1;player.grounded=false}}}
   if(player.y>650){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
   for(const z of lavaZones){if(player.x<z.x+z.w&&player.x+player.w>z.x&&player.y<z.y+z.h&&player.y+player.h>z.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-7;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}}
   for(const e of enemies){
@@ -213,6 +217,7 @@ function draw(){
  ctx.fillStyle="#263e59";ctx.fillRect(2128,260,38,90);ctx.fillStyle="#ffd56b";ctx.fillRect(2090,225,22,28);ctx.fillRect(2180,225,22,28);
  ctx.fillStyle="#65d9ee";ctx.fillRect(2048,350,28,80);ctx.fillRect(2215,350,28,80);
  ctx.fillStyle="#d5fbff";ctx.fillRect(2057,350,8,80);ctx.fillRect(2224,350,8,80);
+ for(const pad of springPads){ctx.fillStyle="#21e6d1";ctx.fillRect(pad.x,pad.y,pad.w,pad.h);ctx.fillStyle="#eaffff";ctx.fillRect(pad.x+7,pad.y+4,pad.w-14,4)}
  for(const z of lavaZones){ctx.fillStyle="#ff4b16";ctx.fillRect(z.x,z.y,z.w,z.h);ctx.fillStyle="#ffd34e";ctx.fillRect(z.x,z.y,z.w,7)}
  for(const p of platforms){ctx.fillStyle=worldNumber===2?"#514044":"#294b3c";ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle=worldNumber===2?"#ff8a36":"#42d68b";ctx.fillRect(p.x,p.y,p.w,6)}
  for(const c of coins){if(c.taken)continue;ctx.fillStyle="#ffd700";ctx.beginPath();ctx.arc(c.x,c.y,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#fff0a0";ctx.stroke()}
@@ -260,7 +265,10 @@ document.getElementById("homeButton").onclick=returnHome;
 document.getElementById("clearHomeButton").onclick=returnHome;
 document.getElementById("clearRestartButton").onclick=restart;
 document.getElementById("nextStageButton").onclick=()=>{if(worldNumber===1&&world2Unlocked){loadWorld2();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}};
-document.getElementById("startGame").onclick=()=>{if(world2Unlocked&&worldNumber===1)loadWorld2();gameStarted=true;document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";gameStart=Date.now()-currentTime*1000};
+document.getElementById("startGame").onclick=()=>{document.getElementById("stageSelect").style.display=document.getElementById("stageSelect").style.display==="block"?"none":"block"};
+document.getElementById("world1Select").onclick=()=>{worldNumber=1;springPads=[];lavaZones=[];platforms=[{x:0,y:430,w:500,h:70},{x:560,y:380,w:180,h:25},{x:800,y:330,w:180,h:25},{x:1050,y:390,w:180,h:25},{x:1300,y:330,w:180,h:25},{x:1550,y:280,w:180,h:25},{x:1800,y:350,w:250,h:100},{x:2150,y:300,w:180,h:25},{x:2450,y:350,w:350,h:100}];enemies=[{x:650,y:350,w:30,h:30,min:600,max:700,dir:1,alive:true},{x:1100,y:360,w:30,h:30,min:1050,max:1200,dir:-1,alive:true},{x:1900,y:320,w:30,h:30,min:1850,max:2000,dir:1,alive:true}];coins=[{x:300,y:395,taken:false},{x:650,y:340,taken:false},{x:900,y:290,taken:false},{x:1150,y:350,taken:false},{x:1400,y:290,taken:false},{x:1650,y:240,taken:false},{x:2250,y:260,taken:false}];goal={x:2650,y:270,w:45,h:80};boss={x:2500,y:270,w:80,h:80,hp:10,maxHP:10,alive:true};bossDefeated=false;gameClear=false;stageCleared=false;player.x=80;player.y=200;player.vx=0;player.vy=0;playerHP=3;camera=0;currentTime=0;document.querySelector(".stage-top p").textContent="WORLD 1 : GREEN FOREST";beginSelectedWorld()};
+document.getElementById("world2Select").onclick=()=>{if(!world2Unlocked)return;loadWorld2();beginSelectedWorld()};
+function beginSelectedWorld(){gameStarted=true;gameStart=Date.now();document.getElementById("stageSelect").style.display="none";document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";document.getElementById("clearPanel").style.display="none";saveGame()};
 document.getElementById("save").onclick=()=>{saveGame();alert("GAME SAVED!")};
 document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\\n\\n"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("\\n"):"まだ記録がありません"));
 document.getElementById("shopToggle").onclick=()=>{const p=document.getElementById("shopPanel");p.style.display=p.style.display==="block"?"none":"block"};
@@ -269,7 +277,7 @@ function renderShop(){
  for(const s of skins){const b=document.createElement("button");b.textContent=s.name+" - "+s.price+" COINS";
  b.onclick=()=>{if(ownedSkins.includes(s.color)){playerSkin=s.color;saveGame();alert("スキンを装備した！")}else if(coinCount>=s.price){coinCount-=s.price;ownedSkins.push(s.color);playerSkin=s.color;saveGame();alert("スキンを購入した！")}else alert("コインが足りない！")};area.appendChild(b)}
 }
-renderShop();loadGame();if(worldNumber===2){const wasClear=gameClear,wasStageCleared=stageCleared,wasTime=currentTime,wasBossHP=boss.hp,wasBossAlive=boss.alive,wasBossDefeated=bossDefeated;loadWorld2();gameClear=wasClear;stageCleared=wasStageCleared;currentTime=wasTime;boss.hp=wasBossHP;boss.alive=wasBossAlive;bossDefeated=wasBossDefeated;if(gameClear)gameStart=Date.now()-currentTime*1000;document.getElementById("startGame").textContent="CONTINUE WORLD 2"}else if(world2Unlocked){document.getElementById("startGame").textContent="START WORLD 2"}setInterval(()=>{if(gameStarted)saveGame()},5000);update();
+renderShop();loadGame();document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";if(worldNumber===2){const wasClear=gameClear,wasStageCleared=stageCleared,wasTime=currentTime,wasBossHP=boss.hp,wasBossAlive=boss.alive,wasBossDefeated=bossDefeated;loadWorld2();gameClear=wasClear;stageCleared=wasStageCleared;currentTime=wasTime;boss.hp=wasBossHP;boss.alive=wasBossAlive;bossDefeated=wasBossDefeated;if(gameClear)gameStart=Date.now()-currentTime*1000;document.getElementById("startGame").textContent="CONTINUE WORLD 2"}else if(world2Unlocked){document.getElementById("startGame").textContent="START WORLD 2"}setInterval(()=>{if(gameStarted)saveGame()},5000);update();
 </script>
 </body>
 </html>
