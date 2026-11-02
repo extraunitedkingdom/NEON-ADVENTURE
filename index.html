@@ -237,7 +237,6 @@ function draw(){
   // 火の粉
   for(let i=0;i<34;i++){const x=((i*97-camera*.3)%(W+30)+W+30)%(W+30),y=80+(i*67)%320;ctx.fillStyle=i%3?"rgba(255,190,95,.7)":"rgba(255,90,48,.85)";ctx.beginPath();ctx.arc(x,y,1+(i%3),0,Math.PI*2);ctx.fill()}
   ctx.save();ctx.translate(-camera,0);
- }
  }else{
   const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#263b83");sky.addColorStop(.55,"#75c9ef");sky.addColorStop(1,"#e7f8ff");ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
   ctx.fillStyle="rgba(255,255,255,.72)";for(let i=0;i<12;i++){const x=((i*137-camera*.18)%(W+220)+W+220)%(W+220)-100,y=90+(i%4)*75;ctx.beginPath();ctx.arc(x,y,28,0,Math.PI*2);ctx.arc(x+34,y-12,38,0,Math.PI*2);ctx.arc(x+72,y,30,0,Math.PI*2);ctx.fill()}
