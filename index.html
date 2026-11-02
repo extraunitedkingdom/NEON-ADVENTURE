@@ -69,7 +69,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <div id="actions">
 <button id="attack">ATTACK</button><button id="dash">DASH</button><button id="restart">RESTART</button>
 </div>
-<p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p>
+<p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p><p class="small" id="world2Hint">WORLD 2：水色のジャンプパッドでマグマを飛び越えよう。2つ目は高い壁の上へ飛び乗るためのパッド！</p>
 </div>
 <script>
 "use strict";
@@ -103,13 +103,15 @@ let goal={x:2650,y:270,w:45,h:80};
 let boss={x:2500,y:270,w:80,h:80,hp:10,maxHP:10,alive:true};
 let lavaZones=[];
 let springPads=[];
+let stageWalls=[];
 function loadWorld2(){
- worldNumber=2;springPads=[{x:455,y:350,w:42,h:20},{x:1080,y:305,w:42,h:20},{x:1780,y:275,w:42,h:20},{x:2260,y:270,w:42,h:20}];player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;camera=0;
- platforms=[{x:0,y:430,w:300,h:70},{x:390,y:370,w:130,h:25},{x:610,y:315,w:125,h:25},{x:830,y:385,w:135,h:25},{x:1060,y:325,w:130,h:25},{x:1290,y:270,w:130,h:25},{x:1510,y:355,w:150,h:25},{x:1760,y:295,w:140,h:25},{x:1990,y:350,w:160,h:25},{x:2240,y:290,w:150,h:25},{x:2490,y:350,w:360,h:100}];
- lavaZones=[{x:300,y:455,w:90,h:45},{x:520,y:455,w:90,h:45},{x:735,y:455,w:95,h:45},{x:965,y:455,w:95,h:45},{x:1190,y:455,w:100,h:45},{x:1420,y:455,w:90,h:45},{x:1660,y:455,w:100,h:45},{x:1900,y:455,w:90,h:45},{x:2150,y:455,w:90,h:45},{x:2390,y:455,w:100,h:45}];
- enemies=[{x:450,y:340,w:30,h:30,min:410,max:490,dir:1,alive:true},{x:900,y:355,w:32,h:30,min:850,max:930,dir:-1,alive:true},{x:1350,y:240,w:34,h:30,min:1300,max:1380,dir:1,alive:true},{x:1810,y:265,w:34,h:30,min:1770,max:1860,dir:-1,alive:true},{x:2280,y:260,w:36,h:30,min:2250,max:2340,dir:1,alive:true}];
- coins=[{x:340,y:400,taken:false},{x:455,y:330,taken:false},{x:675,y:275,taken:false},{x:895,y:345,taken:false},{x:1125,y:285,taken:false},{x:1355,y:230,taken:false},{x:1580,y:315,taken:false},{x:1825,y:255,taken:false},{x:2070,y:310,taken:false},{x:2310,y:250,taken:false}];
- goal={x:2700,y:270,w:45,h:80};boss={x:2520,y:270,w:80,h:80,hp:14,maxHP:14,alive:true};bossDefeated=false;gameClear=false;stageCleared=false;currentTime=0;gameStart=Date.now();
+ worldNumber=2;springPads=[{x:470,y:410,w:54,h:20,power:17},{x:1320,y:410,w:58,h:20,power:21}];stageWalls=[{x:1700,y:170,w:70,h:260}];player.x=80;player.y=350;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;camera=0;
+ // 基本は平地。マグマ溜まりをジャンプパッドで越え、最後は高い壁を飛び乗る構成
+ platforms=[{x:0,y:430,w:470,h:70},{x:570,y:430,w:750,h:70},{x:1420,y:430,w:280,h:70},{x:1770,y:170,w:90,h:25},{x:1860,y:300,w:500,h:130},{x:2360,y:430,w:430,h:70}];
+ lavaZones=[{x:470,y:455,w:100,h:45},{x:1320,y:455,w:100,h:45},{x:1700,y:455,w:60,h:45},{x:2290,y:455,w:70,h:45}];
+ enemies=[{x:760,y:400,w:32,h:30,min:650,max:1000,dir:1,alive:true},{x:1120,y:400,w:32,h:30,min:1050,max:1270,dir:-1,alive:true},{x:1930,y:270,w:34,h:30,min:1880,max:2250,dir:1,alive:true},{x:2450,y:400,w:36,h:30,min:2400,max:2700,dir:-1,alive:true}];
+ coins=[{x:330,y:385,taken:false},{x:520,y:345,taken:false},{x:820,y:385,taken:false},{x:1120,y:385,taken:false},{x:1370,y:345,taken:false},{x:1660,y:330,taken:false},{x:1815,y:125,taken:false},{x:2050,y:255,taken:false},{x:2250,y:255,taken:false},{x:2510,y:385,taken:false}];
+ goal={x:2700,y:350,w:45,h:80};boss={x:2580,y:350,w:80,h:80,hp:14,maxHP:14,alive:true};bossDefeated=false;gameClear=false;stageCleared=false;currentTime=0;gameStart=Date.now();
  document.querySelector(".stage-top p").textContent="WORLD 2 : LAVA LAND";
 }
 const skins=[
@@ -172,10 +174,12 @@ function update(){
   if(dashTimer>0)dashTimer--;if(shieldTimer>0)shieldTimer--;if(invincibleTimer>0)invincibleTimer--;if(attackCooldown>0)attackCooldown--;if(attackTimer>0)attackTimer--;
   const speed=dashTimer>0?player.speed*2:player.speed;
   const left=keys.ArrowLeft||keys.KeyA||touch.left,right=keys.ArrowRight||keys.KeyD||touch.right;
-  player.vx=(right?speed:0)-(left?speed:0);if(player.vx!==0)facing=player.vx>0?1:-1;player.x=Math.max(0,player.x+player.vx);
+  player.vx=(right?speed:0)-(left?speed:0);if(player.vx!==0)facing=player.vx>0?1:-1;
+  const oldX=player.x;player.x=Math.max(0,player.x+player.vx);
+  for(const wall of stageWalls){if(player.y+player.h>wall.y&&player.y<wall.y+wall.h&&player.x+player.w>wall.x&&player.x<wall.x+wall.w){if(oldX+player.w<=wall.x)player.x=wall.x-player.w;else if(oldX>=wall.x+wall.w)player.x=wall.x+wall.w;player.vx=0}}
   const oldY=player.y;player.vy+=0.5;player.y+=player.vy;player.grounded=false;
   for(const p of platforms){if(player.vy>=0&&oldY+player.h<=p.y&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0}}
-  if(worldNumber>=2&&player.vy>=0){for(const pad of springPads){if(oldY+player.h<=pad.y&&player.y+player.h>=pad.y&&player.x+player.w>pad.x&&player.x<pad.x+pad.w){player.y=pad.y-player.h;player.vy=-16;player.jumps=1;player.grounded=false}}}
+  if(worldNumber>=2&&player.vy>=0){for(const pad of springPads){if(oldY+player.h<=pad.y&&player.y+player.h>=pad.y&&player.x+player.w>pad.x&&player.x<pad.x+pad.w){player.y=pad.y-player.h;player.vy=-pad.power;player.jumps=1;player.grounded=false}}}
   if(player.y>650){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
   for(const z of lavaZones){if(player.x<z.x+z.w&&player.x+player.w>z.x&&player.y<z.y+z.h&&player.y+player.h>z.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-7;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}}
   for(const e of enemies){
@@ -217,7 +221,8 @@ function draw(){
  ctx.fillStyle="#263e59";ctx.fillRect(2128,260,38,90);ctx.fillStyle="#ffd56b";ctx.fillRect(2090,225,22,28);ctx.fillRect(2180,225,22,28);
  ctx.fillStyle="#65d9ee";ctx.fillRect(2048,350,28,80);ctx.fillRect(2215,350,28,80);
  ctx.fillStyle="#d5fbff";ctx.fillRect(2057,350,8,80);ctx.fillRect(2224,350,8,80);
- for(const pad of springPads){ctx.fillStyle="#21e6d1";ctx.fillRect(pad.x,pad.y,pad.w,pad.h);ctx.fillStyle="#eaffff";ctx.fillRect(pad.x+7,pad.y+4,pad.w-14,4)}
+ for(const pad of springPads){ctx.fillStyle="#21e6d1";ctx.fillRect(pad.x,pad.y,pad.w,pad.h);ctx.fillStyle="#eaffff";ctx.fillRect(pad.x+7,pad.y+4,pad.w-14,4);ctx.fillStyle="#21e6d1";ctx.font="bold 13px sans-serif";ctx.fillText("JUMP!",pad.x+5,pad.y-8)}
+ for(const wall of stageWalls){ctx.fillStyle="#493c59";ctx.fillRect(wall.x,wall.y,wall.w,wall.h);ctx.fillStyle="#b58aff";ctx.fillRect(wall.x,wall.y,wall.w,9);for(let yy=wall.y+25;yy<wall.y+wall.h;yy+=28){ctx.fillStyle="#6b587b";ctx.fillRect(wall.x+8,yy,wall.w-16,4)}}
  for(const z of lavaZones){ctx.fillStyle="#ff4b16";ctx.fillRect(z.x,z.y,z.w,z.h);ctx.fillStyle="#ffd34e";ctx.fillRect(z.x,z.y,z.w,7)}
  for(const p of platforms){ctx.fillStyle=worldNumber===2?"#514044":"#294b3c";ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle=worldNumber===2?"#ff8a36":"#42d68b";ctx.fillRect(p.x,p.y,p.w,6)}
  for(const c of coins){if(c.taken)continue;ctx.fillStyle="#ffd700";ctx.beginPath();ctx.arc(c.x,c.y,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#fff0a0";ctx.stroke()}
@@ -260,7 +265,7 @@ function restart(){
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
 document.getElementById("restart").onclick=()=>{restart()};
-function returnHome(){saveGame();document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
+function returnHome(){saveGame();document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
 document.getElementById("homeButton").onclick=returnHome;
 document.getElementById("clearHomeButton").onclick=returnHome;
 document.getElementById("clearRestartButton").onclick=restart;
