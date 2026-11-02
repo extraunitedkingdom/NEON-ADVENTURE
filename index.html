@@ -38,6 +38,7 @@ const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 const W=canvas.width,H=canvas.height;
 const player={x:80,y:200,w:30,h:42,vx:0,vy:0,speed:4,jumpPower:11,jumps:0,maxJumps:2,grounded:false};
 let playerHP=3,invincibleTimer=0,attackCooldown=0,dashTimer=0,shieldTimer=0;
+let facing=1,attackTimer=0;
 let playerSkin="#9b8aff",coinCount=0,camera=0,gameClear=false,bossDefeated=false;
 let gameStart=Date.now(),currentTime=0;
 let bestTime=Number(localStorage.getItem("bestTime"))||null;
@@ -86,7 +87,7 @@ function loadGame(){
 function jump(){if(!gameClear&&player.jumps<player.maxJumps){player.vy=-player.jumpPower;player.jumps++;player.grounded=false}}
 function attack(){
  if(gameClear||attackCooldown>0)return;
- attackCooldown=20;
+ attackCooldown=20;attackTimer=12;
  for(const e of enemies){if(e.alive&&Math.hypot(player.x+player.w/2-(e.x+e.w/2),player.y+player.h/2-(e.y+e.h/2))<75)e.alive=false}
  if(boss.alive&&Math.hypot(player.x+player.w/2-(boss.x+boss.w/2),player.y+player.h/2-(boss.y+boss.h/2))<115){
   boss.hp=Math.max(0,boss.hp-1);if(boss.hp===0){boss.alive=false;bossDefeated=true;saveGame()}
@@ -117,10 +118,10 @@ function finishGame(){
 }
 function update(){
  if(!gameClear){
-  if(dashTimer>0)dashTimer--;if(shieldTimer>0)shieldTimer--;if(invincibleTimer>0)invincibleTimer--;if(attackCooldown>0)attackCooldown--;
+  if(dashTimer>0)dashTimer--;if(shieldTimer>0)shieldTimer--;if(invincibleTimer>0)invincibleTimer--;if(attackCooldown>0)attackCooldown--;if(attackTimer>0)attackTimer--;
   const speed=dashTimer>0?player.speed*2:player.speed;
   const left=keys.ArrowLeft||keys.KeyA||touch.left,right=keys.ArrowRight||keys.KeyD||touch.right;
-  player.vx=(right?speed:0)-(left?speed:0);player.x=Math.max(0,player.x+player.vx);
+  player.vx=(right?speed:0)-(left?speed:0);if(player.vx!==0)facing=player.vx>0?1:-1;player.x=Math.max(0,player.x+player.vx);
   const oldY=player.y;player.vy+=0.5;player.y+=player.vy;player.grounded=false;
   for(const p of platforms){if(player.vy>=0&&oldY+player.h<=p.y&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0}}
   if(player.y>650){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
@@ -151,6 +152,22 @@ function draw(){
  if(bossDefeated){ctx.fillStyle="#ffd700";ctx.fillRect(goal.x,goal.y,goal.w,goal.h);ctx.fillStyle="#fff";ctx.font="16px sans-serif";ctx.fillText("GOAL",goal.x-4,goal.y-10)}
  ctx.shadowColor=playerSkin;ctx.shadowBlur=15;ctx.fillStyle=playerSkin;ctx.fillRect(player.x,player.y,player.w,player.h);ctx.shadowBlur=0;
  ctx.fillStyle="white";ctx.fillRect(player.x+19,player.y+9,5,5);ctx.fillStyle="#16e0bd";ctx.fillRect(player.x+4,player.y+player.h-5,22,5);
+ if(attackTimer>0){
+  const progress=1-attackTimer/12;
+  const handX=player.x+player.w/2+facing*9,handY=player.y+19;
+  const start=-1.15+progress*1.8,end=start+0.9;
+  ctx.save();ctx.lineCap="round";
+  ctx.strokeStyle="rgba(80,245,255,0.35)";ctx.lineWidth=13;
+  ctx.beginPath();ctx.arc(handX,handY,43,start*facing,end*facing,false);ctx.stroke();
+  ctx.strokeStyle="#bdfcff";ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(handX,handY);
+  ctx.lineTo(handX+Math.cos((start+0.45)*facing)*48,handY+Math.sin((start+0.45)*facing)*48);
+  ctx.stroke();
+  ctx.strokeStyle="#ffffff";ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(handX,handY);
+  ctx.lineTo(handX+Math.cos((start+0.45)*facing)*48,handY+Math.sin((start+0.45)*facing)*48);
+  ctx.stroke();ctx.restore();
+ }
  ctx.restore();
  ctx.fillStyle="white";ctx.font="bold 19px sans-serif";ctx.fillText("WORLD 1 : GREEN FOREST",18,28);
  ctx.font="16px sans-serif";ctx.fillStyle="#ffd700";ctx.fillText("COINS: "+coinCount,18,58);
