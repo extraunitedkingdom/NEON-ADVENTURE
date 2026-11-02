@@ -35,6 +35,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 #homeButton{padding:7px 12px;margin:0;font-size:13px;border-color:#58efff;background:#112b62;box-shadow:0 0 10px #00dfff55}
 @media(max-width:700px){.stage-top{padding:0 4px}}
 @media(max-width:700px){#actions{gap:3px}#actions button{padding:10px 12px;font-size:14px}.controls button{min-width:28%;padding:14px 8px}}
+#clearPanel{display:none;max-width:520px;margin:12px auto;padding:14px;background:#171b48;border:2px solid #ffd85a;border-radius:14px;box-shadow:0 0 18px #ffd85a55}#clearPanel h3{margin:4px 0 10px;color:#ffd85a}#clearPanel button{min-width:135px}#nextStageButton{border-color:#5affd0;background:linear-gradient(90deg,#104d55,#126a59)}
 #shopPanel{display:none;max-width:360px;margin:10px auto;padding:12px;background:#201a38;border:2px solid #9b8aff;border-radius:12px}
 #shopPanel button{display:block;width:100%;margin:6px 0}
 .small{font-size:13px;color:#c8c9df}
@@ -58,6 +59,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <div id="stage">
 <div class="stage-top"><p>WORLD 1 : GREEN FOREST</p><button id="homeButton" type="button">⌂ HOME</button></div>
 <canvas id="game" width="900" height="500"></canvas>
+<div id="clearPanel"><h3 id="clearTitle">STAGE CLEAR!</h3><button id="clearHomeButton">⌂ HOME</button><button id="clearRestartButton">↻ RESTART</button><button id="nextStageButton">▶ NEXT STAGE</button></div>
 <p class="small">移動：← → / A・D　ジャンプ：Space　ダッシュ：左Ctrl</p>
 <div class="controls">
 <button id="left">◀ LEFT</button><button id="jump">JUMP ▲</button><button id="right">RIGHT ▶</button>
@@ -160,7 +162,7 @@ function finishGame(){
  if(bestTime===null||currentTime<bestTime){bestTime=currentTime;localStorage.setItem("bestTime",String(bestTime))}
  timeRecords.push(currentTime);timeRecords.sort((a,b)=>a-b);timeRecords=timeRecords.slice(0,5);
  localStorage.setItem("timeRecords",JSON.stringify(timeRecords));saveGame();
- saveGame();setTimeout(()=>alert("WORLD "+worldNumber+" CLEAR! "+(worldNumber===1?"WORLD 2 UNLOCKED! ":"")+"TIME: "+currentTime.toFixed(2)+"秒"),50);
+ saveGame();document.getElementById("clearTitle").textContent="WORLD "+worldNumber+" CLEAR!";document.getElementById("clearPanel").style.display="block";document.getElementById("nextStageButton").style.display=worldNumber===1?"inline-block":"none";
 }
 function update(){
  if(gameStarted&&!gameClear){
@@ -246,13 +248,18 @@ function draw(){
  if(gameClear){ctx.fillStyle="rgba(0,0,0,.65)";ctx.fillRect(0,0,W,H);ctx.fillStyle="#ffd700";ctx.font="bold 42px sans-serif";ctx.fillText("WORLD "+worldNumber+" CLEAR!",W/2-165,H/2);ctx.font="20px sans-serif";ctx.fillStyle="white";ctx.fillText("TIME "+currentTime.toFixed(2)+"s",W/2-65,H/2+40)}
 }
 function restart(){
+ document.getElementById("clearPanel").style.display="none";
  player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;
  coins.forEach(c=>c.taken=false); // コインを復活させ、所持数は維持
  enemies.forEach(e=>e.alive=true);boss.hp=boss.maxHP;boss.alive=true;bossDefeated=false;
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
 document.getElementById("restart").onclick=()=>{restart()};
-document.getElementById("homeButton").onclick=()=>{saveGame();gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"};
+function returnHome(){saveGame();document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
+document.getElementById("homeButton").onclick=returnHome;
+document.getElementById("clearHomeButton").onclick=returnHome;
+document.getElementById("clearRestartButton").onclick=restart;
+document.getElementById("nextStageButton").onclick=()=>{if(worldNumber===1&&world2Unlocked){loadWorld2();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}};
 document.getElementById("startGame").onclick=()=>{if(world2Unlocked&&worldNumber===1)loadWorld2();gameStarted=true;document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";gameStart=Date.now()-currentTime*1000};
 document.getElementById("save").onclick=()=>{saveGame();alert("GAME SAVED!")};
 document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\\n\\n"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("\\n"):"まだ記録がありません"));
