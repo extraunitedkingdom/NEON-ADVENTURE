@@ -195,7 +195,7 @@ function update(){
   for(const m of movingPlatforms){m.prevX=m.x;m.x=m.baseX+Math.sin(Date.now()*m.speed/1000+m.phase)*m.range;m.y=m.baseY+Math.sin(Date.now()*m.speed/1400+m.phase)*22}
   for(const v of vanishPlatforms){if(v.timer>0){v.timer--;if(v.timer===0)v.active=false}}
   player.vy+=0.5;player.y+=player.vy;player.grounded=false;
-  for(const w of windZones){if(player.x+player.w>w.x&&player.x<w.x+w.w&&player.y+player.h>w.y&&player.y<w.y+w.h){player.vx+=w.dir*w.power;player.vy-=0.16;player.vx=Math.max(-7,Math.min(7,player.vx))}}
+  for(const w of windZones){if(player.x+player.w>w.x&&player.x<w.x+w.w&&player.y+player.h>w.y&&player.y<w.y+w.h){player.x+=w.dir*w.power;player.vy-=0.16}}
   for(const p of [...platforms,...movingPlatforms,...vanishPlatforms.filter(v=>v.active)]){if(player.vy>=0&&oldY+player.h<=p.y&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;if(movingPlatforms.includes(p))player.x+=p.x-p.prevX;if(vanishPlatforms.includes(p))p.timer=55}}
   for(const l of lightningZones){l.phase=(l.phase+1)%l.period;if(l.phase<48&&player.x<l.x+l.w&&player.x+player.w>l.x&&player.y<l.y+l.h&&player.y+player.h>l.y&&invincibleTimer===0){playerHP--;invincibleTimer=75;player.vy=-6;if(playerHP<=0){playerHP=3;player.x=80;player.y=350;player.vy=0;player.jumps=0}}}
   if(worldNumber>=2&&player.vy>=0){for(const pad of springPads){if(oldY+player.h<=pad.y&&player.y+player.h>=pad.y&&player.x+player.w>pad.x&&player.x<pad.x+pad.w){player.y=pad.y-player.h;player.vy=-pad.power;player.jumps=1;player.grounded=false}}}
