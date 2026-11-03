@@ -50,7 +50,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 .shop-preview-name{font-size:20px;font-weight:900;color:#fff;text-shadow:0 0 10px #00dfff;margin-top:4px}
 .shop-preview-desc{font-size:12px;color:#b9d9ff;margin:4px 0;text-align:center}
 .shop-catalog{border:1px solid #285d9d;border-radius:16px;padding:12px;background:#0c1738dd}
-.shop-tabs{display:flex;gap:5px;margin-bottom:10px}
+.shop-tabs{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}.shop-tabs button{min-width:54px}
 .shop-tabs button{flex:1;margin:0;padding:9px 4px;font-size:13px;background:#101f49;border-color:#285d9d}
 .shop-tabs button.active{background:#087eaa;border-color:#60f5ff;box-shadow:0 0 12px #00dfff88}
 #skinItems{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
@@ -87,7 +87,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
   <div class="shop-header"><button id="closeShop" type="button">〈 戻る</button><h2>SKIN SHOP</h2><div class="shop-coins">🪙 <span id="shopCoinCount">0</span></div></div>
   <div class="shop-layout">
    <section class="shop-preview"><div id="skinPreviewLabel">CHARACTER PREVIEW</div><canvas id="skinPreview" width="300" height="320"></canvas><div class="shop-preview-name" id="previewSkinName">NEON BLUE</div><div class="shop-preview-desc" id="previewSkinDesc">選択中のスキン</div></section>
-   <section class="shop-catalog"><div class="shop-tabs"><button class="active" data-filter="ALL">すべて</button><button data-filter="R">R</button><button data-filter="SR">SR</button><button data-filter="UR">UR</button></div><div id="skinItems"></div><div class="shop-actions"><button id="buySkin">購入</button><button id="equipSkin">装備する</button></div><p id="shopMessage" aria-live="polite"></p></section>
+   <section class="shop-catalog"><div class="shop-tabs"><button class="active" data-filter="ALL">すべて</button><button data-filter="R">R</button><button data-filter="SR">SR</button><button data-filter="UR">UR</button><button data-filter="SSR">SSR</button><button data-filter="UR+">UR+</button><button data-filter="LEGEND">LEGEND</button><button data-filter="MYTHIC">MYTHIC</button></div><div id="skinItems"></div><div class="shop-actions"><button id="buySkin">購入</button><button id="equipSkin">装備する</button></div><p id="shopMessage" aria-live="polite"></p></section>
   </div>
  </div>
 </div>
@@ -150,8 +150,15 @@ function loadWorld2(){
  document.querySelector(".stage-top p").textContent="WORLD 2 : LAVA LAND";
 }
 const skins=[
-{name:"NEON BLUE",color:"#00cfff",price:5},{name:"FIRE RED",color:"#ff4545",price:10},
-{name:"GOLD",color:"#ffd700",price:20},{name:"MINT",color:"#16e0bd",price:30}
+{name:"NEON BLUE",color:"#00cfff",price:5,rarity:"R",description:"青い光をまとった基本装備",design:"standard"},
+{name:"FIRE RED",color:"#ff4545",price:10,rarity:"SR",description:"赤い発光ラインの強化ジャケット",design:"standard"},
+{name:"GOLD",color:"#ffd700",price:20,rarity:"UR",description:"金色の装甲パネルを備えた装備",design:"royal"},
+{name:"MINT",color:"#16e0bd",price:30,rarity:"SR",description:"ミントカラーの軽量ジャケット",design:"standard"},
+{name:"SHADOW ASSASSIN",color:"#9b65ff",price:55,rarity:"SSR",description:"フードと肩当てを備えた影の戦闘服",design:"assassin"},
+{name:"CRIMSON KNIGHT",color:"#ff315d",price:80,rarity:"SSR",description:"胸部装甲と大型肩当ての騎士装備",design:"knight"},
+{name:"CYBER COMMANDER",color:"#438cff",price:120,rarity:"UR+",description:"分割装甲と発光バイザーの司令官装備",design:"commander"},
+{name:"CELESTIAL",color:"#f2d7ff",price:180,rarity:"LEGEND",description:"白銀の外套と翼型ユニットを持つ伝説装備",design:"celestial"},
+{name:"VOID EMPEROR",color:"#c04cff",price:260,rarity:"MYTHIC",description:"黒紫のロングコートと王冠状ヘッドギア",design:"emperor"}
 ];
 let ownedSkins=["#9b8aff"];
 function saveGame(){
@@ -434,11 +441,19 @@ function draw(){
   ctx.fillStyle="#d9f8ff";ctx.fillRect(-5,11,11,4);
   ctx.fillStyle=skinGlow;ctx.fillRect(-3,12,5,2);ctx.restore();
  }
- // jacket: equipped skin determines the main suit color
- ctx.shadowColor=skinGlow;ctx.shadowBlur=7;ctx.fillStyle=skinGlow;ctx.fillRect(-12,15,24,14);ctx.shadowBlur=0;
- ctx.fillStyle="#eafaff";ctx.fillRect(-11,16,7,11);ctx.fillRect(4,16,7,11);
- ctx.fillStyle="#142b49";ctx.fillRect(-4,15,8,14);ctx.fillStyle=skinGlow;ctx.fillRect(-1,17,2,10);
- ctx.fillStyle="#ffffff";ctx.fillRect(-10,27,20,2);
+ // Outfit silhouette changes with rarity, not just its color.
+ const equippedSkin=skins.find(s=>s.color===playerSkin)||{design:"standard"};
+ const outfit=equippedSkin.design;
+ ctx.shadowColor=skinGlow;ctx.shadowBlur=outfit==="standard"?7:12;
+ ctx.fillStyle=outfit==="emperor"?"#171329":outfit==="celestial"?"#e8eaff":outfit==="knight"?"#26334d":outfit==="assassin"?"#17182d":outfit==="commander"?"#172d50":skinGlow;
+ ctx.fillRect(-12,15,24,14);ctx.shadowBlur=0;
+ if(outfit==="assassin"){ctx.fillStyle="#111326";ctx.fillRect(-14,12,28,7);ctx.fillRect(-10,7,20,7);ctx.fillStyle=skinGlow;ctx.fillRect(-13,17,4,12);ctx.fillRect(9,17,4,12)}
+ else if(outfit==="knight"){ctx.fillStyle="#9eabc3";ctx.fillRect(-15,14,8,8);ctx.fillRect(7,14,8,8);ctx.fillStyle="#dce8ff";ctx.fillRect(-9,16,18,12);ctx.fillStyle="#26334d";ctx.fillRect(-4,15,8,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,18,4,8)}
+ else if(outfit==="commander"){ctx.fillStyle="#b9d9ff";ctx.fillRect(-13,14,7,15);ctx.fillRect(6,14,7,15);ctx.fillStyle="#0b1730";ctx.fillRect(-5,15,10,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,16,4,12);ctx.fillRect(-15,20,3,7);ctx.fillRect(12,20,3,7)}
+ else if(outfit==="celestial"){ctx.fillStyle="#fff";ctx.fillRect(-15,14,6,18);ctx.fillRect(9,14,6,18);ctx.fillStyle="#aebbd8";ctx.fillRect(-5,15,10,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,17,4,10);ctx.fillStyle="#d9e9ff";ctx.fillRect(-17,18,4,13);ctx.fillRect(13,18,4,13)}
+ else if(outfit==="emperor"){ctx.fillStyle="#100d20";ctx.fillRect(-15,14,7,18);ctx.fillRect(8,14,7,18);ctx.fillStyle="#54206f";ctx.fillRect(-5,15,10,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,16,4,12);ctx.fillStyle="#ffd76a";ctx.fillRect(-8,12,16,3)}
+ else{ctx.fillStyle="#eafaff";ctx.fillRect(-11,16,7,11);ctx.fillRect(4,16,7,11);ctx.fillStyle="#142b49";ctx.fillRect(-4,15,8,14);ctx.fillStyle=skinGlow;ctx.fillRect(-1,17,2,10)}
+ ctx.fillStyle=outfit==="celestial"?"#c8d8f5":"#ffffff";ctx.fillRect(-10,27,20,2);
  // arms and gloves
  // Opposite arm swing for a readable running cycle
  for(const side of [-1,1]){
@@ -508,11 +523,19 @@ function drawSkinPreview(color){
  pc.save();pc.translate(-7,28);pc.rotate(-.58);pc.shadowColor="#22eaff";pc.shadowBlur=8;pc.fillStyle="#172944";pc.fillRect(-3,-25,7,35);pc.fillStyle="#bafaff";pc.fillRect(-1,-24,3,29);pc.fillStyle="#263957";pc.fillRect(-6,8,13,4);pc.restore();
  // legs, boots and accents
  for(const side of [-1,1]){pc.save();pc.translate(side*4,48);pc.fillStyle="#111d32";pc.fillRect(-3,-2,7,13);pc.fillStyle="#080f20";pc.fillRect(-4,9,9,9);pc.fillStyle="#d9f8ff";pc.fillRect(-5,16,11,4);pc.fillStyle=color;pc.fillRect(-3,17,7,2);pc.restore()}
- // jacket silhouette and layered panels
- pc.shadowColor=color;pc.shadowBlur=8;pc.fillStyle=color;pc.fillRect(-13,15,26,33);pc.shadowBlur=0;
- pc.fillStyle="#eafaff";pc.fillRect(-12,17,7,26);pc.fillRect(5,17,7,26);
- pc.fillStyle="#142b49";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-1,19,2,24);
- pc.fillStyle="#fff";pc.fillRect(-10,43,20,3);pc.fillStyle="#0c1830";pc.fillRect(-3,29,6,8);
+ // レア度に応じて服のシルエット・装甲・外套を変更
+ const previewSkin=skins.find(s=>s.color===color)||{design:"standard"};
+ const design=previewSkin.design;
+ pc.shadowColor=color;pc.shadowBlur=design==="standard"?8:13;
+ pc.fillStyle=design==="emperor"?"#171329":design==="celestial"?"#e8eaff":design==="knight"?"#26334d":design==="assassin"?"#17182d":design==="commander"?"#172d50":color;
+ pc.fillRect(-13,15,26,33);pc.shadowBlur=0;
+ if(design==="assassin"){pc.fillStyle="#111326";pc.fillRect(-15,11,30,9);pc.fillRect(-10,4,20,12);pc.fillStyle=color;pc.fillRect(-14,20,5,25);pc.fillRect(9,20,5,25)}
+ else if(design==="knight"){pc.fillStyle="#9eabc3";pc.fillRect(-17,13,9,11);pc.fillRect(8,13,9,11);pc.fillStyle="#dce8ff";pc.fillRect(-12,17,24,25);pc.fillStyle="#26334d";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-2,19,4,24)}
+ else if(design==="commander"){pc.fillStyle="#b9d9ff";pc.fillRect(-15,15,8,29);pc.fillRect(7,15,8,29);pc.fillStyle="#0b1730";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-2,18,4,27);pc.fillRect(-18,22,4,12);pc.fillRect(14,22,4,12)}
+ else if(design==="celestial"){pc.fillStyle="#fff";pc.fillRect(-17,14,7,35);pc.fillRect(10,14,7,35);pc.fillStyle="#aebbd8";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-2,19,4,24);pc.fillStyle="#d9e9ff";pc.fillRect(-21,20,4,23);pc.fillRect(17,20,4,23)}
+ else if(design==="emperor"){pc.fillStyle="#100d20";pc.fillRect(-17,14,8,37);pc.fillRect(9,14,8,37);pc.fillStyle="#54206f";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-2,19,4,24);pc.fillStyle="#ffd76a";pc.fillRect(-9,11,18,4)}
+ else{pc.fillStyle="#eafaff";pc.fillRect(-12,17,7,26);pc.fillRect(5,17,7,26);pc.fillStyle="#142b49";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-1,19,2,24)}
+ pc.fillStyle=design==="celestial"?"#c8d8f5":"#fff";pc.fillRect(-10,43,20,3);pc.fillStyle="#0c1830";pc.fillRect(-3,29,6,8);
  // shoulders, arms and gloves
  for(const side of [-1,1]){pc.fillStyle="#172b4a";pc.fillRect(side*12-3,19,6,18);pc.fillStyle="#eafaff";pc.fillRect(side*12-3,19,6,5);pc.fillStyle="#f1c9b6";pc.fillRect(side*12-3,35,6,7)}
  // neck and face
