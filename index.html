@@ -845,15 +845,15 @@ document.getElementById("adminToggle").onclick=()=>{
 };
 document.getElementById("floatToggle").onclick=()=>{if(!adminMode)return;floatMode=!floatMode;refreshAdminUI();};
 document.getElementById("exportSaveCode").onclick=()=>{
- saveGame();const raw=localStorage.getItem("gameSave")||"{}";
- document.getElementById("saveCodeText").value=btoa(unescape(encodeURIComponent(raw)));
+ saveGame();const payload={gameSave:JSON.parse(localStorage.getItem("gameSave")||"{}"),usedSerialCodes:JSON.parse(localStorage.getItem("usedSerialCodes")||"[]")};
+ document.getElementById("saveCodeText").value=btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
  document.getElementById("codeMessage").textContent="セーブコードを発行しました";
 };
 document.getElementById("importSaveCode").onclick=()=>{
  try{
   const raw=decodeURIComponent(escape(atob(document.getElementById("saveCodeText").value.trim())));
-  const data=JSON.parse(raw);if(!data||typeof data!=="object"||![1,2,3,4].includes(data.worldNumber))throw new Error("invalid");
-  localStorage.setItem("gameSave",JSON.stringify(data));if(!loadGame())throw new Error("load");
+  const payload=JSON.parse(raw);const data=payload.gameSave||payload;if(!data||typeof data!=="object"||![1,2,3,4].includes(data.worldNumber))throw new Error("invalid");
+  localStorage.setItem("gameSave",JSON.stringify(data));if(Array.isArray(payload.usedSerialCodes))localStorage.setItem("usedSerialCodes",JSON.stringify(payload.usedSerialCodes));if(!loadGame())throw new Error("load");
   updateWorldUnlockButtons();refreshAdminUI();document.getElementById("codeMessage").textContent="セーブデータを読み込みました。ページを再読み込みしてください";
  }catch(e){document.getElementById("codeMessage").textContent="セーブコードが正しくありません";}
 };
