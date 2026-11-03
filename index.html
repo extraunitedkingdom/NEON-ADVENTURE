@@ -778,43 +778,40 @@ document.getElementById("save").onclick=()=>{alert(saveGame()?"GAME SAVED!":"セ
 document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\\n\\n"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("\\n"):"まだ記録がありません"));
 let selectedSkinColor=playerSkin,shopFilter="ALL";
 function drawSkinPreview(color){
- const preview=document.getElementById("skinPreview"),pc=preview.getContext("2d");
- pc.clearRect(0,0,preview.width,preview.height);
- // ネオンの足元リング
- const glow=pc.createRadialGradient(150,265,8,150,265,112);glow.addColorStop(0,"rgba(0,225,255,.28)");glow.addColorStop(1,"rgba(0,225,255,0)");
- pc.fillStyle=glow;pc.fillRect(0,150,300,170);
- pc.strokeStyle="rgba(75,235,255,.75)";pc.lineWidth=3;pc.beginPath();pc.ellipse(150,276,112,22,0,0,Math.PI*2);pc.stroke();
- pc.strokeStyle="rgba(75,235,255,.3)";pc.lineWidth=2;pc.beginPath();pc.ellipse(150,276,82,13,0,0,Math.PI*2);pc.stroke();
- pc.save();pc.translate(150,48);pc.scale(5.2,5.2);
- // sword on back
- pc.save();pc.translate(-7,28);pc.rotate(-.58);pc.shadowColor="#22eaff";pc.shadowBlur=8;pc.fillStyle="#172944";pc.fillRect(-3,-25,7,35);pc.fillStyle="#bafaff";pc.fillRect(-1,-24,3,29);pc.fillStyle="#263957";pc.fillRect(-6,8,13,4);pc.restore();
- // legs, boots and accents
- for(const side of [-1,1]){pc.save();pc.translate(side*4,48);pc.fillStyle="#111d32";pc.fillRect(-3,-2,7,13);pc.fillStyle="#080f20";pc.fillRect(-4,9,9,9);pc.fillStyle="#d9f8ff";pc.fillRect(-5,16,11,4);pc.fillStyle=color;pc.fillRect(-3,17,7,2);pc.restore()}
- // レア度に応じて服のシルエット・装甲・外套を変更
- const previewSkin=skins.find(s=>s.color===color)||{design:"standard"};
- const design=previewSkin.design;
- pc.shadowColor=color;pc.shadowBlur=design==="standard"?8:13;
- pc.fillStyle=design==="emperor"?"#171329":design==="celestial"?"#e8eaff":design==="knight"?"#26334d":design==="assassin"?"#17182d":design==="commander"?"#172d50":color;
- pc.fillRect(-13,15,26,33);pc.shadowBlur=0;
- if(design==="assassin"){pc.fillStyle="#111326";pc.fillRect(-15,11,30,9);pc.fillRect(-10,4,20,12);pc.fillStyle=color;pc.fillRect(-14,20,5,25);pc.fillRect(9,20,5,25)}
- else if(design==="knight"){pc.fillStyle="#9eabc3";pc.fillRect(-17,13,9,11);pc.fillRect(8,13,9,11);pc.fillStyle="#dce8ff";pc.fillRect(-12,17,24,25);pc.fillStyle="#26334d";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-2,19,4,24)}
- else if(design==="commander"){pc.fillStyle="#b9d9ff";pc.fillRect(-15,15,8,29);pc.fillRect(7,15,8,29);pc.fillStyle="#0b1730";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-2,18,4,27);pc.fillRect(-18,22,4,12);pc.fillRect(14,22,4,12)}
- else if(design==="celestial"){pc.fillStyle="#fff";pc.fillRect(-17,14,7,35);pc.fillRect(10,14,7,35);pc.fillStyle="#aebbd8";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-2,19,4,24);pc.fillStyle="#d9e9ff";pc.fillRect(-21,20,4,23);pc.fillRect(17,20,4,23)}
- else if(design==="emperor"){pc.fillStyle="#100d20";pc.fillRect(-17,14,8,37);pc.fillRect(9,14,8,37);pc.fillStyle="#54206f";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-2,19,4,24);pc.fillStyle="#ffd76a";pc.fillRect(-9,11,18,4)}
- else{pc.fillStyle="#eafaff";pc.fillRect(-12,17,7,26);pc.fillRect(5,17,7,26);pc.fillStyle="#142b49";pc.fillRect(-5,15,10,33);pc.fillStyle=color;pc.fillRect(-1,19,2,24)}
- pc.fillStyle=design==="celestial"?"#c8d8f5":"#fff";pc.fillRect(-10,43,20,3);pc.fillStyle="#0c1830";pc.fillRect(-3,29,6,8);
- // shoulders, arms and gloves
- for(const side of [-1,1]){pc.fillStyle="#172b4a";pc.fillRect(side*12-3,19,6,18);pc.fillStyle="#eafaff";pc.fillRect(side*12-3,19,6,5);pc.fillStyle="#f1c9b6";pc.fillRect(side*12-3,35,6,7)}
- // neck and face
- pc.fillStyle="#f1c9b6";pc.fillRect(-4,8,8,10);pc.fillStyle="#f1c9b6";pc.fillRect(-11,-8,22,22);
- // hair silhouette with distinct spikes
- pc.fillStyle="#0b1427";pc.beginPath();pc.moveTo(-13,1);pc.lineTo(-18,-8);pc.lineTo(-10,-6);pc.lineTo(-8,-18);pc.lineTo(-2,-11);pc.lineTo(3,-22);pc.lineTo(7,-12);pc.lineTo(15,-17);pc.lineTo(13,-7);pc.lineTo(19,-3);pc.lineTo(13,8);pc.lineTo(10,1);pc.lineTo(6,7);pc.lineTo(1,1);pc.lineTo(-5,8);pc.lineTo(-9,2);pc.lineTo(-14,8);pc.closePath();pc.fill();
- // fringe and cyan eyes
- pc.fillStyle="#17233c";pc.beginPath();pc.moveTo(-10,-6);pc.lineTo(-2,-13);pc.lineTo(1,-5);pc.lineTo(7,-13);pc.lineTo(9,-3);pc.lineTo(4,2);pc.lineTo(-1,-2);pc.lineTo(-6,3);pc.closePath();pc.fill();
- pc.fillStyle="#f4fbff";pc.fillRect(-8,2,5,2);pc.fillRect(3,2,5,2);pc.shadowColor="#19eaff";pc.shadowBlur=8;pc.fillStyle="#19eaff";pc.fillRect(-7,3,4,4);pc.fillRect(4,3,4,4);pc.shadowBlur=0;
- // jacket collar details
- pc.fillStyle="#07152b";pc.fillRect(-5,14,10,5);pc.fillStyle="#eafaff";pc.fillRect(-2,16,4,3);
- pc.restore();
+ const canvas=document.getElementById("skinPreview"),p=canvas.getContext("2d");
+ p.clearRect(0,0,300,320);
+ const glow=p.createRadialGradient(150,265,8,150,265,100);glow.addColorStop(0,"rgba(0,225,255,.28)");glow.addColorStop(1,"rgba(0,225,255,0)");p.fillStyle=glow;p.fillRect(30,150,240,170);
+ p.strokeStyle="rgba(75,235,255,.7)";p.lineWidth=3;p.beginPath();p.ellipse(150,276,92,18,0,0,Math.PI*2);p.stroke();
+ const skin=skins.find(v=>v.color===color)||skins[0],d=skin.design||"standard",c=color;
+ // 身長・頭身・足元は全スキン共通。BOYと同じサイズに統一
+ p.save();p.translate(150,91);p.scale(3.15,3.15);
+ const R=(x,y,w,h,col)=>{p.fillStyle=col;p.fillRect(x,y,w,h)};
+ const G=(x,y,w,h)=>{p.shadowColor=c;p.shadowBlur=7;R(x,y,w,h,c);p.shadowBlur=0};
+ // 背中の剣
+ p.save();p.translate(-10,27);p.rotate(-.58);p.shadowColor=c;p.shadowBlur=8;R(-3,-24,6,34,"#172944");R(-1,-23,2,29,"#bafaff");R(-6,8,12,4,"#263957");p.restore();
+ // 脚・ブーツ
+ for(const side of [-1,1]){p.save();p.translate(side*4,48);R(-3,-2,7,13,d==="celestial"?"#dce7ff":"#17243a");R(-4,9,9,9,d==="emperor"?"#100d20":"#080f20");R(-5,16,11,4,"#d9f8ff");G(-3,17,7,2);p.restore()}
+ // 胴体と固有装甲
+ R(-13,15,26,33,d==="emperor"?"#171329":d==="celestial"?"#e8eaff":d==="knight"?"#26334d":d==="assassin"?"#17182d":d==="commander"?"#172d50":c);
+ if(d==="assassin"){R(-15,10,30,12,"#111326");R(-11,4,22,12,"#111326");R(-14,20,5,26,c);R(9,20,5,26,c);R(-5,18,10,25,"#080b18")}
+ else if(d==="knight"){R(-18,13,9,12,"#9eabc3");R(9,13,9,12,"#9eabc3");R(-12,17,24,25,"#dce8ff");R(-5,15,10,33,"#26334d");G(-2,19,4,24);R(-3,13,6,3,"#f6d77a")}
+ else if(d==="commander"){R(-16,15,8,29,"#b9d9ff");R(8,15,8,29,"#b9d9ff");R(-5,15,10,33,"#0b1730");G(-2,18,4,27);R(-19,22,4,12,"#8dbfff");R(15,22,4,12,"#8dbfff")}
+ else if(d==="celestial"){R(-17,14,7,35,"#fff");R(10,14,7,35,"#fff");R(-5,15,10,33,"#aebbd8");G(-2,19,4,24);R(-21,20,4,23,"#d9e9ff");R(17,20,4,23,"#d9e9ff")}
+ else if(d==="emperor"){R(-17,14,8,37,"#100d20");R(9,14,8,37,"#100d20");R(-5,15,10,33,"#54206f");G(-2,19,4,24);R(-9,11,18,4,"#ffd76a")}
+ else{R(-12,17,7,26,"#eafaff");R(5,17,7,26,"#eafaff");R(-5,15,10,33,"#142b49");G(-1,19,2,24)}
+ // 肩・腕・手
+ for(const side of [-1,1]){R(side*12-4,18,8,17,d==="knight"?"#9eabc3":"#172b4a");R(side*12-4,18,8,5,"#eafaff");R(side*12-3,34,6,8,"#f1c9b6")}
+ // 顔とスキン固有ヘルメット／フード／髪型
+ R(-4,7,8,11,"#f1c9b6");R(-11,-8,22,23,"#f1c9b6");
+ if(d==="assassin"){R(-14,-13,28,12,"#111326");R(-13,-5,26,8,"#111326");R(-11,-2,22,3,c);R(-8,3,16,3,"#19eaff")}
+ else if(d==="knight"){R(-14,-14,28,9,"#aebbd8");R(-13,-10,5,15,"#9eabc3");R(8,-10,5,15,"#9eabc3");R(-5,-18,10,5,"#f6d77a");R(-9,1,18,5,"#26334d")}
+ else if(d==="commander"){R(-13,-15,26,9,"#162c4b");R(-12,-8,24,7,"#162c4b");R(-8,-7,16,3,c);R(-5,2,10,4,"#0b1730")}
+ else if(d==="celestial"){R(-14,-13,28,8,"#fff");R(-17,-8,4,14,"#d9e9ff");R(13,-8,4,14,"#d9e9ff");R(-8,-3,16,5,"#aebbd8")}
+ else if(d==="emperor"){R(-14,-13,28,9,"#100d20");R(-9,-18,18,5,"#ffd76a");R(-6,-23,4,6,"#ffd76a");R(2,-23,4,6,"#ffd76a");R(-11,-3,22,5,"#54206f")}
+ else{R(-13,-13,26,9,"#0b1427");R(-12,-8,5,12,"#0b1427");R(7,-8,5,12,"#0b1427");R(-9,-15,6,7,c);R(-2,-18,6,9,"#17233c");R(5,-14,7,7,c)}
+ // 目・胸の発光コア
+ R(-8,3,5,3,"#f4fbff");R(3,3,5,3,"#f4fbff");p.shadowColor="#19eaff";p.shadowBlur=7;R(-7,4,4,4,"#19eaff");R(4,4,4,4,"#19eaff");p.shadowBlur=0;R(-2,12,4,2,"#9a5360");R(-5,25,10,3,"#07152b");G(-2,25,4,3);
+ p.restore();
 }
 function renderShop(){
  const area=document.getElementById("skinItems");area.innerHTML="";
