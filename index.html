@@ -226,14 +226,25 @@ function jump(){if(!gameClear&&player.jumps<player.maxJumps){player.vy=-player.j
 function attack(){
  if(gameClear||attackCooldown>0)return;
  attackCooldown=20;attackTimer=12;
+ const px=player.x+player.w/2,py=player.y+player.h/2;
  for(const e of enemies){
   if(!e.alive)continue;
-  const px=player.x+player.w/2,py=player.y+player.h/2,ex=e.x+e.w/2,ey=e.y+e.h/2;
-  const hit=worldNumber===4?(Math.abs(ex-px)<=520&&Math.abs(ey-py)<=360):(Math.hypot(px-ex,py-ey)<75);
+  const ex=e.x+e.w/2,ey=e.y+e.h/2;
+  // WORLD 4: mage/ranged/melee all use a forgiving rectangular sword range.
+  const hit=worldNumber===4
+   ? (Math.abs(ex-px)<=900&&Math.abs(ey-py)<=500)
+   : (Math.hypot(px-ex,py-ey)<75);
   if(hit)e.alive=false;
  }
- if(boss.alive&&Math.hypot(player.x+player.w/2-(boss.x+boss.w/2),player.y+player.h/2-(boss.y+boss.h/2))<(worldNumber===4?155:115)){
-  boss.hp=Math.max(0,boss.hp-1);if(boss.hp===0){boss.alive=false;bossDefeated=true;saveGame()}
+ if(boss.alive){
+  const bx=boss.x+boss.w/2,by=boss.y+boss.h/2;
+  const bossHit=worldNumber===4
+   ? (Math.abs(bx-px)<=700&&Math.abs(by-py)<=500)
+   : Math.hypot(px-bx,py-by)<115;
+  if(bossHit){
+   boss.hp=Math.max(0,boss.hp-1);
+   if(boss.hp===0){boss.alive=false;bossDefeated=true;saveGame()}
+  }
  }
 }
 function useAdminBeam(){
