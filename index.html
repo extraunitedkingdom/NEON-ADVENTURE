@@ -291,17 +291,13 @@ function attack(){
  for(const e of enemies){
   if(!e.alive)continue;
   const ex=e.x+e.w/2,ey=e.y+e.h/2;
-  // WORLD 4: mage/ranged/melee all use a forgiving rectangular sword range.
-  const hit=worldNumber===4
-   ? (Math.abs(ex-px)<=900&&Math.abs(ey-py)<=500)
-   : (Math.hypot(px-ex,py-ey)<75);
+   // 全ワールド共通の通常攻撃範囲
+   const hit=Math.hypot(px-ex,py-ey)<75;
   if(hit)e.alive=false;
  }
  if(boss.alive){
   const bx=boss.x+boss.w/2,by=boss.y+boss.h/2;
-  const bossHit=worldNumber===4
-   ? (px>=boss.x-95&&px<=boss.x+boss.w+95&&py>=boss.y-95&&py<=boss.y+boss.h+95)
-   : Math.hypot(px-bx,py-by)<115;
+  const bossHit=Math.hypot(px-bx,py-by)<115;
   if(bossHit){
    boss.hp=Math.max(0,boss.hp-playerAttackPower());
    if(boss.hp===0){boss.alive=false;bossDefeated=true;saveGame()}
@@ -716,7 +712,7 @@ function draw(){
  }
  ctx.restore();
  ctx.restore();
- ctx.fillStyle="white";ctx.font="bold 19px sans-serif";ctx.fillText(worldNumber===1?"WORLD 1 : GREEN FOREST":worldNumber===2?"WORLD 2 : LAVA LAND":"WORLD 3 : SKY KINGDOM",18,28);
+ ctx.fillStyle="white";ctx.font="bold 19px sans-serif";ctx.fillText(worldNumber===1?"WORLD 1 : GREEN FOREST":worldNumber===2?"WORLD 2 : LAVA LAND":worldNumber===3?"WORLD 3 : SKY KINGDOM":"WORLD 4 : COSMIC ABYSS",18,28);
  ctx.font="16px sans-serif";ctx.fillStyle="#ffd700";ctx.fillText("COINS: "+coinCount,18,58);
  ctx.fillStyle="#00ffff";ctx.fillText("TIME: "+(gameClear?currentTime:(Date.now()-gameStart)/1000).toFixed(2),18,84);
  ctx.fillStyle="#ffd700";ctx.fillText("BEST: "+(bestTime===null?"--":bestTime.toFixed(2)+"s"),18,110);
@@ -741,7 +737,10 @@ function draw(){
     robot:{hair:"#263d55",face:"#9cecff",body:"#54758e",trim:"#43f5ff",leg:"#26394f"},
     ghost:{hair:"#c8f5ff",face:"#dffaff",body:"#8bdcf2",trim:"#ffffff",leg:"#65b9dc"}
    };
-   const p=palette[appearanceCharacter]||palette.boy;
+   const base=palette[appearanceCharacter]||palette.boy;
+    // 装備中スキンの色をキャラクターの胴体・装飾に反映する
+    const skinColor=playerSkin||base.body;
+    const p={...base,body:skinColor,trim:skinColor};
    // 頭・髪・顔
    rect(-10,-25,20,20,p.face);rect(-12,-29,24,8,p.hair);rect(-12,-22,4,10,p.hair);rect(8,-22,4,10,p.hair);
    if(appearanceCharacter==="girl"){rect(-13,-20,5,16,p.hair);rect(9,-20,5,16,p.hair);rect(-5,-31,10,3,p.trim)}
@@ -758,7 +757,7 @@ function draw(){
 }
 function restart(){
  document.getElementById("clearPanel").style.display="none";
- player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;
+ player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=skinMaxHP();
  coins.forEach(c=>c.taken=false);for(const v of vanishPlatforms){v.timer=0;v.active=true}for(const l of lightningZones){l.phase=l.phase||0} // ギミックも初期状態へ
  enemies.forEach(e=>e.alive=true);boss.hp=boss.maxHP;boss.alive=true;bossDefeated=false;
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
@@ -941,7 +940,7 @@ function drawWorld4Actors(){
   }
  }
  if(w4BossState!=="idle"&&w4BossState!=="recovery"&&boss.alive){
-  const labels={melee:"ボス：近接攻撃！",shot:"ボス：弾 हमला！",magic:"ボス：魔法攻撃！",area:"ボス：範囲攻撃！"};
+  const labels={melee:"ボス：近接攻撃！",shot:"ボス：弾攻撃！",magic:"ボス：魔法攻撃！",area:"ボス：範囲攻撃！"};
   ctx.save();ctx.fillStyle="rgba(10,5,28,.82)";ctx.fillRect(250,12,400,42);ctx.strokeStyle="#ff65d8";ctx.lineWidth=3;ctx.strokeRect(250,12,400,42);ctx.fillStyle="#fff";ctx.font="bold 22px sans-serif";ctx.textAlign="center";ctx.fillText(labels[w4BossState]||"危険！",450,41);ctx.textAlign="left";
   if(w4BossState==="area"){ctx.strokeStyle="#ff3c76";ctx.lineWidth=5;ctx.globalAlpha=.35+.55*pulse;ctx.beginPath();ctx.ellipse(boss.x+boss.w/2-camera,boss.y+boss.h/2,250,100,0,0,Math.PI*2);ctx.stroke()}
   ctx.restore();
