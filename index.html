@@ -839,7 +839,7 @@ function loadWorld4(){
 }
 function damagePlayer(amount=1){
  if(adminMode||invincibleTimer>0)return;
- amount=Math.max(1,amount-playerDefense());
+ amount=Math.max(1,amount-Math.floor(playerDefense()/2));
  playerHP-=amount;invincibleTimer=65;player.vy=-4;
  if(playerHP<=0){playerHP=skinMaxHP();player.x=checkpoint4?2780:80;player.y=388;player.vx=0;player.vy=0;player.jumps=0;w4Shots=[];w4Magic=[];w4Laser=null;w4BossState="idle";w4BossTimer=0;invincibleTimer=90}
 }
