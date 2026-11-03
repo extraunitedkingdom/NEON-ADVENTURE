@@ -230,12 +230,59 @@ function update(){
 function draw(){
  ctx.clearRect(0,0,W,H);
  if(worldNumber===1){
-  // GREEN FOREST：青空と雲
-  const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#55c9f5");bg.addColorStop(.58,"#b5f0dc");bg.addColorStop(1,"#e5f7c4");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-  ctx.fillStyle="rgba(255,255,255,.72)";for(let i=0;i<7;i++){const x=((i*173-camera*.12)%(W+180)+W+180)%(W+180)-90,y=65+(i%3)*42;ctx.beginPath();ctx.arc(x,y,22,0,Math.PI*2);ctx.arc(x+25,y-10,29,0,Math.PI*2);ctx.arc(x+55,y,21,0,Math.PI*2);ctx.fill()}
-  ctx.save();ctx.translate(-camera*.22,0);for(let i=0;i<9;i++){const x=i*260-80;ctx.fillStyle=i%2?"#70b9a0":"#579e91";ctx.beginPath();ctx.moveTo(x,355);ctx.lineTo(x+125,125+(i%3)*35);ctx.lineTo(x+270,355);ctx.closePath();ctx.fill();ctx.fillStyle="rgba(239,255,235,.8)";ctx.beginPath();ctx.moveTo(x+91,190+(i%3)*35);ctx.lineTo(x+125,125+(i%3)*35);ctx.lineTo(x+164,190+(i%3)*35);ctx.closePath();ctx.fill()}ctx.restore();
-  ctx.save();ctx.translate(-camera,0);for(let i=0;i<30;i++){const x=i*145-30;ctx.fillStyle=i%2?"#287b59":"#328b5c";ctx.beginPath();ctx.arc(x+45,370,82,Math.PI,0);ctx.fill();ctx.fillRect(x+35,365,20,55)}
-  ctx.fillStyle="#526b79";ctx.fillRect(2070,205,155,145);ctx.fillStyle="#718c99";ctx.fillRect(2055,185,185,24);ctx.fillStyle="#526b79";ctx.fillRect(2090,155,30,52);ctx.fillRect(2170,155,30,52);ctx.fillStyle="#e8f3e8";ctx.beginPath();ctx.moveTo(2080,155);ctx.lineTo(2105,120);ctx.lineTo(2130,155);ctx.fill();ctx.beginPath();ctx.moveTo(2160,155);ctx.lineTo(2185,120);ctx.lineTo(2210,155);ctx.fill();ctx.fillStyle="#263e59";ctx.fillRect(2128,260,38,90);ctx.fillStyle="#ffd56b";ctx.fillRect(2090,225,22,28);ctx.fillRect(2180,225,22,28);ctx.fillStyle="#65d9ee";ctx.fillRect(2048,350,28,80);ctx.fillRect(2215,350,28,80);ctx.fillStyle="#d5fbff";ctx.fillRect(2057,350,8,80);ctx.fillRect(2224,350,8,80);
+  // GREEN FOREST：多層パララックスの森。遠景から手前まで奥行きを重ねる
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,"#62c9ed");sky.addColorStop(.48,"#b8e9c9");sky.addColorStop(1,"#f0edb8");
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  // 朝日の光と柔らかな光芒
+  const sun=ctx.createRadialGradient(690,105,8,690,105,230);
+  sun.addColorStop(0,"rgba(255,255,220,.9)");sun.addColorStop(.22,"rgba(255,245,180,.38)");sun.addColorStop(1,"rgba(255,245,180,0)");
+  ctx.fillStyle=sun;ctx.fillRect(450,-100,480,420);
+  ctx.fillStyle="#fff4bd";ctx.beginPath();ctx.arc(690,105,37,0,Math.PI*2);ctx.fill();
+  // 遠い山並みと霧の谷
+  ctx.save();ctx.translate(-camera*.10,0);
+  for(let i=0;i<8;i++){const x=i*300-80;ctx.fillStyle=i%2?"#91c9a7":"#83bba1";ctx.beginPath();ctx.moveTo(x-40,365);ctx.lineTo(x+90,190+(i%3)*24);ctx.lineTo(x+180,275);ctx.lineTo(x+260,175+(i%2)*32);ctx.lineTo(x+350,365);ctx.closePath();ctx.fill()}
+  ctx.fillStyle="rgba(239,255,226,.38)";for(let i=0;i<6;i++){const x=i*190-50;ctx.beginPath();ctx.ellipse(x+90,335,145,24,0,0,Math.PI*2);ctx.fill()}
+  ctx.restore();
+  // 中景：巨大な木々、枝、葉の房
+  ctx.save();ctx.translate(-camera*.28,0);
+  for(let i=0;i<13;i++){
+   const x=i*245-55,base=365+(i%3)*8,thick=24+(i%3)*7;
+   ctx.fillStyle=i%2?"#477b55":"#3d704f";ctx.fillRect(x+92,base-155,thick,190);
+   ctx.fillStyle="#6e9b62";ctx.fillRect(x+98,base-145,6,150);
+   ctx.strokeStyle="#477b55";ctx.lineWidth=13;ctx.beginPath();ctx.moveTo(x+105,base-105);ctx.lineTo(x+55,base-155);ctx.moveTo(x+110,base-90);ctx.lineTo(x+158,base-145);ctx.stroke();
+   const clusters=[[x+65,base-175,61],[x+120,base-205,72],[x+175,base-165,58],[x+105,base-145,65]];
+   for(let j=0;j<clusters.length;j++){const q=clusters[j];ctx.fillStyle=["#347d59","#438d5c","#559c65","#2f704f"][(i+j)%4];ctx.beginPath();ctx.arc(q[0],q[1],q[2],0,Math.PI*2);ctx.fill();ctx.fillStyle="rgba(190,239,143,.20)";ctx.beginPath();ctx.arc(q[0]-17,q[1]-20,q[2]*.48,0,Math.PI*2);ctx.fill()}
+  }
+  ctx.restore();
+  // 木漏れ日：斜めの光の帯
+  ctx.save();ctx.globalCompositeOperation="screen";
+  for(let i=0;i<7;i++){const x=((i*177-camera*.20)%(W+250)+W+250)%(W+250)-120;ctx.fillStyle="rgba(255,255,190,.075)";ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+38,0);ctx.lineTo(x+205,365);ctx.lineTo(x+145,365);ctx.closePath();ctx.fill()}
+  ctx.restore();
+  // 手前の大木の幹と葉で画面端を額縁のように囲む
+  ctx.save();ctx.translate(-camera*.72,0);
+  for(const x of [-110,810,1710,2610,3510]){
+   ctx.fillStyle="#294f3e";ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+28,0);ctx.lineTo(x+78,500);ctx.lineTo(x-22,500);ctx.closePath();ctx.fill();
+   ctx.fillStyle="#3b7650";ctx.beginPath();ctx.arc(x+8,62,95,0,Math.PI*2);ctx.arc(x+76,92,82,0,Math.PI*2);ctx.arc(x-42,112,70,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+  // 空中に漂う花粉と小さな光
+  for(let i=0;i<42;i++){const x=((i*83-camera*.32)%(W+24)+W+24)%(W+24)-12;const y=95+(i*59)%310;ctx.fillStyle=i%4===0?"rgba(255,245,150,.9)":"rgba(245,255,207,.58)";ctx.beginPath();ctx.arc(x,y,1+(i%3)*.55,0,Math.PI*2);ctx.fill()}
+  // 地面近くの草むら・シダ
+  ctx.save();ctx.translate(-camera,0);
+  for(let i=0;i<62;i++){const x=i*49-20;ctx.strokeStyle=i%2?"#27734c":"#3c9258";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,430);ctx.quadraticCurveTo(x-10,405-(i%4)*5,x-18,394-(i%4)*5);ctx.moveTo(x,430);ctx.quadraticCurveTo(x+8,405-(i%3)*7,x+17,398-(i%3)*7);ctx.stroke()}
+  // 花
+  for(let i=0;i<34;i++){const x=i*91+25,y=414-(i%4)*5;ctx.fillStyle=i%3===0?"#ffe58b":i%3===1?"#f5b7dc":"#eaf7ff";ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();ctx.fillStyle="#f6d65b";ctx.beginPath();ctx.arc(x,y,1.3,0,Math.PI*2);ctx.fill()}
+  ctx.restore();
+  // 既存のステージ奥にある遺跡を森の神殿に見せる
+  ctx.save();ctx.translate(-camera*.9,0);
+  ctx.fillStyle="#526f58";ctx.fillRect(2070,205,155,145);ctx.fillStyle="#78956b";ctx.fillRect(2055,185,185,24);
+  ctx.fillStyle="#42634f";ctx.fillRect(2090,155,30,52);ctx.fillRect(2170,155,30,52);
+  ctx.fillStyle="#d9e9a9";ctx.beginPath();ctx.moveTo(2080,155);ctx.lineTo(2105,120);ctx.lineTo(2130,155);ctx.fill();ctx.beginPath();ctx.moveTo(2160,155);ctx.lineTo(2185,120);ctx.lineTo(2210,155);ctx.fill();
+  ctx.fillStyle="#294b3e";ctx.fillRect(2128,260,38,90);ctx.fillStyle="#f7d77b";ctx.fillRect(2090,225,22,28);ctx.fillRect(2180,225,22,28);
+  ctx.fillStyle="#8ce8d2";ctx.fillRect(2048,350,28,80);ctx.fillRect(2215,350,28,80);ctx.fillStyle="#d5fbff";ctx.fillRect(2057,350,8,80);ctx.fillRect(2224,350,8,80);
+  ctx.restore();
+  ctx.save();ctx.translate(-camera,0);
  }else if(worldNumber===2){
   // LAVA LAND：夕焼け、火山群、煙、溶岩の光が広がる灼熱の景色
   const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#251b43");bg.addColorStop(.38,"#71334b");bg.addColorStop(.72,"#e16a3c");bg.addColorStop(1,"#ffb45c");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
