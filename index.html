@@ -35,6 +35,15 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 #homeButton{padding:7px 12px;margin:0;font-size:13px;border-color:#58efff;background:#112b62;box-shadow:0 0 10px #00dfff55}
 @media(max-width:700px){.stage-top{padding:0 4px}}
 @media(max-width:700px){#actions{gap:3px}#actions button{padding:10px 12px;font-size:14px}.controls button{min-width:28%;padding:14px 8px}}
+#equipmentPanel{display:none;position:fixed;z-index:40;inset:0;overflow-y:auto;padding:14px;background:rgba(3,7,24,.96);color:#fff}
+.equipment-shell{max-width:620px;margin:20px auto;padding:18px;background:#111a3d;border:2px solid #27eaff;border-radius:16px;box-shadow:0 0 24px #27eaff66;text-align:left}
+.equipment-shell h2{text-align:center;color:#8ffaff;margin:4px 0 14px}
+#equipmentStats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.stat-card{padding:10px;border:1px solid #3476a8;border-radius:10px;background:#14234a}
+.equipment-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;margin:7px 0;border:1px solid #405a91;border-radius:10px;background:#17264f}
+.equipment-item small{display:block;color:#c5d9ff}
+.equipment-item button{margin:0;padding:8px 10px;font-size:13px;white-space:nowrap}
+@media(max-width:500px){.equipment-item{align-items:flex-start;flex-direction:column}.equipment-item button{width:100%}}
 #clearPanel{display:none;max-width:520px;margin:12px auto;padding:14px;background:#171b48;border:2px solid #ffd85a;border-radius:14px;box-shadow:0 0 18px #ffd85a55}#clearPanel h3{margin:4px 0 10px;color:#ffd85a}#clearPanel button{min-width:135px}#nextStageButton{border-color:#5affd0;background:linear-gradient(90deg,#104d55,#126a59)}
 #stageSelect{display:none;max-width:390px;margin:12px auto;padding:12px;background:#171b48;border:2px solid #27eaff;border-radius:14px}#stageSelect button{display:block;width:100%;margin:8px 0}#world2Select{border-color:#ff8a36;background:linear-gradient(90deg,#6b2417,#9b4b20)}
 #shopPanel{display:none;position:fixed;z-index:20;inset:0;overflow-y:auto;padding:14px;background:radial-gradient(ellipse at 50% 10%,#172f68 0%,#080d25 68%);color:#fff}
@@ -104,8 +113,17 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <div class="controls">
 <button id="left">◀ LEFT</button><button id="jump">JUMP ▲</button><button id="right">RIGHT ▶</button>
 </div>
+<div id="equipmentPanel" role="dialog" aria-modal="true" aria-label="装備・ステータス">
+ <div class="equipment-shell">
+  <h2>⚔ EQUIPMENT & STATUS</h2>
+  <div id="equipmentStats"></div>
+  <h3>装備一覧</h3>
+  <div id="equipmentItems"></div>
+  <button id="closeEquipment" type="button" style="display:block;width:100%;margin-top:12px">閉じる</button>
+ </div>
+</div>
 <div id="actions">
-<button id="attack">ATTACK</button><button id="dash">DASH</button><button id="restart">RESTART</button><button id="adminToggle" style="display:none">ADMIN: OFF</button><button id="floatToggle" style="display:none">FLOAT: OFF</button><button id="kamehameha" style="display:none;border-color:#55f5ff;background:linear-gradient(90deg,#075c9b,#12bde0)">かめはめ波</button>
+<button id="attack">ATTACK</button><button id="equipmentToggle">装備・ステータス</button><button id="dash">DASH</button><button id="restart">RESTART</button><button id="adminToggle" style="display:none">ADMIN: OFF</button><button id="floatToggle" style="display:none">FLOAT: OFF</button><button id="kamehameha" style="display:none;border-color:#55f5ff;background:linear-gradient(90deg,#075c9b,#12bde0)">かめはめ波</button>
 </div>
 <p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p><p class="small" id="world2Hint">WORLD 2：水色のジャンプパッドでマグマを飛び越えよう。2つ目は高い壁の上へ飛び乗るためのパッド！</p>
 </div>
@@ -167,8 +185,47 @@ const skins=[
 {name:"VOID EMPEROR",color:"#c04cff",price:260,rarity:"MYTHIC",description:"黒紫のロングコートと王冠状ヘッドギア",design:"emperor"}
 ];
 let ownedSkins=["#9b8aff"];
+const equipmentCatalog=[
+ {id:"wood-sword",name:"ブレードI",slot:"weapon",price:0,attack:1,defense:0,hp:0,description:"攻撃力 +1"},
+ {id:"plasma-sword",name:"プラズマブレード",slot:"weapon",price:80,attack:3,defense:0,hp:0,description:"攻撃力 +3"},
+ {id:"void-sword",name:"ヴォイドブレード",slot:"weapon",price:180,attack:5,defense:0,hp:0,description:"攻撃力 +5"},
+ {id:"leather-armor",name:"ライトアーマー",slot:"armor",price:0,attack:0,defense:1,hp:0,description:"防御力 +1"},
+ {id:"neon-armor",name:"ネオンアーマー",slot:"armor",price:120,attack:0,defense:2,hp:1,description:"防御力 +2 / 最大HP +1"},
+ {id:"heart-core",name:"ハートコア",slot:"accessory",price:100,attack:0,defense:0,hp:2,description:"最大HP +2"}
+];
+let ownedEquipment=["wood-sword","leather-armor"],equippedEquipment={weapon:"wood-sword",armor:"leather-armor",accessory:null};
+function equipmentBonus(key){const item=equipmentCatalog.find(v=>v.id===equippedEquipment[key]);return item||{attack:0,defense:0,hp:0}}
+function playerAttackPower(){return 1+equipmentBonus("weapon").attack}
+function playerDefense(){return equipmentBonus("armor").defense}
+function playerMaxHP(){return skinMaxHP()+equipmentBonus("armor").hp+equipmentBonus("accessory").hp}
+function renderEquipment(){
+ const stats=document.getElementById("equipmentStats"),items=document.getElementById("equipmentItems");
+ if(!stats||!items)return;
+ stats.innerHTML="";
+ const values=[["❤️ HP",playerHP+" / "+playerMaxHP()],["⚔ 攻撃力",playerAttackPower()],["🛡 防御力",playerDefense()],["🪙 コイン",coinCount]];
+ for(const [label,value] of values){const el=document.createElement("div");el.className="stat-card";el.innerHTML="<small>"+label+"</small><div style='font-size:22px;font-weight:bold'>"+value+"</div>";stats.appendChild(el)}
+ items.innerHTML="";
+ for(const item of equipmentCatalog){
+  const owned=ownedEquipment.includes(item.id),equipped=equippedEquipment[item.slot]===item.id;
+  const row=document.createElement("div");row.className="equipment-item";
+  const info=document.createElement("div");info.innerHTML="<strong>"+item.name+" ("+({weapon:"武器",armor:"防具",accessory:"アクセサリー"}[item.slot])+")</strong><small>"+item.description+" ・ "+(item.price===0?"初期装備":item.price+"コイン")+"</small>";
+  const btn=document.createElement("button");btn.type="button";btn.textContent=equipped?"装備中":owned?"装備する": "購入";
+  btn.disabled=equipped;
+  btn.onclick=()=>{
+   if(!owned){if(coinCount<item.price){alert("コインが足りません");return}coinCount-=item.price;ownedEquipment.push(item.id)}
+   equippedEquipment[item.slot]=item.id;playerHP=Math.min(playerHP,playerMaxHP());saveGame();renderEquipment();renderShop();
+  };
+  row.append(info,btn);items.appendChild(row);
+ }
+}
+function openEquipment(){renderEquipment();document.getElementById("equipmentPanel").style.display="block"}
+function closeEquipment(){document.getElementById("equipmentPanel").style.display="none"}
+document.getElementById("equipmentToggle").onclick=openEquipment;
+document.getElementById("closeEquipment").onclick=closeEquipment;
+document.getElementById("equipmentPanel").addEventListener("click",e=>{if(e.target.id==="equipmentPanel")closeEquipment()});
+
 function saveGame(){
- const data={version:3,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ const data={version:3,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
  try{localStorage.setItem("gameSave",JSON.stringify(data));return true}catch(e){console.error("セーブに失敗しました",e);return false}
 }
 function loadGame(){
@@ -185,6 +242,8 @@ function loadGame(){
  bestTime=d.bestTime??bestTime;timeRecords=Array.isArray(d.timeRecords)?d.timeRecords:timeRecords;
  playerSkin=typeof d.playerSkin==="string"?d.playerSkin:playerSkin;
  ownedSkins=Array.isArray(d.ownedSkins)?d.ownedSkins:ownedSkins;
+ ownedEquipment=Array.isArray(d.ownedEquipment)?d.ownedEquipment:ownedEquipment;
+ equippedEquipment=d.equippedEquipment&&typeof d.equippedEquipment==="object"?{...equippedEquipment,...d.equippedEquipment}:equippedEquipment;
  if(worldNumber===2)loadWorld2();else if(worldNumber===3)loadWorld3();else if(worldNumber===4)loadWorld4();
  checkpoint4=!!d.checkpoint4;
  if(Array.isArray(d.coins))coins.forEach((c,i)=>{if(i<d.coins.length)c.taken=!!d.coins[i]});
@@ -193,7 +252,7 @@ function loadGame(){
  if(typeof d.bossAlive==="boolean")boss.alive=d.bossAlive;
  bossDefeated=!!d.bossDefeated;
  if(d.player&&Number.isFinite(d.player.x)&&Number.isFinite(d.player.y)){player.x=Math.max(0,d.player.x);player.y=Math.max(-500,Math.min(H-player.h,d.player.y))}
- if(Number.isFinite(d.playerHP))playerHP=Math.max(1,Math.min(skinMaxHP(),d.playerHP));
+ if(Number.isFinite(d.playerHP))playerHP=Math.max(1,Math.min(playerMaxHP(),d.playerHP));
  gameClear=!!d.gameClear;currentTime=Number.isFinite(d.currentTime)?d.currentTime:0;
  if(gameClear)gameStart=Date.now()-currentTime*1000;
  renderShop();return true;
@@ -242,7 +301,7 @@ function attack(){
    ? (px>=boss.x-95&&px<=boss.x+boss.w+95&&py>=boss.y-95&&py<=boss.y+boss.h+95)
    : Math.hypot(px-bx,py-by)<115;
   if(bossHit){
-   boss.hp=Math.max(0,boss.hp-1);
+   boss.hp=Math.max(0,boss.hp-playerAttackPower());
    if(boss.hp===0){boss.alive=false;bossDefeated=true;saveGame()}
   }
  }
@@ -780,6 +839,7 @@ function loadWorld4(){
 }
 function damagePlayer(amount=1){
  if(adminMode||invincibleTimer>0)return;
+ amount=Math.max(1,amount-playerDefense());
  playerHP-=amount;invincibleTimer=65;player.vy=-4;
  if(playerHP<=0){playerHP=skinMaxHP();player.x=checkpoint4?2780:80;player.y=388;player.vx=0;player.vy=0;player.jumps=0;w4Shots=[];w4Magic=[];w4Laser=null;w4BossState="idle";w4BossTimer=0;invincibleTimer=90}
 }
@@ -874,7 +934,7 @@ document.getElementById("redeemCode").onclick=()=>{
  let used=[];try{used=JSON.parse(localStorage.getItem("usedSerialCodes")||"[]")}catch(e){used=[]}
  if(code===ADMIN_CODE){
   adminUnlocked=true;adminMode=true;world2Unlocked=world3Unlocked=world4Unlocked=true;
-  updateWorldUnlockButtons();refreshAdminUI();saveGame();document.getElementById("codeMessage").textContent="管理者モードを解放しました！";
+  updateWorldUnlockButtons();refreshAdminUI();renderEquipment();saveGame();document.getElementById("codeMessage").textContent="管理者モードを解放しました！";
   return;
  }
  if(!Object.prototype.hasOwnProperty.call(SERIAL_CODES,code)){document.getElementById("codeMessage").textContent="コードが違います";return}
