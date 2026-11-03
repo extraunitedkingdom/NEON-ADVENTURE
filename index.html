@@ -229,7 +229,7 @@ window.addEventListener("keyup",e=>keys[e.code]=false);
 canvas.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button===0)attack()});
 function finishGame(){
  if(gameClear)return;
- gameClear=true;stageCleared=true;if(worldNumber===1)world2Unlocked=true;else if(worldNumber===2){world2Cleared=true;world3Unlocked=true}else world3Cleared=true;currentTime=(Date.now()-gameStart)/1000;
+ gameClear=true;stageCleared=true;if(worldNumber===1)world2Unlocked=true;else if(worldNumber===2){world2Cleared=true;world3Unlocked=true}else if(worldNumber===3){world3Cleared=true;world4Unlocked=true;world4Cleared=false;}else world4Cleared=true;currentTime=(Date.now()-gameStart)/1000;
  if(bestTime===null||currentTime<bestTime){bestTime=currentTime;localStorage.setItem("bestTime",String(bestTime))}
  timeRecords.push(currentTime);timeRecords.sort((a,b)=>a-b);timeRecords=timeRecords.slice(0,5);
  localStorage.setItem("timeRecords",JSON.stringify(timeRecords));saveGame();
@@ -253,7 +253,7 @@ function update(){
   for(const p of [...platforms,...movingPlatforms,...vanishPlatforms.filter(v=>v.active)]){if(player.vy>=0&&oldY+player.h<=(p.prevY??p.y)+2&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;player.ridingPlatform=(movingPlatforms.includes(p)?p:null);if(vanishPlatforms.includes(p)&&p.timer===0){p.timer=30;p.respawn=0}}}
   for(const l of lightningZones){l.phase=(l.phase+1)%l.period;if(l.phase<48&&player.x<l.x+l.w&&player.x+player.w>l.x&&player.y<l.y+l.h&&player.y+player.h>l.y&&invincibleTimer===0){playerHP--;invincibleTimer=75;player.vy=-6;if(playerHP<=0){playerHP=3;player.x=80;player.y=350;player.vy=0;player.jumps=0}}}
   if(worldNumber>=2&&player.vy>=0){for(const pad of springPads){if(oldY+player.h<=pad.y&&player.y+player.h>=pad.y&&player.x+player.w>pad.x&&player.x<pad.x+pad.w){player.y=pad.y-player.h;player.vy=-pad.power;player.jumps=1;player.grounded=false}}}
-  if(player.y>650){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;player.ridingPlatform=null;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
+  if(player.y>650&&worldNumber!==4){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;player.ridingPlatform=null;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
   for(const z of lavaZones){if(player.x<z.x+z.w&&player.x+player.w>z.x&&player.y<z.y+z.h&&player.y+player.h>z.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-7;if(playerHP<=0){playerHP=worldNumber===4?skinMaxHP():3;player.x=worldNumber===4&&checkpoint4?2780:80;player.y=worldNumber===4?388:200;player.vy=0;player.jumps=0}}}
   for(const e of enemies){
    if(!e.alive)continue;e.x+=e.dir*1.5;if(e.x<e.min||e.x>e.max)e.dir*=-1;
@@ -613,7 +613,7 @@ function restart(){
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
 document.getElementById("restart").onclick=()=>{restart()};
-function returnHome(){saveGame();document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";document.getElementById("world3Select").disabled=!world3Unlocked;document.getElementById("world3Select").textContent=world3Unlocked?"☁️ WORLD 3 : SKY KINGDOM":"☁️ WORLD 3 : SKY KINGDOM 🔒";document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
+function returnHome(){saveGame();document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";document.getElementById("world3Select").disabled=!world3Unlocked;document.getElementById("world3Select").textContent=world3Unlocked?"☁️ WORLD 3 : SKY KINGDOM":"☁️ WORLD 3 : SKY KINGDOM 🔒";document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
 document.getElementById("homeButton").onclick=returnHome;
 document.getElementById("clearHomeButton").onclick=returnHome;
 document.getElementById("clearRestartButton").onclick=restart;
