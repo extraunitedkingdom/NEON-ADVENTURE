@@ -138,7 +138,7 @@ let adminBeamTimer=0,adminBeamCooldown=0;
 let worldNumber=1,world2Unlocked=false,world2Cleared=false,world3Unlocked=false,world3Cleared=false;
 let facing=1,attackTimer=0,gameStarted=false;
 let playerSkin="#9b8aff",coinCount=0,camera=0,gameClear=false,bossDefeated=false,stageCleared=false;
-let appearanceBackground="default",appearanceEmoji="";
+let appearanceBackground="default",appearanceEmoji="",appearanceCharacter="boy";
 let gameStart=Date.now(),currentTime=0;
 let bestTime=Number(localStorage.getItem("bestTime"))||null;
 let timeRecords=[];
@@ -226,14 +226,14 @@ document.getElementById("closeEquipment").onclick=closeEquipment;
 document.getElementById("equipmentPanel").addEventListener("click",e=>{if(e.target.id==="equipmentPanel")closeEquipment()});
 
 function saveGame(){
- const data={version:4,appearanceBackground,appearanceEmoji,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ const data={version:5,appearanceBackground,appearanceEmoji,appearanceCharacter,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
  try{localStorage.setItem("gameSave",JSON.stringify(data));return true}catch(e){console.error("セーブに失敗しました",e);return false}
 }
 function loadGame(){
  let d;
  try{d=JSON.parse(localStorage.getItem("gameSave")||"null")}catch(e){console.warn("セーブデータの形式が壊れています",e);return false}
  if(!d||typeof d!=="object")return false;
- appearanceBackground=typeof d.appearanceBackground==="string"?d.appearanceBackground:"default";appearanceEmoji=typeof d.appearanceEmoji==="string"?d.appearanceEmoji:"";
+ appearanceBackground=typeof d.appearanceBackground==="string"?d.appearanceBackground:"default";appearanceEmoji=typeof d.appearanceEmoji==="string"?d.appearanceEmoji:"";appearanceCharacter=typeof d.appearanceCharacter==="string"?d.appearanceCharacter:"boy";
  coinCount=Number.isFinite(d.coinCount)?d.coinCount:coinCount;
  adminUnlocked=!!d.adminUnlocked;adminMode=adminUnlocked&&!!d.adminMode;floatMode=false;
  worldNumber=[1,2,3,4].includes(d.worldNumber)?d.worldNumber:1;
@@ -725,7 +725,36 @@ function draw(){
  if(boss.alive){ctx.fillStyle="#555";ctx.fillRect(300,20,300,16);ctx.fillStyle="#ff477e";ctx.fillRect(300,20,300*(boss.hp/boss.maxHP),16);ctx.fillStyle="white";ctx.fillText("BOSS",300,15)}
  if(gameClear){ctx.fillStyle="rgba(0,0,0,.65)";ctx.fillRect(0,0,W,H);ctx.fillStyle="#ffd700";ctx.font="bold 42px sans-serif";ctx.fillText("WORLD "+worldNumber+" CLEAR!",W/2-165,H/2);ctx.font="20px sans-serif";ctx.fillStyle="white";ctx.fillText("TIME "+currentTime.toFixed(2)+"s",W/2-65,H/2+40)}
  if(appearanceBackground!=="default"){const t={forest:"rgba(30,170,95,.13)",lava:"rgba(255,75,20,.16)",sky:"rgba(75,180,255,.16)",space:"rgba(80,35,180,.20)"}[appearanceBackground];if(t){ctx.fillStyle=t;ctx.fillRect(0,0,W,H)}}
- if(appearanceEmoji&&!gameClear){ctx.save();ctx.font="34px sans-serif";ctx.textAlign="center";ctx.fillText(appearanceEmoji,player.x-camera+player.w/2,player.y+player.h/2+12);ctx.restore()}
+ if(!gameClear&&(appearanceCharacter||appearanceEmoji)){
+  const px=player.x-camera+player.w/2,py=player.y;
+  if(appearanceCharacter){
+   ctx.save();ctx.translate(px,py);ctx.scale(facing,1);
+   const walking=Math.abs(player.vx)>.1&&player.grounded,step=walking?Math.sin(Date.now()*.014)*2:0;
+   // 専用ピクセルキャラクター。既存キャラを覆う不透明なドット絵。
+   ctx.fillStyle="#10182b";ctx.fillRect(-14,-3,28,43);
+   const rect=(x,y,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(x,y,w,h)};
+   const palette={
+    boy:{hair:"#17223b",face:"#f1c9a8",body:"#247fbd",trim:"#58eaff",leg:"#17243a"},
+    girl:{hair:"#54244f",face:"#f5cbb8",body:"#b84e9d",trim:"#ffb5e8",leg:"#29213e"},
+    knight:{hair:"#28364d",face:"#f0c8a6",body:"#aabbd2",trim:"#ffe18a",leg:"#29364c"},
+    ninja:{hair:"#101426",face:"#d9aa91",body:"#33305e",trim:"#9b7cff",leg:"#17182d"},
+    robot:{hair:"#263d55",face:"#9cecff",body:"#54758e",trim:"#43f5ff",leg:"#26394f"},
+    ghost:{hair:"#c8f5ff",face:"#dffaff",body:"#8bdcf2",trim:"#ffffff",leg:"#65b9dc"}
+   };
+   const p=palette[appearanceCharacter]||palette.boy;
+   // 頭・髪・顔
+   rect(-10,-25,20,20,p.face);rect(-12,-29,24,8,p.hair);rect(-12,-22,4,10,p.hair);rect(8,-22,4,10,p.hair);
+   if(appearanceCharacter==="girl"){rect(-13,-20,5,16,p.hair);rect(9,-20,5,16,p.hair);rect(-5,-31,10,3,p.trim)}
+   if(appearanceCharacter==="knight"){rect(-13,-28,26,7,p.trim);rect(-4,-33,8,5,p.trim);rect(-12,-18,24,4,"#dce8ff")}
+   if(appearanceCharacter==="ninja"){rect(-13,-25,26,6,p.trim);rect(-7,-16,14,3,p.hair)}
+   if(appearanceCharacter==="robot"){rect(-12,-26,24,19,"#668ba5");rect(-8,-21,5,4,p.trim);rect(3,-21,5,4,p.trim);rect(-3,-11,6,2,"#dffaff")}
+   else {rect(-6,-17,4,3,"#15243b");rect(3,-17,4,3,"#15243b");rect(-2,-10,5,2,"#9a5360")}
+   // 胴体・腕・脚
+   rect(-11,-5,22,16,p.body);rect(-14,-3,4,13,p.trim);rect(10,-3,4,13,p.trim);rect(-3,-3,6,13,p.trim);
+   rect(-9,11+step,7,13,p.leg);rect(2,11-step,7,13,p.leg);rect(-11,22+step,10,4,"#eafaff");rect(1,22-step,10,4,"#eafaff");
+   ctx.restore();
+  }else{ctx.save();ctx.font="34px sans-serif";ctx.textAlign="center";ctx.fillText(appearanceEmoji,px,py+30);ctx.restore()}
+ }
 }
 function restart(){
  document.getElementById("clearPanel").style.display="none";
@@ -947,20 +976,20 @@ document.getElementById("redeemCode").onclick=()=>{
   "BG 3":{bg:"sky",message:"背景をWORLD 3に変更しました"},
   "BG 4":{bg:"space",message:"背景をWORLD 4に変更しました"},
   "BG DEFAULT":{bg:"default",message:"背景を通常に戻しました"},
-  "CHAR BOY":{emoji:"🧑🏻‍🚀",message:"男キャラクターに変更しました"},
-  "CHAR GIRL":{emoji:"👩🏻‍🚀",message:"女キャラクターに変更しました"},
-  "CHAR KNIGHT":{emoji:"🛡️",message:"騎士キャラクターに変更しました"},
-  "CHAR NINJA":{emoji:"🥷",message:"忍者キャラクターに変更しました"},
-  "CHAR ROBOT":{emoji:"🤖",message:"ロボットキャラクターに変更しました"},
-  "CHAR GHOST":{emoji:"👻",message:"ゴーストキャラクターに変更しました"},
-  "EMOJI 🐱":{emoji:"🐱",message:"キャラクターを猫に変更しました"},
-  "EMOJI 🐉":{emoji:"🐉",message:"キャラクターをドラゴンに変更しました"},
-  "EMOJI 👽":{emoji:"👽",message:"キャラクターをエイリアンに変更しました"},
-  "EMOJI DEFAULT":{emoji:"",message:"キャラクターを通常に戻しました"},
-  "RESET LOOK":{bg:"default",emoji:"",message:"見た目を初期状態に戻しました"}
+  "CHAR BOY":{character:"boy",message:"男キャラクターに変更しました"},
+  "CHAR GIRL":{character:"girl",message:"女キャラクターに変更しました"},
+  "CHAR KNIGHT":{character:"knight",message:"騎士キャラクターに変更しました"},
+  "CHAR NINJA":{character:"ninja",message:"忍者キャラクターに変更しました"},
+  "CHAR ROBOT":{character:"robot",message:"ロボットキャラクターに変更しました"},
+  "CHAR GHOST":{character:"ghost",message:"ゴーストキャラクターに変更しました"},
+  "EMOJI 🐱":{emoji:"🐱",character:"",message:"キャラクターを猫に変更しました"},
+  "EMOJI 🐉":{emoji:"🐉",character:"",message:"キャラクターをドラゴンに変更しました"},
+  "EMOJI 👽":{emoji:"👽",character:"",message:"キャラクターをエイリアンに変更しました"},
+  "EMOJI DEFAULT":{emoji:"",character:"boy",message:"キャラクターを通常に戻しました"},
+  "RESET LOOK":{bg:"default",emoji:"",character:"boy",message:"見た目を初期状態に戻しました"}
  };
  if(appearanceCodes[code]){
-  const v=appearanceCodes[code];if(v.bg!==undefined)appearanceBackground=v.bg;if(v.emoji!==undefined)appearanceEmoji=v.emoji;
+  const v=appearanceCodes[code];if(v.bg!==undefined)appearanceBackground=v.bg;if(v.emoji!==undefined)appearanceEmoji=v.emoji;if(v.character!==undefined)appearanceCharacter=v.character;
   saveGame();document.getElementById("codeMessage").textContent=v.message;return;
  }
  if(!Object.prototype.hasOwnProperty.call(SERIAL_CODES,code)){document.getElementById("codeMessage").textContent="コードが違います";return}
