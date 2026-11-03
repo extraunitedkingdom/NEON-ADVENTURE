@@ -38,6 +38,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 #clearPanel{display:none;max-width:520px;margin:12px auto;padding:14px;background:#171b48;border:2px solid #ffd85a;border-radius:14px;box-shadow:0 0 18px #ffd85a55}#clearPanel h3{margin:4px 0 10px;color:#ffd85a}#clearPanel button{min-width:135px}#nextStageButton{border-color:#5affd0;background:linear-gradient(90deg,#104d55,#126a59)}
 #stageSelect{display:none;max-width:390px;margin:12px auto;padding:12px;background:#171b48;border:2px solid #27eaff;border-radius:14px}#stageSelect button{display:block;width:100%;margin:8px 0}#world2Select{border-color:#ff8a36;background:linear-gradient(90deg,#6b2417,#9b4b20)}
 #shopPanel{display:none;max-width:360px;margin:10px auto;padding:12px;background:#201a38;border:2px solid #9b8aff;border-radius:12px}
+#skinPreviewWrap{margin:10px auto 14px;padding:10px;border:1px solid #38eaff;border-radius:14px;background:radial-gradient(ellipse,#263b68,#101329);box-shadow:inset 0 0 18px #21dfff33}#skinPreview{display:block;width:180px;height:190px;max-width:100%;margin:0 auto}#skinPreviewLabel{color:#9ffaff;font-weight:bold;letter-spacing:2px;font-size:12px}
 #shopPanel button{display:block;width:100%;margin:6px 0}
 .small{font-size:13px;color:#c8c9df}
 </style>
@@ -463,6 +464,28 @@ document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\\n\\n"+
 document.getElementById("shopToggle").onclick=()=>{const p=document.getElementById("shopPanel");p.style.display=p.style.display==="block"?"none":"block"};
 function renderShop(){
  const area=document.getElementById("skinItems");area.innerHTML="";
+ const previewWrap=document.createElement("div");previewWrap.id="skinPreviewWrap";
+ const label=document.createElement("div");label.id="skinPreviewLabel";label.textContent="CURRENT SKIN";
+ const preview=document.createElement("canvas");preview.id="skinPreview";preview.width=180;preview.height=190;
+ previewWrap.append(label,preview);area.appendChild(previewWrap);
+ // ゲーム内と同じ配色の冒険者を拡大表示
+ const pc=preview.getContext("2d"),accent=playerSkin;
+ pc.clearRect(0,0,180,190);
+ pc.save();pc.translate(90,25);pc.scale(3.5,3.5);
+ pc.shadowColor=accent;pc.shadowBlur=12;
+ // 背中のレーザーブレード
+ pc.save();pc.translate(-5,19);pc.rotate(-.62);pc.fillStyle="#182a48";pc.fillRect(-3,-24,7,31);pc.fillStyle="#b9faff";pc.fillRect(-1,-23,3,26);pc.fillStyle="#263957";pc.fillRect(-6,5,13,4);pc.restore();
+ pc.shadowBlur=0;
+ // legs and boots
+ for(const side of [-1,1]){pc.save();pc.translate(side*4,26);pc.fillStyle="#17243a";pc.fillRect(-3,-1,7,9);pc.fillStyle="#101a2d";pc.fillRect(-4,6,8,7);pc.fillStyle="#d9f8ff";pc.fillRect(-5,11,11,4);pc.fillStyle=accent;pc.fillRect(-3,12,5,2);pc.restore()}
+ // jacket
+ pc.shadowColor=accent;pc.shadowBlur=8;pc.fillStyle=accent;pc.fillRect(-12,15,24,14);pc.shadowBlur=0;
+ pc.fillStyle="#eafaff";pc.fillRect(-11,16,7,11);pc.fillRect(4,16,7,11);pc.fillStyle="#142b49";pc.fillRect(-4,15,8,14);pc.fillStyle=accent;pc.fillRect(-1,17,2,10);pc.fillStyle="#fff";pc.fillRect(-10,27,20,2);
+ // arms
+ for(const side of [-1,1]){pc.fillStyle="#142b49";pc.fillRect(side*10-2,19,5,9);pc.fillStyle="#eafaff";pc.fillRect(side*10-2,19,5,3);pc.fillStyle="#f1c9b6";pc.fillRect(side*10-2,27,5,4)}
+ // face and hair
+ pc.fillStyle="#f1c9b6";pc.fillRect(-11,2,22,17);pc.fillStyle="#101827";pc.fillRect(-13,0,25,9);pc.beginPath();pc.moveTo(-12,5);pc.lineTo(-16,1);pc.lineTo(-8,3);pc.lineTo(-4,-3);pc.lineTo(0,2);pc.lineTo(6,-2);pc.lineTo(9,4);pc.lineTo(14,1);pc.lineTo(11,10);pc.lineTo(-11,10);pc.closePath();pc.fill();
+ pc.fillStyle="#f4fbff";pc.fillRect(-8,10,5,2);pc.fillStyle="#19eaff";pc.shadowColor="#19eaff";pc.shadowBlur=7;pc.fillRect(-7,11,4,3);pc.fillRect(3,11,4,3);pc.restore();pc.restore();
  const balance=document.createElement("p");balance.className="small";balance.textContent="所持コイン： "+coinCount+" COINS";area.appendChild(balance);
  for(const s of skins){
   const owned=ownedSkins.includes(s.color),equipped=playerSkin===s.color;
