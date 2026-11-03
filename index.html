@@ -239,7 +239,7 @@ function attack(){
  if(boss.alive){
   const bx=boss.x+boss.w/2,by=boss.y+boss.h/2;
   const bossHit=worldNumber===4
-   ? (Math.abs(bx-px)<=700&&Math.abs(by-py)<=500)
+   ? (px>=boss.x-95&&px<=boss.x+boss.w+95&&py>=boss.y-95&&py<=boss.y+boss.h+95)
    : Math.hypot(px-bx,py-by)<115;
   if(bossHit){
    boss.hp=Math.max(0,boss.hp-1);
