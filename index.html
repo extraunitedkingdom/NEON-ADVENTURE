@@ -203,14 +203,15 @@ function update(){
   const oldX=player.x;player.x=Math.max(0,player.x+player.vx);
   for(const wall of stageWalls){if(player.y+player.h>wall.y&&player.y<wall.y+wall.h&&player.x+player.w>wall.x&&player.x<wall.x+wall.w){if(oldX+player.w<=wall.x)player.x=wall.x-player.w;else if(oldX>=wall.x+wall.w)player.x=wall.x+wall.w;player.vx=0}}
   const oldY=player.y;
-  for(const m of movingPlatforms){m.prevX=m.x;m.prevY=m.y;m.x=m.baseX+Math.sin(Date.now()*m.speed+m.phase)*m.range;m.y=m.baseY+Math.sin(Date.now()*m.speed*0.72+m.phase)*42}
-  for(const v of vanishPlatforms){if(v.timer>0){v.timer--;if(v.timer===0)v.active=false}}
+  if(worldNumber===3&&player.ridingPlatform){const rp=player.ridingPlatform;if(rp.active!==false){player.x+=rp.x-(rp.prevX??rp.x);player.y+=rp.y-(rp.prevY??rp.y)}else player.ridingPlatform=null}
+  for(const m of movingPlatforms){m.prevX=m.x;m.prevY=m.y;m.x=m.baseX+Math.sin(Date.now()*m.speed+m.phase)*m.range;m.y=m.baseY+Math.sin(Date.now()*m.speed*0.72+m.phase)*42;if(m.prevX===undefined)m.prevX=m.x;if(m.prevY===undefined)m.prevY=m.y}
+  for(const v of vanishPlatforms){if(v.timer>0){v.timer--;if(v.timer===0){v.active=false;v.respawn=150}}else if(v.respawn>0){v.respawn--;if(v.respawn===0)v.active=true}}
   player.vy+=0.5;player.y+=player.vy;player.grounded=false;
-  for(const w of windZones){if(player.x+player.w>w.x&&player.x<w.x+w.w&&player.y+player.h>w.y&&player.y<w.y+w.h){player.x+=w.dir*w.power;player.vy=Math.max(-10,player.vy-0.95)}}
-  for(const p of [...platforms,...movingPlatforms,...vanishPlatforms.filter(v=>v.active)]){if(player.vy>=0&&oldY+player.h<=(p.prevY??p.y)+2&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;if(movingPlatforms.includes(p)){player.x+=p.x-p.prevX;player.y+=p.y-(p.prevY??p.y)}if(vanishPlatforms.includes(p))p.timer=90}}
+  for(const w of windZones){if(player.x+player.w>w.x&&player.x<w.x+w.w&&player.y+player.h>w.y&&player.y<w.y+w.h){player.x+=w.dir*3.2;player.vy=Math.min(player.vy,-7.5);player.y-=1.8}}
+  for(const p of [...platforms,...movingPlatforms,...vanishPlatforms.filter(v=>v.active)]){if(player.vy>=0&&oldY+player.h<=(p.prevY??p.y)+2&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;player.ridingPlatform=(movingPlatforms.includes(p)?p:null);if(vanishPlatforms.includes(p)){p.timer=90;p.respawn=0}}}
   for(const l of lightningZones){l.phase=(l.phase+1)%l.period;if(l.phase<48&&player.x<l.x+l.w&&player.x+player.w>l.x&&player.y<l.y+l.h&&player.y+player.h>l.y&&invincibleTimer===0){playerHP--;invincibleTimer=75;player.vy=-6;if(playerHP<=0){playerHP=3;player.x=80;player.y=350;player.vy=0;player.jumps=0}}}
   if(worldNumber>=2&&player.vy>=0){for(const pad of springPads){if(oldY+player.h<=pad.y&&player.y+player.h>=pad.y&&player.x+player.w>pad.x&&player.x<pad.x+pad.w){player.y=pad.y-player.h;player.vy=-pad.power;player.jumps=1;player.grounded=false}}}
-  if(player.y>650){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
+  if(player.y>650){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;player.ridingPlatform=null;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
   for(const z of lavaZones){if(player.x<z.x+z.w&&player.x+player.w>z.x&&player.y<z.y+z.h&&player.y+player.h>z.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-7;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}}
   for(const e of enemies){
    if(!e.alive)continue;e.x+=e.dir*1.5;if(e.x<e.min||e.x>e.max)e.dir*=-1;
