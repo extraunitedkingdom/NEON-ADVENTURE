@@ -140,14 +140,25 @@ function loadGame(){
 }
 function loadWorld3(){
  worldNumber=3;springPads=[];lavaZones=[];stageWalls=[];
- windZones=[{x:350,y:150,w:190,h:280,dir:1,power:0.48},{x:1740,y:80,w:190,h:330,dir:-1,power:0.42},{x:2780,y:70,w:210,h:350,dir:1,power:0.5}];
- movingPlatforms=[{x:650,y:340,w:120,h:18,baseX:650,baseY:340,range:90,speed:0.035,phase:0},{x:1010,y:270,w:120,h:18,baseX:1010,baseY:270,range:85,speed:0.04,phase:1.8},{x:1370,y:335,w:125,h:18,baseX:1370,baseY:335,range:100,speed:0.03,phase:3}];
- vanishPlatforms=[{x:1980,y:350,w:105,h:18,timer:0,active:true},{x:2110,y:290,w:105,h:18,timer:0,active:true},{x:2240,y:230,w:105,h:18,timer:0,active:true},{x:2370,y:170,w:110,h:18,timer:0,active:true}];
- lightningZones=[{x:1580,y:250,w:58,h:180,period:180,phase:0},{x:2510,y:100,w:58,h:330,period:150,phase:70},{x:2910,y:80,w:58,h:350,period:165,phase:30}];
- platforms=[{x:0,y:430,w:430,h:70},{x:520,y:390,w:120,h:20},{x:790,y:330,w:120,h:20},{x:1150,y:390,w:120,h:20},{x:1490,y:350,w:130,h:20},{x:1690,y:430,w:250,h:70},{x:1930,y:430,w:80,h:70},{x:2480,y:430,w:180,h:70},{x:2670,y:350,w:150,h:20},{x:2840,y:430,w:380,h:70}];
- enemies=[{x:1730,y:395,w:32,h:30,min:1700,max:1880,dir:1,alive:true},{x:2700,y:315,w:32,h:30,min:2670,max:2790,dir:-1,alive:true}];
- coins=[{x:330,y:370,taken:false},{x:700,y:295,taken:false},{x:1060,y:215,taken:false},{x:1400,y:285,taken:false},{x:1820,y:370,taken:false},{x:2030,y:300,taken:false},{x:2290,y:180,taken:false},{x:2730,y:310,taken:false},{x:3000,y:370,taken:false}];
- goal={x:3130,y:350,w:45,h:80};boss={x:3000,y:350,w:80,h:80,hp:18,maxHP:18,alive:true};
+ // 風で上昇→浮島を渡る→雷を見て通過→消える足場を登る→風で城へ
+ windZones=[{x:350,y:115,w:220,h:315,dir:1,power:1.35},{x:2580,y:70,w:230,h:360,dir:1,power:1.35}];
+ movingPlatforms=[
+  {x:690,y:350,w:125,h:18,baseX:690,baseY:350,range:45,speed:0.0018,phase:0},
+  {x:900,y:295,w:125,h:18,baseX:900,baseY:295,range:55,speed:0.0017,phase:1.8},
+  {x:1110,y:345,w:130,h:18,baseX:1110,baseY:345,range:50,speed:0.0016,phase:3},
+  {x:1330,y:285,w:130,h:18,baseX:1330,baseY:285,range:55,speed:0.0017,phase:4}
+ ];
+ vanishPlatforms=[{x:1950,y:365,w:110,h:18,timer:0,active:true},{x:2100,y:305,w:110,h:18,timer:0,active:true},{x:2250,y:245,w:110,h:18,timer:0,active:true},{x:2400,y:185,w:120,h:18,timer:0,active:true}];
+ lightningZones=[{x:1580,y:165,w:62,h:265,period:190,phase:0},{x:1760,y:165,w:62,h:265,period:190,phase:95},{x:2470,y:80,w:58,h:350,period:165,phase:35}];
+ platforms=[
+  {x:0,y:430,w:350,h:70},{x:570,y:430,w:90,h:22},
+  {x:1480,y:390,w:105,h:40},{x:1660,y:430,w:180,h:70},
+  {x:1840,y:430,w:100,h:70},{x:2530,y:430,w:100,h:70},
+  {x:2820,y:270,w:150,h:22},{x:2990,y:430,w:390,h:70}
+ ];
+ enemies=[{x:1690,y:395,w:32,h:30,min:1660,max:1810,dir:1,alive:true},{x:3020,y:395,w:34,h:30,min:2990,max:3300,dir:-1,alive:true}];
+ coins=[{x:290,y:370,taken:false},{x:760,y:310,taken:false},{x:1190,y:250,taken:false},{x:1510,y:350,taken:false},{x:1880,y:370,taken:false},{x:2180,y:210,taken:false},{x:2450,y:145,taken:false},{x:2870,y:230,taken:false},{x:3200,y:370,taken:false}];
+ goal={x:3330,y:350,w:45,h:80};boss={x:3160,y:350,w:80,h:80,hp:18,maxHP:18,alive:true};
  player.x=80;player.y=350;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;camera=0;bossDefeated=false;gameClear=false;stageCleared=false;currentTime=0;gameStart=Date.now();
  document.querySelector(".stage-top p").textContent="WORLD 3 : SKY KINGDOM";
 }
@@ -192,11 +203,11 @@ function update(){
   const oldX=player.x;player.x=Math.max(0,player.x+player.vx);
   for(const wall of stageWalls){if(player.y+player.h>wall.y&&player.y<wall.y+wall.h&&player.x+player.w>wall.x&&player.x<wall.x+wall.w){if(oldX+player.w<=wall.x)player.x=wall.x-player.w;else if(oldX>=wall.x+wall.w)player.x=wall.x+wall.w;player.vx=0}}
   const oldY=player.y;
-  for(const m of movingPlatforms){m.prevX=m.x;m.x=m.baseX+Math.sin(Date.now()*m.speed/1000+m.phase)*m.range;m.y=m.baseY+Math.sin(Date.now()*m.speed/1400+m.phase)*22}
+  for(const m of movingPlatforms){m.prevX=m.x;m.prevY=m.y;m.x=m.baseX+Math.sin(Date.now()*m.speed+m.phase)*m.range;m.y=m.baseY+Math.sin(Date.now()*m.speed*0.72+m.phase)*42}
   for(const v of vanishPlatforms){if(v.timer>0){v.timer--;if(v.timer===0)v.active=false}}
   player.vy+=0.5;player.y+=player.vy;player.grounded=false;
-  for(const w of windZones){if(player.x+player.w>w.x&&player.x<w.x+w.w&&player.y+player.h>w.y&&player.y<w.y+w.h){player.x+=w.dir*w.power;player.vy-=0.16}}
-  for(const p of [...platforms,...movingPlatforms,...vanishPlatforms.filter(v=>v.active)]){if(player.vy>=0&&oldY+player.h<=p.y&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;if(movingPlatforms.includes(p))player.x+=p.x-p.prevX;if(vanishPlatforms.includes(p))p.timer=55}}
+  for(const w of windZones){if(player.x+player.w>w.x&&player.x<w.x+w.w&&player.y+player.h>w.y&&player.y<w.y+w.h){player.x+=w.dir*w.power;player.vy=Math.max(-10,player.vy-0.95)}}
+  for(const p of [...platforms,...movingPlatforms,...vanishPlatforms.filter(v=>v.active)]){if(player.vy>=0&&oldY+player.h<=(p.prevY??p.y)+2&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;if(movingPlatforms.includes(p)){player.x+=p.x-p.prevX;player.y+=p.y-(p.prevY??p.y)}if(vanishPlatforms.includes(p))p.timer=90}}
   for(const l of lightningZones){l.phase=(l.phase+1)%l.period;if(l.phase<48&&player.x<l.x+l.w&&player.x+player.w>l.x&&player.y<l.y+l.h&&player.y+player.h>l.y&&invincibleTimer===0){playerHP--;invincibleTimer=75;player.vy=-6;if(playerHP<=0){playerHP=3;player.x=80;player.y=350;player.vy=0;player.jumps=0}}}
   if(worldNumber>=2&&player.vy>=0){for(const pad of springPads){if(oldY+player.h<=pad.y&&player.y+player.h>=pad.y&&player.x+player.w>pad.x&&player.x<pad.x+pad.w){player.y=pad.y-player.h;player.vy=-pad.power;player.jumps=1;player.grounded=false}}}
   if(player.y>650){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
@@ -211,7 +222,7 @@ function update(){
   for(const c of coins){if(!c.taken&&player.x<c.x+15&&player.x+player.w>c.x-15&&player.y<c.y+15&&player.y+player.h>c.y-15){c.taken=true;coinCount++}}
   if(boss.alive&&player.x<boss.x+boss.w&&player.x+player.w>boss.x&&player.y<boss.y+boss.h&&player.y+player.h>boss.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
   if(bossDefeated&&player.x<goal.x+goal.w&&player.x+player.w>goal.x&&player.y<goal.y+goal.h&&player.y+player.h>goal.y)finishGame();
-  camera=Math.max(0,Math.min(worldNumber===3?2400:1900,player.x-250));
+  camera=Math.max(0,Math.min(worldNumber===3?2500:1900,player.x-250));
  }
  draw();requestAnimationFrame(update);
 }
@@ -286,7 +297,7 @@ function draw(){
 function restart(){
  document.getElementById("clearPanel").style.display="none";
  player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;
- coins.forEach(c=>c.taken=false); // コインを復活させ、所持数は維持
+ coins.forEach(c=>c.taken=false);for(const v of vanishPlatforms){v.timer=0;v.active=true}for(const l of lightningZones){l.phase=l.phase||0} // ギミックも初期状態へ
  enemies.forEach(e=>e.alive=true);boss.hp=boss.maxHP;boss.alive=true;bossDefeated=false;
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
