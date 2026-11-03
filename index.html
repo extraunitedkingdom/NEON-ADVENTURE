@@ -162,22 +162,34 @@ const skins=[
 ];
 let ownedSkins=["#9b8aff"];
 function saveGame(){
- const data={worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,coins:coins.map(c=>c.taken),enemyAlive:enemies.map(e=>e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
- try{localStorage.setItem("gameSave",JSON.stringify(data))}catch(e){}
+ const data={version:2,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ try{localStorage.setItem("gameSave",JSON.stringify(data));return true}catch(e){console.error("セーブに失敗しました",e);return false}
 }
 function loadGame(){
- try{
-  const d=JSON.parse(localStorage.getItem("gameSave")||"null");if(!d)return;
-  coinCount=d.coinCount??coinCount;worldNumber=d.worldNumber??worldNumber;world2Unlocked=!!d.world2Unlocked;world2Cleared=!!d.world2Cleared;world3Unlocked=!!d.world3Unlocked;world3Cleared=!!d.world3Cleared;world4Unlocked=!!d.world4Unlocked;world4Cleared=!!d.world4Cleared;checkpoint4=!!d.checkpoint4;stageCleared=!!d.stageCleared;bestTime=d.bestTime??bestTime;timeRecords=Array.isArray(d.timeRecords)?d.timeRecords:timeRecords;
-  if(d.player){player.x=d.player.x??player.x;player.y=d.player.y??player.y}
-  playerHP=d.playerHP??playerHP;playerSkin=d.playerSkin??playerSkin;
-  ownedSkins=Array.isArray(d.ownedSkins)?d.ownedSkins:ownedSkins;
-  if(Array.isArray(d.coins))coins.forEach((c,i)=>c.taken=!!d.coins[i]);
-  if(Array.isArray(d.enemyAlive))enemies.forEach((e,i)=>e.alive=d.enemyAlive[i]!==false);
-  boss.hp=d.bossHP??boss.hp;boss.alive=d.bossAlive??boss.alive;bossDefeated=!!d.bossDefeated;
-  gameClear=!!d.gameClear;currentTime=d.currentTime??0;
-  if(gameClear)gameStart=Date.now()-currentTime*1000;
- }catch(e){console.warn("セーブデータを読み込めませんでした",e)}
+ let d;
+ try{d=JSON.parse(localStorage.getItem("gameSave")||"null")}catch(e){console.warn("セーブデータの形式が壊れています",e);return false}
+ if(!d||typeof d!=="object")return false;
+ coinCount=Number.isFinite(d.coinCount)?d.coinCount:coinCount;
+ worldNumber=[1,2,3,4].includes(d.worldNumber)?d.worldNumber:1;
+ world2Unlocked=!!d.world2Unlocked;world2Cleared=!!d.world2Cleared;
+ world3Unlocked=!!d.world3Unlocked;world3Cleared=!!d.world3Cleared;
+ world4Unlocked=!!d.world4Unlocked;world4Cleared=!!d.world4Cleared;
+ checkpoint4=!!d.checkpoint4;stageCleared=!!d.stageCleared;
+ bestTime=d.bestTime??bestTime;timeRecords=Array.isArray(d.timeRecords)?d.timeRecords:timeRecords;
+ playerSkin=typeof d.playerSkin==="string"?d.playerSkin:playerSkin;
+ ownedSkins=Array.isArray(d.ownedSkins)?d.ownedSkins:ownedSkins;
+ if(worldNumber===2)loadWorld2();else if(worldNumber===3)loadWorld3();else if(worldNumber===4)loadWorld4();
+ checkpoint4=!!d.checkpoint4;
+ if(Array.isArray(d.coins))coins.forEach((c,i)=>{if(i<d.coins.length)c.taken=!!d.coins[i]});
+ if(Array.isArray(d.enemyAlive))enemies.forEach((e,i)=>{if(i<d.enemyAlive.length)e.alive=d.enemyAlive[i]!==false});
+ if(Number.isFinite(d.bossHP))boss.hp=Math.max(0,Math.min(boss.maxHP,d.bossHP));
+ if(typeof d.bossAlive==="boolean")boss.alive=d.bossAlive;
+ bossDefeated=!!d.bossDefeated;
+ if(d.player&&Number.isFinite(d.player.x)&&Number.isFinite(d.player.y)){player.x=Math.max(0,d.player.x);player.y=Math.max(-500,Math.min(H-player.h,d.player.y))}
+ if(Number.isFinite(d.playerHP))playerHP=Math.max(1,Math.min(skinMaxHP(),d.playerHP));
+ gameClear=!!d.gameClear;currentTime=Number.isFinite(d.currentTime)?d.currentTime:0;
+ if(gameClear)gameStart=Date.now()-currentTime*1000;
+ renderShop();return true;
 }
 function loadWorld3(){
  worldNumber=3;springPads=[];lavaZones=[];stageWalls=[];
@@ -637,7 +649,7 @@ document.getElementById("world2Select").onclick=()=>{if(!world2Unlocked)return;l
 document.getElementById("world3Select").onclick=()=>{if(!world3Unlocked)return;loadWorld3();beginSelectedWorld()};
 document.getElementById("world4Select").onclick=()=>{if(!world4Unlocked)return;loadWorld4();beginSelectedWorld()};
 function beginSelectedWorld(){gameStarted=true;gameStart=Date.now();document.getElementById("stageSelect").style.display="none";document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";document.getElementById("clearPanel").style.display="none";saveGame()};
-document.getElementById("save").onclick=()=>{saveGame();alert("GAME SAVED!")};
+document.getElementById("save").onclick=()=>{alert(saveGame()?"GAME SAVED!":"セーブに失敗しました。ブラウザの保存領域を確認してください。")};
 document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\\n\\n"+(timeRecords.length?timeRecords.map((t,i)=>(i+1)+"位 : "+t.toFixed(2)+"秒").join("\\n"):"まだ記録がありません"));
 let selectedSkinColor=playerSkin,shopFilter="ALL";
 function drawSkinPreview(color){
@@ -708,7 +720,7 @@ function closeShop(){document.getElementById("shopPanel").style.display="none"}
 document.getElementById("shopToggle").onclick=openShop;
 document.getElementById("closeShop").onclick=closeShop;
 document.getElementById("shopPanel").addEventListener("click",e=>{if(e.target.id==="shopPanel")closeShop()});
-renderShop();loadGame();document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";if(worldNumber===2){const wasClear=gameClear,wasStageCleared=stageCleared,wasTime=currentTime,wasBossHP=boss.hp,wasBossAlive=boss.alive,wasBossDefeated=bossDefeated;loadWorld2();gameClear=wasClear;stageCleared=wasStageCleared;currentTime=wasTime;boss.hp=wasBossHP;boss.alive=wasBossAlive;bossDefeated=wasBossDefeated;if(gameClear)gameStart=Date.now()-currentTime*1000;document.getElementById("startGame").textContent="CONTINUE WORLD 2"}else if(world3Unlocked){document.getElementById("startGame").textContent="START WORLD 3"}else if(world2Unlocked){document.getElementById("startGame").textContent="START WORLD 2"}
+
 /* WORLD 4: COSMIC ABYSS */
 let world4Unlocked=false,world4Cleared=false,checkpoint4=false;
 let w4Shots=[],w4Magic=[],w4Laser=null,w4BossState="idle",w4BossTimer=0,w4BossAttack=0,w4BossWave=0;
@@ -791,6 +803,20 @@ function drawWorld4Actors(){
  if(boss.alive){ctx.save();ctx.translate(boss.x-camera,boss.y);ctx.fillStyle="#080711";ctx.beginPath();ctx.moveTo(25,10);ctx.lineTo(105,10);ctx.lineTo(125,90);ctx.lineTo(4,90);ctx.closePath();ctx.fill();ctx.fillStyle="#29243d";ctx.fillRect(38,4,48,65);ctx.fillStyle="#bda9d8";ctx.fillRect(46,0,32,14);ctx.fillStyle="#080711";ctx.beginPath();ctx.moveTo(37,5);ctx.lineTo(13,85);ctx.lineTo(42,72);ctx.fill();ctx.beginPath();ctx.moveTo(86,5);ctx.lineTo(116,85);ctx.lineTo(83,72);ctx.fill();ctx.shadowColor="#b44cff";ctx.shadowBlur=25;ctx.fillStyle="#c65cff";ctx.beginPath();ctx.arc(62,39,12,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle="#f0d7ff";ctx.fillRect(56,36,12,5);ctx.restore()}
 }
 
+// 全ステージ変数の初期化後にセーブを復元
+renderShop();
+const hasSave=loadGame();
+if(!hasSave)worldNumber=1;
+document.getElementById("world2Select").disabled=!world2Unlocked;
+document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";
+document.getElementById("world3Select").disabled=!world3Unlocked;
+document.getElementById("world3Select").textContent=world3Unlocked?"☁️ WORLD 3 : SKY KINGDOM":"☁️ WORLD 3 : SKY KINGDOM 🔒";
+document.getElementById("world4Select").disabled=!world4Unlocked;
+document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";
+if(hasSave&&worldNumber>1)document.getElementById("startGame").textContent="CONTINUE WORLD "+worldNumber;
+else if(world2Unlocked)document.getElementById("startGame").textContent="START WORLD 2";
+window.addEventListener("beforeunload",()=>saveGame());
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")saveGame()});
 setInterval(()=>{if(gameStarted)saveGame()},5000);update();
 </script>
 </body>
