@@ -264,7 +264,7 @@ function update(){
   player.vy+=0.5;player.y+=player.vy;player.grounded=false;
   for(const w of windZones){if(player.x+player.w>w.x&&player.x<w.x+w.w&&player.y+player.h>w.y&&player.y<w.y+w.h){player.x+=w.dir*3.2;player.vy=Math.min(player.vy,-7.5);player.y-=1.8}}
   for(const p of [...platforms,...movingPlatforms,...vanishPlatforms.filter(v=>v.active)]){if(player.vy>=0&&oldY+player.h<=(p.prevY??p.y)+2&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;player.ridingPlatform=(movingPlatforms.includes(p)?p:null);if(vanishPlatforms.includes(p)&&p.timer===0){p.timer=30;p.respawn=0}}}
-  for(const l of lightningZones){l.phase=(l.phase+1)%l.period;if(l.phase<48&&player.x<l.x+l.w&&player.x+player.w>l.x&&player.y<l.y+l.h&&player.y+player.h>l.y&&invincibleTimer===0){playerHP--;invincibleTimer=75;player.vy=-6;if(playerHP<=0){playerHP=3;player.x=80;player.y=350;player.vy=0;player.jumps=0}}}
+  for(const l of lightningZones){l.phase=(l.phase+1)%l.period;if(l.phase<48&&player.x<l.x+l.w&&player.x+player.w>l.x&&player.y<l.y+l.h&&player.y+player.h>l.y)damagePlayer()}
   if(worldNumber>=2&&player.vy>=0){for(const pad of springPads){if(oldY+player.h<=pad.y&&player.y+player.h>=pad.y&&player.x+player.w>pad.x&&player.x<pad.x+pad.w){player.y=pad.y-player.h;player.vy=-pad.power;player.jumps=1;player.grounded=false}}}
   if(player.y>650&&worldNumber!==4){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;player.ridingPlatform=null;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
   for(const z of lavaZones){if(player.x<z.x+z.w&&player.x+player.w>z.x&&player.y<z.y+z.h&&player.y+player.h>z.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-7;if(playerHP<=0){playerHP=worldNumber===4?skinMaxHP():3;player.x=worldNumber===4&&checkpoint4?2780:80;player.y=worldNumber===4?388:200;player.vy=0;player.jumps=0}}}
@@ -719,7 +719,7 @@ function skinMaxHP(){
 function applySkinHP(fill=true){const m=skinMaxHP();playerHP=fill?m:Math.min(playerHP,m)}
 function loadWorld4(){
  worldNumber=4;springPads=[];lavaZones=[];stageWalls=[];windZones=[];movingPlatforms=[];vanishPlatforms=[];lightningZones=[];
- platforms=[{x:0,y:430,w:3700,h:70}];
+ platforms=[{x:0,y:430,w:3700,h:70},{x:430,y:385,w:190,h:45},{x:760,y:350,w:190,h:80},{x:1080,y:390,w:210,h:40},{x:1430,y:355,w:210,h:75},{x:1780,y:385,w:190,h:45},{x:2110,y:345,w:220,h:85},{x:2490,y:385,w:190,h:45},{x:2820,y:350,w:210,h:80},{x:3100,y:390,w:180,h:40}];
  enemies=[
  {x:520,y:388,w:42,h:42,min:420,max:850,dir:1,alive:true,type:"melee",cool:70},
  {x:1120,y:365,w:30,h:65,min:1000,max:1450,dir:-1,alive:true,type:"ranged",cool:90},
@@ -744,7 +744,7 @@ function updateWorld4Combat(){
   if(!e.alive)continue;
   e.cool--;
   if(e.type==="melee"){e.x+=Math.sign(px-(e.x+e.w/2))*1.15;if(Math.abs(px-(e.x+e.w/2))<58&&e.cool<=0){if(Math.abs(py-(e.y+e.h/2))<55)damagePlayer();e.cool=95}}
-  if(e.type==="ranged"&&e.cool<=0){w4Shots.push({x:e.x+e.w/2,y:e.y+25,vx:Math.sign(px-e.x)*3.2,life:180});e.cool=115}
+  if(e.type==="ranged"&&e.cool<=0){w4Shots.push({x:e.x+e.w/2,y:e.y+25,vx:Math.sign(px-(e.x+e.w/2))*player.speed*0.75,life:85});e.cool=115}
   if(e.type==="mage"&&e.cool<=0){
    if(Math.random()<.5)w4Magic.push({x:px-24,y:430,w:90,h:12,t:55,active:false});
    else w4Laser={x:e.x+e.w/2,y:350,w:Math.max(80,Math.abs(px-e.x)),t:42,dir:Math.sign(px-e.x)};
@@ -761,7 +761,7 @@ function updateWorld4Combat(){
   w4BossTimer--;
   if(w4BossState==="idle"&&w4BossTimer<=0){w4BossAttack=(w4BossAttack+1)%4;w4BossState=["melee","shot","magic","area"][w4BossAttack];w4BossTimer=w4BossState==="area"?95:75}
   if(w4BossState==="melee"&&w4BossTimer===35&&Math.abs(px-(boss.x+boss.w/2))<125)damagePlayer();
-  if(w4BossState==="shot"&&w4BossTimer===40)for(let k=-1;k<=1;k++)w4Shots.push({x:boss.x,y:boss.y+35,vx:k*2.4-2,life:180});
+  if(w4BossState==="shot"&&w4BossTimer===40)w4Shots.push({x:boss.x,y:boss.y+35,vx:Math.sign(px-(boss.x+boss.w/2))*player.speed*0.75,life:85});
   if(w4BossState==="magic"&&w4BossTimer===42)w4Magic.push({x:px-48,y:430,w:110,h:12,t:45,active:false});
   if(w4BossState==="area"&&w4BossTimer===1){if(Math.abs(px-(boss.x+boss.w/2))<250)damagePlayer(2);w4BossState="recovery";w4BossTimer=180}
   else if(w4BossState!=="recovery"&&w4BossTimer<=0){w4BossState="idle";w4BossTimer=38}
