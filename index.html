@@ -284,17 +284,78 @@ function draw(){
   ctx.restore();
   ctx.save();ctx.translate(-camera,0);
  }else if(worldNumber===2){
-  // LAVA LAND：夕焼け、火山群、煙、溶岩の光が広がる灼熱の景色
-  const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#251b43");bg.addColorStop(.38,"#71334b");bg.addColorStop(.72,"#e16a3c");bg.addColorStop(1,"#ffb45c");ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
-  const sun=ctx.createRadialGradient(690,155,8,690,155,125);sun.addColorStop(0,"#fff2b0");sun.addColorStop(.35,"#ffb35c");sun.addColorStop(1,"rgba(255,120,50,0)");ctx.fillStyle=sun;ctx.fillRect(540,5,300,300);ctx.fillStyle="#ffd58a";ctx.beginPath();ctx.arc(690,155,43,0,Math.PI*2);ctx.fill();
+  // LAVA LAND：噴煙の空、複数の火山帯、溶岩河、黒い岩壁で構成した奥行きのある火山地帯
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,"#171b39");sky.addColorStop(.30,"#49304e");sky.addColorStop(.62,"#b34d3f");sky.addColorStop(1,"#ff9a4e");
+  ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+  // 火口の向こうに沈む巨大な赤橙色の太陽
+  const glow=ctx.createRadialGradient(690,170,8,690,170,250);
+  glow.addColorStop(0,"rgba(255,238,165,.95)");glow.addColorStop(.22,"rgba(255,166,82,.52)");glow.addColorStop(1,"rgba(255,85,40,0)");
+  ctx.fillStyle=glow;ctx.fillRect(430,-60,520,480);
+  ctx.fillStyle="#ffd99a";ctx.beginPath();ctx.arc(690,170,49,0,Math.PI*2);ctx.fill();
+  // 空を流れる火山灰の雲
+  ctx.save();ctx.translate(-camera*.08,0);
+  for(let i=0;i<9;i++){
+   const x=i*245-80,y=65+(i%4)*34;
+   ctx.fillStyle="rgba(35,31,53,.48)";ctx.beginPath();
+   ctx.ellipse(x+35,y,78,25,0,0,Math.PI*2);ctx.ellipse(x+95,y-15,66,31,0,0,Math.PI*2);ctx.ellipse(x+145,y+2,85,24,0,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle="rgba(255,153,103,.10)";ctx.beginPath();ctx.ellipse(x+105,y+18,105,9,0,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+  // 遠景：巨大な火山の連なり。火口から煙が立ち上る
   ctx.save();ctx.translate(-camera*.16,0);
-  for(let i=0;i<10;i++){const x=i*330-100;ctx.fillStyle=i%2?"#57334a":"#402b49";ctx.beginPath();ctx.moveTo(x-80,370);ctx.lineTo(x+35,170+(i%3)*30);ctx.lineTo(x+85,225+(i%2)*20);ctx.lineTo(x+155,115+(i%4)*28);ctx.lineTo(x+285,370);ctx.closePath();ctx.fill();ctx.strokeStyle="#ff874d";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x+155,145+(i%4)*28);ctx.lineTo(x+165,225);ctx.lineTo(x+205,300);ctx.stroke()}
-  // 火山の煙
-  for(let i=0;i<7;i++){const x=120+i*390,y=100+(i%3)*24;ctx.fillStyle="rgba(45,35,58,.48)";ctx.beginPath();ctx.arc(x,y,28,0,Math.PI*2);ctx.arc(x+25,y-22,35,0,Math.PI*2);ctx.arc(x+58,y-8,29,0,Math.PI*2);ctx.fill()}ctx.restore();
-  ctx.save();ctx.translate(-camera*.55,0);
-  for(let i=0;i<22;i++){const x=i*175-45;ctx.fillStyle=i%2?"#673747":"#4b3045";ctx.beginPath();ctx.moveTo(x,420);ctx.lineTo(x+28,315);ctx.lineTo(x+62,365);ctx.lineTo(x+105,285);ctx.lineTo(x+150,420);ctx.closePath();ctx.fill();ctx.fillStyle="#ff713c";ctx.fillRect(x+58,365,7,38)}ctx.restore();
-  // 火の粉
-  for(let i=0;i<34;i++){const x=((i*97-camera*.3)%(W+30)+W+30)%(W+30),y=80+(i*67)%320;ctx.fillStyle=i%3?"rgba(255,190,95,.7)":"rgba(255,90,48,.85)";ctx.beginPath();ctx.arc(x,y,1+(i%3),0,Math.PI*2);ctx.fill()}
+  for(let i=0;i<7;i++){
+   const x=i*390-130,peak=145+(i%3)*38;
+   ctx.fillStyle=i%2?"#493348":"#3b2d43";
+   ctx.beginPath();ctx.moveTo(x-70,385);ctx.lineTo(x+55,peak+75);ctx.lineTo(x+112,peak+105);ctx.lineTo(x+175,peak);ctx.lineTo(x+225,peak+88);ctx.lineTo(x+340,385);ctx.closePath();ctx.fill();
+   ctx.fillStyle="#211f35";ctx.beginPath();ctx.ellipse(x+175,peak+4,31,10,0,0,Math.PI*2);ctx.fill();
+   ctx.strokeStyle="rgba(255,112,62,.8)";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x+175,peak+12);ctx.lineTo(x+160,peak+75);ctx.lineTo(x+195,peak+135);ctx.stroke();
+   for(let j=0;j<4;j++){ctx.fillStyle="rgba(255,104,59,.48)";ctx.beginPath();ctx.arc(x+175+(j-1.5)*14,peak-35-j*25,8+j*3,0,Math.PI*2);ctx.fill()}
+  }
+  ctx.restore();
+  // 中景：崩れた火山斜面と溶岩の裂け目
+  ctx.save();ctx.translate(-camera*.38,0);
+  for(let i=0;i<11;i++){
+   const x=i*285-90;
+   ctx.fillStyle=i%2?"#593344":"#4a3042";ctx.beginPath();ctx.moveTo(x,420);ctx.lineTo(x+40,320);ctx.lineTo(x+92,350);ctx.lineTo(x+150,250+(i%3)*22);ctx.lineTo(x+215,335);ctx.lineTo(x+275,420);ctx.closePath();ctx.fill();
+   ctx.strokeStyle="#e65b3d";ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x+150,280+(i%3)*22);ctx.lineTo(x+135,335);ctx.lineTo(x+169,370);ctx.stroke();
+   ctx.strokeStyle="rgba(255,174,76,.55)";ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+148,320);ctx.lineTo(x+150,370);ctx.stroke();
+  }
+  ctx.restore();
+  // 火口から立ち上る複数の煙柱
+  ctx.save();ctx.translate(-camera*.22,0);
+  for(let i=0;i<6;i++){
+   const x=180+i*510,y=205+(i%2)*45;
+   ctx.fillStyle="rgba(37,31,48,.55)";
+   for(let j=0;j<5;j++){ctx.beginPath();ctx.arc(x+(j-2)*15,y-j*27,18+j*5,0,Math.PI*2);ctx.fill()}
+   ctx.fillStyle="rgba(112,75,79,.18)";ctx.beginPath();ctx.ellipse(x+8,y-65,43,72,.18,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+  // 地平線を照らす溶岩の川
+  const lavaGlow=ctx.createLinearGradient(0,350,0,455);
+  lavaGlow.addColorStop(0,"rgba(255,92,38,0)");lavaGlow.addColorStop(.65,"rgba(255,75,25,.22)");lavaGlow.addColorStop(1,"rgba(255,177,61,.35)");
+  ctx.fillStyle=lavaGlow;ctx.fillRect(0,330,W,150);
+  ctx.save();ctx.translate(-camera*.52,0);
+  for(let i=0;i<12;i++){
+   const x=i*245-100,y=385+(i%3)*13;
+   ctx.fillStyle="#302637";ctx.beginPath();ctx.moveTo(x,y+35);ctx.lineTo(x+45,y-22);ctx.lineTo(x+90,y+4);ctx.lineTo(x+150,y-32);ctx.lineTo(x+205,y+35);ctx.closePath();ctx.fill();
+   ctx.strokeStyle="#ff7137";ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(x+55,y+8);ctx.lineTo(x+95,y+18);ctx.lineTo(x+145,y-8);ctx.stroke();
+  }
+  ctx.restore();
+  // 手前の黒い岩柱で画面に立体感を出す
+  ctx.save();ctx.translate(-camera*.78,0);
+  for(let i=0;i<15;i++){
+   const x=i*175-60,h=70+(i%4)*28;
+   ctx.fillStyle=i%2?"#292535":"#332638";ctx.beginPath();ctx.moveTo(x,430);ctx.lineTo(x+12,430-h);ctx.lineTo(x+42,430-h-24);ctx.lineTo(x+72,430-h+8);ctx.lineTo(x+91,430);ctx.closePath();ctx.fill();
+   ctx.strokeStyle="rgba(255,102,48,.5)";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+42,430-h-18);ctx.lineTo(x+48,430-h+24);ctx.stroke();
+  }
+  ctx.restore();
+  // 舞い上がる火の粉と小さな溶岩片
+  for(let i=0;i<55;i++){
+   const x=((i*79-camera*.32)%(W+30)+W+30)%(W+30)-15,y=65+(i*53)%365;
+   ctx.fillStyle=i%4===0?"rgba(255,224,128,.95)":"rgba(255,111,48,.78)";
+   ctx.beginPath();ctx.arc(x,y,1+(i%3)*.7,0,Math.PI*2);ctx.fill();
+  }
   ctx.save();ctx.translate(-camera,0);
  }else{
   const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#263b83");sky.addColorStop(.55,"#75c9ef");sky.addColorStop(1,"#e7f8ff");ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
