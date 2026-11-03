@@ -444,16 +444,50 @@ function draw(){
  // Outfit silhouette changes with rarity, not just its color.
  const equippedSkin=skins.find(s=>s.color===playerSkin)||{design:"standard"};
  const outfit=equippedSkin.design;
+ // ベースジャケット
  ctx.shadowColor=skinGlow;ctx.shadowBlur=outfit==="standard"?7:12;
  ctx.fillStyle=outfit==="emperor"?"#171329":outfit==="celestial"?"#e8eaff":outfit==="knight"?"#26334d":outfit==="assassin"?"#17182d":outfit==="commander"?"#172d50":skinGlow;
  ctx.fillRect(-12,15,24,14);ctx.shadowBlur=0;
- if(outfit==="assassin"){ctx.fillStyle="#111326";ctx.fillRect(-14,12,28,7);ctx.fillRect(-10,7,20,7);ctx.fillStyle=skinGlow;ctx.fillRect(-13,17,4,12);ctx.fillRect(9,17,4,12)}
- else if(outfit==="knight"){ctx.fillStyle="#9eabc3";ctx.fillRect(-15,14,8,8);ctx.fillRect(7,14,8,8);ctx.fillStyle="#dce8ff";ctx.fillRect(-9,16,18,12);ctx.fillStyle="#26334d";ctx.fillRect(-4,15,8,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,18,4,8)}
- else if(outfit==="commander"){ctx.fillStyle="#b9d9ff";ctx.fillRect(-13,14,7,15);ctx.fillRect(6,14,7,15);ctx.fillStyle="#0b1730";ctx.fillRect(-5,15,10,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,16,4,12);ctx.fillRect(-15,20,3,7);ctx.fillRect(12,20,3,7)}
- else if(outfit==="celestial"){ctx.fillStyle="#fff";ctx.fillRect(-15,14,6,18);ctx.fillRect(9,14,6,18);ctx.fillStyle="#aebbd8";ctx.fillRect(-5,15,10,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,17,4,10);ctx.fillStyle="#d9e9ff";ctx.fillRect(-17,18,4,13);ctx.fillRect(13,18,4,13)}
- else if(outfit==="emperor"){ctx.fillStyle="#100d20";ctx.fillRect(-15,14,7,18);ctx.fillRect(8,14,7,18);ctx.fillStyle="#54206f";ctx.fillRect(-5,15,10,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,16,4,12);ctx.fillStyle="#ffd76a";ctx.fillRect(-8,12,16,3)}
- else{ctx.fillStyle="#eafaff";ctx.fillRect(-11,16,7,11);ctx.fillRect(4,16,7,11);ctx.fillStyle="#142b49";ctx.fillRect(-4,15,8,14);ctx.fillStyle=skinGlow;ctx.fillRect(-1,17,2,10)}
+ if(outfit==="assassin"){
+  // フード＋長い暗色コート＋紫の縁取り
+  ctx.fillStyle="#111326";ctx.fillRect(-14,9,28,10);ctx.fillRect(-11,5,22,7);
+  ctx.fillStyle="#25213f";ctx.fillRect(-14,20,7,16);ctx.fillRect(7,20,7,16);
+  ctx.fillStyle=skinGlow;ctx.fillRect(-13,17,3,17);ctx.fillRect(10,17,3,17);
+  ctx.fillStyle="#070b18";ctx.fillRect(-4,16,8,13);
+ }else if(outfit==="knight"){
+  // 大型肩鎧＋銀色の胸当て＋中央紋章
+  ctx.fillStyle="#9eabc3";ctx.fillRect(-17,13,9,10);ctx.fillRect(8,13,9,10);
+  ctx.fillStyle="#dce8ff";ctx.fillRect(-10,16,20,13);ctx.fillStyle="#26334d";ctx.fillRect(-4,15,8,14);
+  ctx.fillStyle=skinGlow;ctx.fillRect(-2,18,4,8);ctx.fillStyle="#f6d77a";ctx.fillRect(-2,14,4,3);
+ }else if(outfit==="commander"){
+  // 分割装甲＋腕部ユニット＋胸部コア
+  ctx.fillStyle="#b9d9ff";ctx.fillRect(-15,13,8,16);ctx.fillRect(7,13,8,16);
+  ctx.fillStyle="#0b1730";ctx.fillRect(-5,15,10,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,16,4,12);
+  ctx.fillStyle="#8dbfff";ctx.fillRect(-17,20,4,9);ctx.fillRect(13,20,4,9);
+  ctx.fillStyle="#e8f7ff";ctx.fillRect(-1,18,2,3);
+ }else if(outfit==="celestial"){
+  // 白銀の長い外套＋翼型ショルダーユニット
+  ctx.fillStyle="#fff";ctx.fillRect(-15,14,6,23);ctx.fillRect(9,14,6,23);
+  ctx.fillStyle="#aebbd8";ctx.fillRect(-5,15,10,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,17,4,10);
+  ctx.fillStyle="#d9e9ff";ctx.fillRect(-19,17,4,17);ctx.fillRect(15,17,4,17);
+  ctx.fillStyle="#fff";ctx.fillRect(-12,29,24,5);ctx.fillStyle="#d2b7ff";ctx.fillRect(-2,18,4,4);
+ }else if(outfit==="emperor"){
+  // 黒紫のロングコート＋金の襟章
+  ctx.fillStyle="#100d20";ctx.fillRect(-16,14,8,24);ctx.fillRect(8,14,8,24);
+  ctx.fillStyle="#54206f";ctx.fillRect(-5,15,10,14);ctx.fillStyle=skinGlow;ctx.fillRect(-2,16,4,12);
+  ctx.fillStyle="#ffd76a";ctx.fillRect(-9,12,18,3);ctx.fillRect(-2,17,4,5);
+  ctx.fillStyle="#100d20";ctx.fillRect(-12,34,24,4);
+ }else{
+  ctx.fillStyle="#eafaff";ctx.fillRect(-11,16,7,11);ctx.fillRect(4,16,7,11);
+  ctx.fillStyle="#142b49";ctx.fillRect(-4,15,8,14);ctx.fillStyle=skinGlow;ctx.fillRect(-1,17,2,10);
+ }
  ctx.fillStyle=outfit==="celestial"?"#c8d8f5":"#ffffff";ctx.fillRect(-10,27,20,2);
+ // レアスキンは頭部にも固有シルエットを追加
+ if(outfit==="assassin"){ctx.fillStyle="#111326";ctx.fillRect(-11,-19,22,6);ctx.fillStyle=skinGlow;ctx.fillRect(-10,-14,20,2)}
+ if(outfit==="knight"){ctx.fillStyle="#aebbd8";ctx.fillRect(-12,-24,5,7);ctx.fillRect(7,-24,5,7);ctx.fillStyle="#f6d77a";ctx.fillRect(-3,-27,6,3)}
+ if(outfit==="commander"){ctx.fillStyle="#162c4b";ctx.fillRect(-12,-20,24,4);ctx.fillStyle=skinGlow;ctx.fillRect(-8,-19,16,2)}
+ if(outfit==="celestial"){ctx.fillStyle="#fff";ctx.fillRect(-15,-18,4,10);ctx.fillRect(11,-18,4,10)}
+ if(outfit==="emperor"){ctx.fillStyle="#ffd76a";ctx.fillRect(-9,-28,18,4);ctx.fillRect(-6,-32,3,4);ctx.fillRect(3,-32,3,4)}
  // arms and gloves
  // Opposite arm swing for a readable running cycle
  for(const side of [-1,1]){
