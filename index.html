@@ -226,7 +226,12 @@ function jump(){if(!gameClear&&player.jumps<player.maxJumps){player.vy=-player.j
 function attack(){
  if(gameClear||attackCooldown>0)return;
  attackCooldown=20;attackTimer=12;
- for(const e of enemies){if(!e.alive)continue;const px=player.x+player.w/2,py=player.y+player.h/2,ex=e.x+e.w/2,ey=e.y+e.h/2;const hit=worldNumber===4?(Math.abs(ex-px)<=260&&Math.abs(ey-py)<=230):(Math.hypot(px-ex,py-ey)<75);if(hit)e.alive=false}
+ for(const e of enemies){
+  if(!e.alive)continue;
+  const px=player.x+player.w/2,py=player.y+player.h/2,ex=e.x+e.w/2,ey=e.y+e.h/2;
+  const hit=worldNumber===4?(Math.abs(ex-px)<=520&&Math.abs(ey-py)<=360):(Math.hypot(px-ex,py-ey)<75);
+  if(hit)e.alive=false;
+ }
  if(boss.alive&&Math.hypot(player.x+player.w/2-(boss.x+boss.w/2),player.y+player.h/2-(boss.y+boss.h/2))<(worldNumber===4?155:115)){
   boss.hp=Math.max(0,boss.hp-1);if(boss.hp===0){boss.alive=false;bossDefeated=true;saveGame()}
  }
@@ -772,7 +777,7 @@ function updateWorld4Combat(){
  for(const e of enemies){
   if(!e.alive)continue;
   e.cool--;
-  if(e.type==="melee"){e.x+=Math.sign(px-(e.x+e.w/2))*1.15;if(Math.abs(px-(e.x+e.w/2))<58&&e.cool<=0){if(Math.abs(py-(e.y+e.h/2))<55)damagePlayer();e.cool=95}}
+  if(e.type==="melee"){if(Math.abs(px-(e.x+e.w/2))<58&&e.cool<=0){if(Math.abs(py-(e.y+e.h/2))<55)damagePlayer();e.cool=95}}
   if(e.type==="ranged"&&e.cool<=0){w4Shots.push({x:e.x+e.w/2,y:e.y+25,vx:Math.sign(px-(e.x+e.w/2))*player.speed*0.75,life:85});e.cool=115}
   if(e.type==="mage"&&e.cool<=0){
    if(Math.random()<.5)w4Magic.push({x:px-24,y:430,w:90,h:12,t:55,active:false});
@@ -818,6 +823,24 @@ function drawWorld4Actors(){
  for(const m of w4Magic){ctx.fillStyle="rgba(172,95,255,.35)";ctx.strokeStyle="#d7b6ff";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(m.x-camera+m.w/2,423,m.w/2,13,0,0,Math.PI*2);ctx.fill();ctx.stroke()}
  if(w4Laser){ctx.fillStyle="rgba(190,110,255,.25)";ctx.fillRect((w4Laser.dir>0?w4Laser.x:w4Laser.x-w4Laser.w)-camera,380,w4Laser.w,15);ctx.fillStyle="#e7caff";ctx.fillRect((w4Laser.dir>0?w4Laser.x:w4Laser.x-w4Laser.w)-camera,385,w4Laser.w,5)}
  if(boss.alive){ctx.save();ctx.translate(boss.x-camera,boss.y);ctx.fillStyle="#080711";ctx.beginPath();ctx.moveTo(25,10);ctx.lineTo(105,10);ctx.lineTo(125,90);ctx.lineTo(4,90);ctx.closePath();ctx.fill();ctx.fillStyle="#29243d";ctx.fillRect(38,4,48,65);ctx.fillStyle="#bda9d8";ctx.fillRect(46,0,32,14);ctx.fillStyle="#080711";ctx.beginPath();ctx.moveTo(37,5);ctx.lineTo(13,85);ctx.lineTo(42,72);ctx.fill();ctx.beginPath();ctx.moveTo(86,5);ctx.lineTo(116,85);ctx.lineTo(83,72);ctx.fill();ctx.shadowColor="#b44cff";ctx.shadowBlur=25;ctx.fillStyle="#c65cff";ctx.beginPath();ctx.arc(62,39,12,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle="#f0d7ff";ctx.fillRect(56,36,12,5);ctx.restore()}
+ // 攻撃予告は色・形・文字を統一して視認性を上げる
+ const pulse=.55+.45*Math.sin(Date.now()*.018);
+ for(const e of enemies){
+  if(!e.alive)continue;
+  if(e.type==="ranged"&&e.cool<55){
+   const sx=e.x+e.w/2-camera,sy=e.y+24,tx=player.x+player.w/2-camera,ty=player.y+player.h/2;
+   ctx.save();ctx.strokeStyle="#ff4fba";ctx.lineWidth=3+2*pulse;ctx.setLineDash([10,7]);ctx.globalAlpha=.45+.45*pulse;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(tx,ty);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#ff4fba";ctx.beginPath();ctx.arc(tx,ty,18+5*pulse,0,Math.PI*2);ctx.stroke();ctx.font="bold 13px sans-serif";ctx.fillText("狙われている！",tx-43,ty-25);ctx.restore();
+  }
+  if(e.type==="mage"&&e.cool<65){
+   ctx.save();ctx.globalAlpha=.65+.35*pulse;ctx.strokeStyle="#d9a5ff";ctx.lineWidth=4;ctx.setLineDash([7,5]);ctx.beginPath();ctx.ellipse(e.x+e.w/2-camera,423,55+8*pulse,18+3*pulse,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#f2dfff";ctx.font="bold 13px sans-serif";ctx.fillText("魔法攻撃！",e.x+e.w/2-camera-35,395);ctx.restore();
+  }
+ }
+ if(w4BossState!=="idle"&&w4BossState!=="recovery"&&boss.alive){
+  const labels={melee:"ボス：近接攻撃！",shot:"ボス：弾 हमला！",magic:"ボス：魔法攻撃！",area:"ボス：範囲攻撃！"};
+  ctx.save();ctx.fillStyle="rgba(10,5,28,.82)";ctx.fillRect(250,12,400,42);ctx.strokeStyle="#ff65d8";ctx.lineWidth=3;ctx.strokeRect(250,12,400,42);ctx.fillStyle="#fff";ctx.font="bold 22px sans-serif";ctx.textAlign="center";ctx.fillText(labels[w4BossState]||"危険！",450,41);ctx.textAlign="left";
+  if(w4BossState==="area"){ctx.strokeStyle="#ff3c76";ctx.lineWidth=5;ctx.globalAlpha=.35+.55*pulse;ctx.beginPath();ctx.ellipse(boss.x+boss.w/2-camera,boss.y+boss.h/2,250,100,0,0,Math.PI*2);ctx.stroke()}
+  ctx.restore();
+ }
 }
 
 
