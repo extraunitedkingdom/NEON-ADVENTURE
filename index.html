@@ -81,6 +81,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <button id="shopToggle">🛒　SKIN SHOP</button>
 <button id="save">▣　SAVE</button>
 <button id="ranking">🏆　RANKING</button>
+<button id="codeToggle">⌨️　CODE</button>
 </div>
 <div id="shopPanel" aria-label="スキンショップ">
  <div class="shop-shell">
@@ -92,6 +93,9 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
  </div>
 </div>
 </div>
+<div id="codePanel" style="display:none;max-width:520px;margin:12px auto;padding:16px;background:#111a3d;border:2px solid #27eaff;border-radius:14px">
+<h3>CODE CENTER</h3><p>シリアルコード・管理者コードを入力</p><input id="codeInput" autocomplete="off" placeholder="コードを入力" style="width:100%;padding:12px;border-radius:8px;font-size:16px"><button id="redeemCode">コードを使う</button><p id="codeMessage" aria-live="polite"></p><hr><h3>セーブコード</h3><button id="exportSaveCode">セーブコードを発行</button><textarea id="saveCodeText" rows="3" placeholder="発行したセーブコード／読み込むセーブコード" style="width:100%;padding:10px;border-radius:8px"></textarea><button id="importSaveCode">セーブコードを読み込む</button><button id="closeCodePanel">閉じる</button>
+</div>
 <div id="stage">
 <div class="stage-top"><p>WORLD 1 : GREEN FOREST</p><button id="homeButton" type="button">⌂ HOME</button></div>
 <canvas id="game" width="900" height="500"></canvas>
@@ -101,7 +105,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <button id="left">◀ LEFT</button><button id="jump">JUMP ▲</button><button id="right">RIGHT ▶</button>
 </div>
 <div id="actions">
-<button id="attack">ATTACK</button><button id="dash">DASH</button><button id="restart">RESTART</button>
+<button id="attack">ATTACK</button><button id="dash">DASH</button><button id="restart">RESTART</button><button id="adminToggle" style="display:none">ADMIN: OFF</button><button id="floatToggle" style="display:none">FLOAT: OFF</button>
 </div>
 <p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p><p class="small" id="world2Hint">WORLD 2：水色のジャンプパッドでマグマを飛び越えよう。2つ目は高い壁の上へ飛び乗るためのパッド！</p>
 </div>
@@ -111,6 +115,7 @@ const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 const W=canvas.width,H=canvas.height;
 const player={x:80,y:200,w:30,h:42,vx:0,vy:0,speed:4,jumpPower:11,jumps:0,maxJumps:2,grounded:false};
 let playerHP=3,invincibleTimer=0,attackCooldown=0,dashTimer=0,shieldTimer=0;
+let adminUnlocked=false,adminMode=false,floatMode=false;
 let worldNumber=1,world2Unlocked=false,world2Cleared=false,world3Unlocked=false,world3Cleared=false;
 let facing=1,attackTimer=0,gameStarted=false;
 let playerSkin="#9b8aff",coinCount=0,camera=0,gameClear=false,bossDefeated=false,stageCleared=false;
@@ -162,7 +167,7 @@ const skins=[
 ];
 let ownedSkins=["#9b8aff"];
 function saveGame(){
- const data={version:2,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ const data={version:3,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
  try{localStorage.setItem("gameSave",JSON.stringify(data));return true}catch(e){console.error("セーブに失敗しました",e);return false}
 }
 function loadGame(){
@@ -170,6 +175,7 @@ function loadGame(){
  try{d=JSON.parse(localStorage.getItem("gameSave")||"null")}catch(e){console.warn("セーブデータの形式が壊れています",e);return false}
  if(!d||typeof d!=="object")return false;
  coinCount=Number.isFinite(d.coinCount)?d.coinCount:coinCount;
+ adminUnlocked=!!d.adminUnlocked;adminMode=adminUnlocked&&!!d.adminMode;floatMode=false;
  worldNumber=[1,2,3,4].includes(d.worldNumber)?d.worldNumber:1;
  world2Unlocked=!!d.world2Unlocked;world2Cleared=!!d.world2Cleared;
  world3Unlocked=!!d.world3Unlocked;world3Cleared=!!d.world3Cleared;
@@ -273,7 +279,8 @@ function update(){
    }
   }
   const oldY=player.y;
-  player.vy+=0.5;player.y+=player.vy;player.grounded=false;
+  if(adminMode&&floatMode){player.vy=0;player.y=Math.max(0,Math.min(H-player.h,player.y+(keys.ArrowUp||keys.KeyW?-4:keys.ArrowDown||keys.KeyS?4:0)));player.grounded=false;}
+  else{player.vy+=0.5;player.y+=player.vy;player.grounded=false;}
   for(const w of windZones){if(player.x+player.w>w.x&&player.x<w.x+w.w&&player.y+player.h>w.y&&player.y<w.y+w.h){player.x+=w.dir*3.2;player.vy=Math.min(player.vy,-7.5);player.y-=1.8}}
   for(const p of [...platforms,...movingPlatforms,...vanishPlatforms.filter(v=>v.active)]){if(player.vy>=0&&oldY+player.h<=(p.prevY??p.y)+2&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;player.ridingPlatform=(movingPlatforms.includes(p)?p:null);if(vanishPlatforms.includes(p)&&p.timer===0){p.timer=30;p.respawn=0}}}
   for(const l of lightningZones){l.phase=(l.phase+1)%l.period;if(l.phase<48&&player.x<l.x+l.w&&player.x+player.w>l.x&&player.y<l.y+l.h&&player.y+player.h>l.y)damagePlayer()}
@@ -284,11 +291,11 @@ function update(){
    if(!e.alive)continue;e.x+=e.dir*1.5;if(e.x<e.min||e.x>e.max)e.dir*=-1;
    if(player.x<e.x+e.w&&player.x+player.w>e.x&&player.y<e.y+e.h&&player.y+player.h>e.y){
     if(player.vy>0&&oldY+player.h<=e.y+16){e.alive=false;player.vy=-8;player.jumps=1}
-    else if(invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
+    else if(!adminMode&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
    }
   }
-  for(const c of coins){if(!c.taken&&player.x<c.x+15&&player.x+player.w>c.x-15&&player.y<c.y+15&&player.y+player.h>c.y-15){c.taken=true;coinCount++}}
-  if(boss.alive&&player.x<boss.x+boss.w&&player.x+player.w>boss.x&&player.y<boss.y+boss.h&&player.y+player.h>boss.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
+  for(const c of coins){if(!c.taken&&player.x<c.x+15&&player.x+player.w>c.x-15&&player.y<c.y+15&&player.y+player.h>c.y-15){c.taken=true;if(!adminMode)coinCount++}}
+  if(!adminMode&&boss.alive&&player.x<boss.x+boss.w&&player.x+player.w>boss.x&&player.y<boss.y+boss.h&&player.y+player.h>boss.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
   if(worldNumber===4&&boss.alive&&player.x<boss.x+boss.w&&player.x+player.w>boss.x&&player.y<boss.y+boss.h&&player.y+player.h>boss.y&&invincibleTimer===0)damagePlayer();
   if(bossDefeated&&player.x<goal.x+goal.w&&player.x+player.w>goal.x&&player.y<goal.y+goal.h&&player.y+player.h>goal.y)finishGame();
   camera=Math.max(0,Math.min(worldNumber===3?2500:1900,player.x-250));
@@ -638,7 +645,7 @@ function restart(){
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
 document.getElementById("restart").onclick=()=>{restart()};
-function returnHome(){saveGame();document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";document.getElementById("world3Select").disabled=!world3Unlocked;document.getElementById("world3Select").textContent=world3Unlocked?"☁️ WORLD 3 : SKY KINGDOM":"☁️ WORLD 3 : SKY KINGDOM 🔒";document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
+function returnHome(){saveGame();document.getElementById("adminToggle").style.display="none";document.getElementById("floatToggle").style.display="none";document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";document.getElementById("world3Select").disabled=!world3Unlocked;document.getElementById("world3Select").textContent=world3Unlocked?"☁️ WORLD 3 : SKY KINGDOM":"☁️ WORLD 3 : SKY KINGDOM 🔒";document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
 document.getElementById("homeButton").onclick=returnHome;
 document.getElementById("clearHomeButton").onclick=returnHome;
 document.getElementById("clearRestartButton").onclick=restart;
@@ -713,7 +720,7 @@ function renderShop(){
  document.getElementById("equipSkin").disabled=!ownedSkins.includes(selected.color)||playerSkin===selected.color;
 }
 document.querySelectorAll(".shop-tabs button").forEach(b=>b.onclick=()=>{shopFilter=b.dataset.filter;document.querySelectorAll(".shop-tabs button").forEach(t=>t.classList.toggle("active",t===b));renderShop()});
-document.getElementById("buySkin").onclick=()=>{const s=skins.find(v=>v.color===selectedSkinColor);if(!s||ownedSkins.includes(s.color))return;if(coinCount<s.price){document.getElementById("shopMessage").textContent="コインが足りません！";return}coinCount-=s.price;ownedSkins.push(s.color);playerSkin=s.color;saveGame();document.getElementById("shopMessage").textContent=s.name+"を購入して装備しました！";renderShop()};
+document.getElementById("buySkin").onclick=()=>{const s=skins.find(v=>v.color===selectedSkinColor);if(!s||ownedSkins.includes(s.color))return;if(!adminMode&&coinCount<s.price){document.getElementById("shopMessage").textContent="コインが足りません！";return}if(!adminMode)coinCount-=s.price;ownedSkins.push(s.color);playerSkin=s.color;saveGame();document.getElementById("shopMessage").textContent=s.name+"を購入して装備しました！";renderShop()};
 document.getElementById("equipSkin").onclick=()=>{if(!ownedSkins.includes(selectedSkinColor))return;playerSkin=selectedSkinColor;saveGame();document.getElementById("shopMessage").textContent="スキンを装備しました！";renderShop()};
 function openShop(){selectedSkinColor=playerSkin;shopFilter="ALL";document.querySelectorAll(".shop-tabs button").forEach(b=>b.classList.toggle("active",b.dataset.filter==="ALL"));document.getElementById("shopPanel").style.display="block";document.getElementById("shopMessage").textContent="";renderShop()}
 function closeShop(){document.getElementById("shopPanel").style.display="none"}
@@ -745,7 +752,7 @@ function loadWorld4(){
  document.querySelector(".stage-top p").textContent="WORLD 4 : COSMIC ABYSS";
 }
 function damagePlayer(amount=1){
- if(invincibleTimer>0)return;
+ if(adminMode||invincibleTimer>0)return;
  playerHP-=amount;invincibleTimer=65;player.vy=-4;
  if(playerHP<=0){playerHP=skinMaxHP();player.x=checkpoint4?2780:80;player.y=388;player.vx=0;player.vy=0;player.jumps=0;w4Shots=[];w4Magic=[];w4Laser=null;w4BossState="idle";w4BossTimer=0;invincibleTimer=90}
 }
@@ -803,10 +810,55 @@ function drawWorld4Actors(){
  if(boss.alive){ctx.save();ctx.translate(boss.x-camera,boss.y);ctx.fillStyle="#080711";ctx.beginPath();ctx.moveTo(25,10);ctx.lineTo(105,10);ctx.lineTo(125,90);ctx.lineTo(4,90);ctx.closePath();ctx.fill();ctx.fillStyle="#29243d";ctx.fillRect(38,4,48,65);ctx.fillStyle="#bda9d8";ctx.fillRect(46,0,32,14);ctx.fillStyle="#080711";ctx.beginPath();ctx.moveTo(37,5);ctx.lineTo(13,85);ctx.lineTo(42,72);ctx.fill();ctx.beginPath();ctx.moveTo(86,5);ctx.lineTo(116,85);ctx.lineTo(83,72);ctx.fill();ctx.shadowColor="#b44cff";ctx.shadowBlur=25;ctx.fillStyle="#c65cff";ctx.beginPath();ctx.arc(62,39,12,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle="#f0d7ff";ctx.fillRect(56,36,12,5);ctx.restore()}
 }
 
+
+const ADMIN_CODE="NEON-ADMIN-TEST";
+const SERIAL_CODES={"NEON200":200};
+function refreshAdminUI(){
+ const a=document.getElementById("adminToggle"),f=document.getElementById("floatToggle");
+ a.style.display=adminUnlocked?"inline-block":"none";f.style.display=adminMode?"inline-block":"none";
+ a.textContent="ADMIN: "+(adminMode?"ON":"OFF");f.textContent="FLOAT: "+(floatMode?"ON":"OFF");
+}
+document.getElementById("codeToggle").onclick=()=>{document.getElementById("codePanel").style.display="block";document.getElementById("codeMessage").textContent="";};
+document.getElementById("closeCodePanel").onclick=()=>document.getElementById("codePanel").style.display="none";
+document.getElementById("redeemCode").onclick=()=>{
+ const code=document.getElementById("codeInput").value.trim().toUpperCase();
+ let used=[];try{used=JSON.parse(localStorage.getItem("usedSerialCodes")||"[]")}catch(e){used=[]}
+ if(code===ADMIN_CODE){
+  if(adminUnlocked){document.getElementById("codeMessage").textContent="管理者モードは解放済みです";return}
+  adminUnlocked=true;adminMode=true;world2Unlocked=world3Unlocked=world4Unlocked=true;
+  refreshAdminUI();saveGame();document.getElementById("codeMessage").textContent="管理者モードを解放しました！";
+  return;
+ }
+ if(!Object.prototype.hasOwnProperty.call(SERIAL_CODES,code)){document.getElementById("codeMessage").textContent="コードが違います";return}
+ if(used.includes(code)){document.getElementById("codeMessage").textContent="このコードは使用済みです";return}
+ coinCount+=SERIAL_CODES[code];used.push(code);localStorage.setItem("usedSerialCodes",JSON.stringify(used));saveGame();renderShop();
+ document.getElementById("codeMessage").textContent="成功！ "+SERIAL_CODES[code]+"コインを獲得しました";
+};
+document.getElementById("adminToggle").onclick=()=>{
+ if(!adminUnlocked)return;adminMode=!adminMode;floatMode=false;
+ if(adminMode){world2Unlocked=world3Unlocked=world4Unlocked=true;}
+ refreshAdminUI();saveGame();
+};
+document.getElementById("floatToggle").onclick=()=>{if(!adminMode)return;floatMode=!floatMode;refreshAdminUI();};
+document.getElementById("exportSaveCode").onclick=()=>{
+ saveGame();const raw=localStorage.getItem("gameSave")||"{}";
+ document.getElementById("saveCodeText").value=btoa(unescape(encodeURIComponent(raw)));
+ document.getElementById("codeMessage").textContent="セーブコードを発行しました";
+};
+document.getElementById("importSaveCode").onclick=()=>{
+ try{
+  const raw=decodeURIComponent(escape(atob(document.getElementById("saveCodeText").value.trim())));
+  const data=JSON.parse(raw);if(!data||typeof data!=="object"||![1,2,3,4].includes(data.worldNumber))throw new Error("invalid");
+  localStorage.setItem("gameSave",JSON.stringify(data));if(!loadGame())throw new Error("load");
+  refreshAdminUI();document.getElementById("codeMessage").textContent="セーブデータを読み込みました。ページを再読み込みしてください";
+ }catch(e){document.getElementById("codeMessage").textContent="セーブコードが正しくありません";}
+};
+
 // 全ステージ変数の初期化後にセーブを復元
 renderShop();
 const hasSave=loadGame();
 if(!hasSave)worldNumber=1;
+refreshAdminUI();
 document.getElementById("world2Select").disabled=!world2Unlocked;
 document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";
 document.getElementById("world3Select").disabled=!world3Unlocked;
