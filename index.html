@@ -286,7 +286,7 @@ function update(){
   for(const l of lightningZones){l.phase=(l.phase+1)%l.period;if(l.phase<48&&player.x<l.x+l.w&&player.x+player.w>l.x&&player.y<l.y+l.h&&player.y+player.h>l.y)damagePlayer()}
   if(worldNumber>=2&&player.vy>=0){for(const pad of springPads){if(oldY+player.h<=pad.y&&player.y+player.h>=pad.y&&player.x+player.w>pad.x&&player.x<pad.x+pad.w){player.y=pad.y-player.h;player.vy=-pad.power;player.jumps=1;player.grounded=false}}}
   if(player.y>650&&worldNumber!==4){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;player.ridingPlatform=null;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
-  for(const z of lavaZones){if(player.x<z.x+z.w&&player.x+player.w>z.x&&player.y<z.y+z.h&&player.y+player.h>z.y&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-7;if(playerHP<=0){playerHP=worldNumber===4?skinMaxHP():3;player.x=worldNumber===4&&checkpoint4?2780:80;player.y=worldNumber===4?388:200;player.vy=0;player.jumps=0}}}
+  for(const z of lavaZones){if(player.x<z.x+z.w&&player.x+player.w>z.x&&player.y<z.y+z.h&&player.y+player.h>z.y&&!adminMode&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-7;if(playerHP<=0){playerHP=worldNumber===4?skinMaxHP():3;player.x=worldNumber===4&&checkpoint4?2780:80;player.y=worldNumber===4?388:200;player.vy=0;player.jumps=0}}}
   for(const e of enemies){
    if(!e.alive)continue;e.x+=e.dir*1.5;if(e.x<e.min||e.x>e.max)e.dir*=-1;
    if(player.x<e.x+e.w&&player.x+player.w>e.x&&player.y<e.y+e.h&&player.y+player.h>e.y){
@@ -813,6 +813,9 @@ function drawWorld4Actors(){
 
 const ADMIN_CODE="NEON-ADMIN-TEST";
 const SERIAL_CODES={"NEON200":200};
+function updateWorldUnlockButtons(){
+ for(const [id,unlocked,label] of [["world2Select",world2Unlocked,"🌋 WORLD 2 : LAVA LAND"],["world3Select",world3Unlocked,"☁️ WORLD 3 : SKY KINGDOM"],["world4Select",world4Unlocked,"🌌 WORLD 4 : COSMIC ABYSS"]]){const b=document.getElementById(id);b.disabled=!unlocked;b.textContent=unlocked?label:label+" 🔒";}
+}
 function refreshAdminUI(){
  const a=document.getElementById("adminToggle"),f=document.getElementById("floatToggle");
  a.style.display=adminUnlocked?"inline-block":"none";f.style.display=adminMode?"inline-block":"none";
@@ -826,7 +829,7 @@ document.getElementById("redeemCode").onclick=()=>{
  if(code===ADMIN_CODE){
   if(adminUnlocked){document.getElementById("codeMessage").textContent="管理者モードは解放済みです";return}
   adminUnlocked=true;adminMode=true;world2Unlocked=world3Unlocked=world4Unlocked=true;
-  refreshAdminUI();saveGame();document.getElementById("codeMessage").textContent="管理者モードを解放しました！";
+  updateWorldUnlockButtons();refreshAdminUI();saveGame();document.getElementById("codeMessage").textContent="管理者モードを解放しました！";
   return;
  }
  if(!Object.prototype.hasOwnProperty.call(SERIAL_CODES,code)){document.getElementById("codeMessage").textContent="コードが違います";return}
@@ -837,7 +840,8 @@ document.getElementById("redeemCode").onclick=()=>{
 document.getElementById("adminToggle").onclick=()=>{
  if(!adminUnlocked)return;adminMode=!adminMode;floatMode=false;
  if(adminMode){world2Unlocked=world3Unlocked=world4Unlocked=true;}
- refreshAdminUI();saveGame();
+ else{world2Unlocked=!!world2Cleared;world3Unlocked=!!world3Cleared;world4Unlocked=!!world4Cleared;}
+ updateWorldUnlockButtons();refreshAdminUI();saveGame();
 };
 document.getElementById("floatToggle").onclick=()=>{if(!adminMode)return;floatMode=!floatMode;refreshAdminUI();};
 document.getElementById("exportSaveCode").onclick=()=>{
@@ -850,7 +854,7 @@ document.getElementById("importSaveCode").onclick=()=>{
   const raw=decodeURIComponent(escape(atob(document.getElementById("saveCodeText").value.trim())));
   const data=JSON.parse(raw);if(!data||typeof data!=="object"||![1,2,3,4].includes(data.worldNumber))throw new Error("invalid");
   localStorage.setItem("gameSave",JSON.stringify(data));if(!loadGame())throw new Error("load");
-  refreshAdminUI();document.getElementById("codeMessage").textContent="セーブデータを読み込みました。ページを再読み込みしてください";
+  updateWorldUnlockButtons();refreshAdminUI();document.getElementById("codeMessage").textContent="セーブデータを読み込みました。ページを再読み込みしてください";
  }catch(e){document.getElementById("codeMessage").textContent="セーブコードが正しくありません";}
 };
 
@@ -858,7 +862,7 @@ document.getElementById("importSaveCode").onclick=()=>{
 renderShop();
 const hasSave=loadGame();
 if(!hasSave)worldNumber=1;
-refreshAdminUI();
+updateWorldUnlockButtons();refreshAdminUI();
 document.getElementById("world2Select").disabled=!world2Unlocked;
 document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";
 document.getElementById("world3Select").disabled=!world3Unlocked;
