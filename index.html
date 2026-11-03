@@ -281,6 +281,7 @@ function finishGame(){
 function update(){
  if(gameStarted&&!gameClear){
   if(worldNumber===4)updateWorld4Combat();
+  if(worldNumber===4&&bossDefeated)finishGame();
   if(adminBeamTimer>0)adminBeamTimer--;if(adminBeamCooldown>0)adminBeamCooldown--;
   if(dashTimer>0)dashTimer--;if(shieldTimer>0)shieldTimer--;if(invincibleTimer>0)invincibleTimer--;if(attackCooldown>0)attackCooldown--;if(attackTimer>0)attackTimer--;
   const speed=dashTimer>0?player.speed*2:player.speed;
@@ -323,7 +324,7 @@ function update(){
   for(const c of coins){if(!c.taken&&player.x<c.x+15&&player.x+player.w>c.x-15&&player.y<c.y+15&&player.y+player.h>c.y-15){c.taken=true;if(!adminMode)coinCount++}}
   if(!adminMode&&boss.alive&&player.x<boss.x+boss.w&&player.x+player.w>boss.x&&player.y<boss.y+boss.h&&player.y+player.h>boss.y&&invincibleTimer===0){if(worldNumber===4)damagePlayer();else{playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}}
   if(bossDefeated&&player.x<goal.x+goal.w&&player.x+player.w>goal.x&&player.y<goal.y+goal.h&&player.y+player.h>goal.y)finishGame();
-  camera=Math.max(0,Math.min(worldNumber===3?2500:1900,player.x-250));
+  camera=Math.max(0,Math.min(worldNumber===3?2500:worldNumber===4?2800:1900,player.x-250));
  }
  draw();requestAnimationFrame(update);
 }
