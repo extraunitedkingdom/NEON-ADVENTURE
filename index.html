@@ -225,7 +225,7 @@ function jump(){if(!gameClear&&player.jumps<player.maxJumps){player.vy=-player.j
 function attack(){
  if(gameClear||attackCooldown>0)return;
  attackCooldown=20;attackTimer=12;
- for(const e of enemies){if(!e.alive)continue;const px=player.x+player.w/2,py=player.y+player.h/2,ex=e.x+e.w/2,ey=e.y+e.h/2;const hit=worldNumber===4?(Math.abs(ex-px)<=105&&Math.abs(ey-py)<=Math.max(85,e.h/2+35)&&((ex-px)*facing>=-12)):(Math.hypot(px-ex,py-ey)<75);if(hit)e.alive=false}
+ for(const e of enemies){if(!e.alive)continue;const px=player.x+player.w/2,py=player.y+player.h/2,ex=e.x+e.w/2,ey=e.y+e.h/2;const hit=worldNumber===4?(Math.abs(ex-px)<=155&&Math.abs(ey-py)<=Math.max(115,e.h/2+55)):(Math.hypot(px-ex,py-ey)<75);if(hit)e.alive=false}
  if(boss.alive&&Math.hypot(player.x+player.w/2-(boss.x+boss.w/2),player.y+player.h/2-(boss.y+boss.h/2))<(worldNumber===4?155:115)){
   boss.hp=Math.max(0,boss.hp-1);if(boss.hp===0){boss.alive=false;bossDefeated=true;saveGame()}
  }
@@ -288,7 +288,7 @@ function update(){
   if(player.y>650&&worldNumber!==4){player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;player.ridingPlatform=null;playerHP=Math.max(1,playerHP-1);invincibleTimer=60}
   for(const z of lavaZones){if(player.x<z.x+z.w&&player.x+player.w>z.x&&player.y<z.y+z.h&&player.y+player.h>z.y&&!adminMode&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-7;if(playerHP<=0){playerHP=worldNumber===4?skinMaxHP():3;player.x=worldNumber===4&&checkpoint4?2780:80;player.y=worldNumber===4?388:200;player.vy=0;player.jumps=0}}}
   for(const e of enemies){
-   if(!e.alive)continue;e.x+=e.dir*1.5;if(e.x<e.min||e.x>e.max)e.dir*=-1;if(worldNumber===4){e.vy=e.vy||0;const foot=e.y+e.h;let supported=false;for(const p of platforms){if(e.x+e.w>p.x&&e.x<p.x+p.w&&Math.abs(foot-p.y)<=5&&e.vy>=0){e.y=p.y-e.h;e.vy=0;supported=true}}if(!supported){e.vy=Math.min(8,e.vy+.45);e.y+=e.vy}const ahead=e.dir>0?e.x+e.w+10:e.x-10;const ledge=platforms.find(p=>ahead>=p.x-5&&ahead<=p.x+p.w+5&&p.y<foot-18&&p.y>=foot-100);if(ledge&&Math.abs(foot-ledge.y)<115&&e.vy===0){e.vy=-9.5}}
+   if(!e.alive)continue;const oldEnemyY=e.y,oldEnemyBottom=e.y+e.h;if(worldNumber===4){e.vy=e.vy||0;e.jumpWait=e.jumpWait||0;if(e.jumpWait>0)e.jumpWait--;const ahead=e.dir>0?e.x+e.w+8:e.x-8;const foot=oldEnemyBottom;const step=platforms.find(p=>ahead>=p.x-4&&ahead<=p.x+p.w+4&&p.y<foot-18&&p.y>=foot-105);if(step&&e.vy===0&&e.jumpWait===0){e.vy=-8.5;e.jumpWait=48}e.x+=e.dir*1.15;if(e.x<e.min||e.x>e.max){e.x=Math.max(e.min,Math.min(e.max,e.x));e.dir*=-1}e.vy=Math.min(9,e.vy+.42);e.y+=e.vy;let landed=false;if(e.vy>=0){for(const p of platforms){const overlaps=e.x+e.w>p.x&&e.x<p.x+p.w;if(overlaps&&oldEnemyBottom<=p.y+2&&e.y+e.h>=p.y){e.y=p.y-e.h;e.vy=0;landed=true}}}if(!landed&&e.y+e.h>430){e.y=430-e.h;e.vy=0}}else{e.x+=e.dir*1.5;if(e.x<e.min||e.x>e.max)e.dir*=-1}
    if(player.x<e.x+e.w&&player.x+player.w>e.x&&player.y<e.y+e.h&&player.y+player.h>e.y){
     if(player.vy>0&&oldY+player.h<=e.y+16){e.alive=false;player.vy=-8;player.jumps=1}
     else if(!adminMode&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
@@ -827,7 +827,6 @@ document.getElementById("redeemCode").onclick=()=>{
  const code=document.getElementById("codeInput").value.trim().toUpperCase();
  let used=[];try{used=JSON.parse(localStorage.getItem("usedSerialCodes")||"[]")}catch(e){used=[]}
  if(code===ADMIN_CODE){
-  if(adminUnlocked){document.getElementById("codeMessage").textContent="管理者モードは解放済みです";return}
   adminUnlocked=true;adminMode=true;world2Unlocked=world3Unlocked=world4Unlocked=true;
   updateWorldUnlockButtons();refreshAdminUI();saveGame();document.getElementById("codeMessage").textContent="管理者モードを解放しました！";
   return;
