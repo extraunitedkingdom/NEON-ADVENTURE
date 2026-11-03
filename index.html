@@ -269,6 +269,11 @@ function draw(){
  if(bossDefeated){ctx.fillStyle="#ffd700";ctx.fillRect(goal.x,goal.y,goal.w,goal.h);ctx.fillStyle="#fff";ctx.font="16px sans-serif";ctx.fillText("GOAL",goal.x-4,goal.y-10)}
  // Chibi adventurer with sheathed/drawn cyan energy blade
  ctx.save();ctx.translate(player.x+player.w/2,player.y);ctx.scale(facing,1);
+ const walking=Math.abs(player.vx)>0.1&&player.grounded&&attackTimer===0;
+ const walkPhase=Date.now()*0.014;
+ const stride=walking?Math.sin(walkPhase):0;
+ const bob=walking?Math.abs(Math.cos(walkPhase))*2.2:0;
+ ctx.translate(0,-bob);
  if(attackTimer===0){
   ctx.save();ctx.translate(-5,19);ctx.rotate(-0.62);ctx.shadowColor="#22eaff";ctx.shadowBlur=8;
   ctx.fillStyle="#182a48";ctx.fillRect(-3,-24,7,31);ctx.fillStyle="#b9faff";ctx.fillRect(-1,-23,3,26);
@@ -276,19 +281,28 @@ function draw(){
  }
  ctx.shadowBlur=0;
  // boots and legs
- ctx.fillStyle="#101a2d";ctx.fillRect(-10,31,8,8);ctx.fillRect(2,31,8,8);
- ctx.fillStyle="#d9f8ff";ctx.fillRect(-11,37,11,4);ctx.fillRect(1,37,11,4);
- ctx.fillStyle="#16d9ed";ctx.fillRect(-9,38,5,2);ctx.fillRect(4,38,5,2);
- ctx.fillStyle="#17243a";ctx.fillRect(-8,25,7,9);ctx.fillRect(1,25,7,9);
+ // Animated legs: alternating stride while moving
+ for(const side of [-1,1]){
+  const phase=stride*side;
+  ctx.save();ctx.translate(side*4,26);ctx.rotate(walking?phase*0.42:0);
+  ctx.fillStyle="#17243a";ctx.fillRect(-3,-1,7,9);
+  ctx.fillStyle="#101a2d";ctx.fillRect(-4,6,8,7);
+  ctx.fillStyle="#d9f8ff";ctx.fillRect(-5,11,11,4);
+  ctx.fillStyle="#16d9ed";ctx.fillRect(-3,12,5,2);ctx.restore();
+ }
  // jacket
  ctx.shadowColor="#24eaff";ctx.shadowBlur=7;ctx.fillStyle="#142b49";ctx.fillRect(-12,15,24,14);ctx.shadowBlur=0;
  ctx.fillStyle="#eafaff";ctx.fillRect(-11,16,7,11);ctx.fillRect(4,16,7,11);
  ctx.fillStyle="#18385a";ctx.fillRect(-4,15,8,14);ctx.fillStyle="#28e9f5";ctx.fillRect(-1,17,2,10);
  ctx.fillStyle="#9cfaff";ctx.fillRect(-10,27,20,2);
  // arms and gloves
- ctx.fillStyle="#142b49";ctx.fillRect(-14,18,5,10);ctx.fillRect(9,18,5,10);
- ctx.fillStyle="#eafaff";ctx.fillRect(-14,18,5,3);ctx.fillRect(9,18,5,3);
- ctx.fillStyle="#f1c9b6";ctx.fillRect(-13,27,4,3);ctx.fillRect(9,27,4,3);
+ // Opposite arm swing for a readable running cycle
+ for(const side of [-1,1]){
+  ctx.save();ctx.translate(side*10,19);ctx.rotate(walking?-stride*0.38:0);
+  ctx.fillStyle="#142b49";ctx.fillRect(-2,0,5,9);
+  ctx.fillStyle="#eafaff";ctx.fillRect(-2,0,5,3);
+  ctx.fillStyle="#f1c9b6";ctx.fillRect(-2,8,5,4);ctx.restore();
+ }
  // face, hair and cyan eyes
  ctx.shadowColor="#22dfff";ctx.shadowBlur=5;ctx.fillStyle="#f1c9b6";ctx.fillRect(-11,2,22,17);ctx.shadowBlur=0;
  ctx.fillStyle="#101827";ctx.fillRect(-13,0,25,9);ctx.fillRect(-12,5,5,7);ctx.fillRect(7,4,5,7);
