@@ -388,6 +388,8 @@ function draw(){
   ctx.fillStyle="#263957";ctx.fillRect(-6,5,13,4);ctx.restore();
  }
  ctx.shadowBlur=0;
+ // スキンカラーを衣装・ブーツ・発光ラインに反映
+ const skinGlow=playerSkin;
  // boots and legs
  // Animated legs: alternating stride while moving
  for(const side of [-1,1]){
@@ -396,13 +398,13 @@ function draw(){
   ctx.fillStyle="#17243a";ctx.fillRect(-3,-1,7,9);
   ctx.fillStyle="#101a2d";ctx.fillRect(-4,6,8,7);
   ctx.fillStyle="#d9f8ff";ctx.fillRect(-5,11,11,4);
-  ctx.fillStyle="#16d9ed";ctx.fillRect(-3,12,5,2);ctx.restore();
+  ctx.fillStyle=skinGlow;ctx.fillRect(-3,12,5,2);ctx.restore();
  }
- // jacket
- ctx.shadowColor="#24eaff";ctx.shadowBlur=7;ctx.fillStyle="#142b49";ctx.fillRect(-12,15,24,14);ctx.shadowBlur=0;
+ // jacket: equipped skin determines the main suit color
+ ctx.shadowColor=skinGlow;ctx.shadowBlur=7;ctx.fillStyle=skinGlow;ctx.fillRect(-12,15,24,14);ctx.shadowBlur=0;
  ctx.fillStyle="#eafaff";ctx.fillRect(-11,16,7,11);ctx.fillRect(4,16,7,11);
- ctx.fillStyle="#18385a";ctx.fillRect(-4,15,8,14);ctx.fillStyle="#28e9f5";ctx.fillRect(-1,17,2,10);
- ctx.fillStyle="#9cfaff";ctx.fillRect(-10,27,20,2);
+ ctx.fillStyle="#142b49";ctx.fillRect(-4,15,8,14);ctx.fillStyle=skinGlow;ctx.fillRect(-1,17,2,10);
+ ctx.fillStyle="#ffffff";ctx.fillRect(-10,27,20,2);
  // arms and gloves
  // Opposite arm swing for a readable running cycle
  for(const side of [-1,1]){
@@ -461,8 +463,19 @@ document.getElementById("ranking").onclick=()=>alert("TIME RANKING TOP 5\\n\\n"+
 document.getElementById("shopToggle").onclick=()=>{const p=document.getElementById("shopPanel");p.style.display=p.style.display==="block"?"none":"block"};
 function renderShop(){
  const area=document.getElementById("skinItems");area.innerHTML="";
- for(const s of skins){const b=document.createElement("button");b.textContent=s.name+" - "+s.price+" COINS";
- b.onclick=()=>{if(ownedSkins.includes(s.color)){playerSkin=s.color;saveGame();alert("スキンを装備した！")}else if(coinCount>=s.price){coinCount-=s.price;ownedSkins.push(s.color);playerSkin=s.color;saveGame();alert("スキンを購入した！")}else alert("コインが足りない！")};area.appendChild(b)}
+ const balance=document.createElement("p");balance.className="small";balance.textContent="所持コイン： "+coinCount+" COINS";area.appendChild(balance);
+ for(const s of skins){
+  const owned=ownedSkins.includes(s.color),equipped=playerSkin===s.color;
+  const b=document.createElement("button");
+  b.textContent=equipped?"✓ "+s.name+"（装備中）":owned?s.name+"（所持・装備）":s.name+" - "+s.price+" COINS";
+  b.disabled=equipped;
+  b.onclick=()=>{
+   if(owned){playerSkin=s.color;saveGame();renderShop();return}
+   if(coinCount>=s.price){coinCount-=s.price;ownedSkins.push(s.color);playerSkin=s.color;saveGame();renderShop();alert(s.name+"を購入して装備した！")}
+   else alert("コインが足りない！");
+  };
+  area.appendChild(b);
+ }
 }
 renderShop();loadGame();document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";if(worldNumber===2){const wasClear=gameClear,wasStageCleared=stageCleared,wasTime=currentTime,wasBossHP=boss.hp,wasBossAlive=boss.alive,wasBossDefeated=bossDefeated;loadWorld2();gameClear=wasClear;stageCleared=wasStageCleared;currentTime=wasTime;boss.hp=wasBossHP;boss.alive=wasBossAlive;bossDefeated=wasBossDefeated;if(gameClear)gameStart=Date.now()-currentTime*1000;document.getElementById("startGame").textContent="CONTINUE WORLD 2"}else if(world3Unlocked){document.getElementById("startGame").textContent="START WORLD 3"}else if(world2Unlocked){document.getElementById("startGame").textContent="START WORLD 2"}setInterval(()=>{if(gameStarted)saveGame()},5000);update();
 </script>
