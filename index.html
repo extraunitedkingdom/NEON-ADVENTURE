@@ -212,7 +212,7 @@ function renderEquipment(){
   const btn=document.createElement("button");btn.type="button";btn.textContent=equipped?"装備中":owned?"装備する": "購入";
   btn.disabled=equipped;
   btn.onclick=()=>{
-   if(!owned){if(coinCount<item.price){alert("コインが足りません");return}coinCount-=item.price;ownedEquipment.push(item.id)}
+   if(!owned){if(!adminMode&&coinCount<item.price){alert("コインが足りません");return}if(!adminMode)coinCount-=item.price;ownedEquipment.push(item.id)}
    equippedEquipment[item.slot]=item.id;playerHP=Math.min(playerHP,playerMaxHP());saveGame();renderEquipment();renderShop();
   };
   row.append(info,btn);items.appendChild(row);
