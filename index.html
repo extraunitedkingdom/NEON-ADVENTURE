@@ -698,11 +698,18 @@ function draw(){
  // face, hair and cyan eyes
  ctx.shadowColor="#22dfff";ctx.shadowBlur=5;ctx.fillStyle="#f1c9b6";ctx.fillRect(-11,2,22,17);ctx.shadowBlur=0;
  if(appearanceCharacter==="girl"){
-  // 女の子：長いサイドヘア＋前髪＋リボン。体格と衣装サイズは元キャラと共通
-  ctx.fillStyle="#54244f";ctx.fillRect(-14,-2,6,22);ctx.fillRect(9,-2,6,22);
-  ctx.fillRect(-13,-7,26,10);ctx.fillRect(-10,-10,8,7);ctx.fillRect(0,-9,8,6);
+  ctx.fillStyle="#54244f";ctx.fillRect(-14,-2,6,22);ctx.fillRect(9,-2,6,22);ctx.fillRect(-13,-7,26,10);ctx.fillRect(-10,-10,8,7);ctx.fillRect(0,-9,8,6);
   ctx.fillStyle="#ffb5e8";ctx.fillRect(8,-12,6,4);ctx.fillRect(11,-9,3,5);
-  ctx.fillStyle="#101827";ctx.fillRect(-8,4,5,5);ctx.fillRect(4,4,5,5);
+ }else if(appearanceCharacter==="knight"){
+  ctx.fillStyle="#8296b5";ctx.fillRect(-14,-8,28,9);ctx.fillRect(-12,-14,24,9);ctx.fillRect(-16,-5,5,14);ctx.fillRect(11,-5,5,14);
+  ctx.fillStyle="#dce8ff";ctx.fillRect(-9,-12,18,3);ctx.fillRect(-8,1,16,4);ctx.fillStyle="#f6d77a";ctx.fillRect(-2,-16,4,4);
+ }else if(appearanceCharacter==="ninja"){
+  ctx.fillStyle="#101426";ctx.fillRect(-14,-8,28,12);ctx.fillRect(-13,-3,26,12);ctx.fillStyle="#9b7cff";ctx.fillRect(-15,-9,30,3);ctx.fillRect(-12,5,24,2);
+  ctx.fillStyle="#f4fbff";ctx.fillRect(-8,2,5,2);ctx.fillRect(3,2,5,2);
+ }else if(appearanceCharacter==="robot"){
+  ctx.fillStyle="#54758e";ctx.fillRect(-14,-10,28,26);ctx.fillStyle="#263d55";ctx.fillRect(-12,-13,24,5);ctx.fillStyle="#43f5ff";ctx.shadowColor="#43f5ff";ctx.shadowBlur=8;ctx.fillRect(-9,0,6,5);ctx.fillRect(3,0,6,5);ctx.shadowBlur=0;ctx.fillStyle="#dffaff";ctx.fillRect(-3,10,6,2);
+ }else if(appearanceCharacter==="ghost"){
+  ctx.fillStyle="rgba(190,245,255,.9)";ctx.fillRect(-14,-8,28,27);ctx.fillRect(-17,-2,4,18);ctx.fillRect(13,-2,4,18);ctx.fillStyle="#c8f5ff";ctx.fillRect(-12,-12,24,7);ctx.fillStyle="#fff";ctx.fillRect(-8,3,5,4);ctx.fillRect(3,3,5,4);ctx.fillStyle="#65b9dc";ctx.fillRect(-2,13,4,2);
  }else{
   ctx.fillStyle="#101827";ctx.fillRect(-13,0,25,9);ctx.fillRect(-12,5,5,7);ctx.fillRect(7,4,5,7);
   ctx.beginPath();ctx.moveTo(-12,5);ctx.lineTo(-16,1);ctx.lineTo(-8,3);ctx.lineTo(-4,-3);ctx.lineTo(0,2);ctx.lineTo(6,-2);ctx.lineTo(9,4);ctx.lineTo(14,1);ctx.lineTo(11,10);ctx.lineTo(-11,10);ctx.closePath();ctx.fill();
@@ -786,9 +793,16 @@ function drawSkinPreview(color){
  pc.fillStyle="#f1c9b6";pc.fillRect(-4,8,8,10);pc.fillStyle="#f1c9b6";pc.fillRect(-11,-8,22,22);
  // 選択中キャラクターの髪型をプレビューにも反映
  if(appearanceCharacter==="girl"){
-  pc.fillStyle="#54244f";pc.fillRect(-14,-2,6,22);pc.fillRect(9,-2,6,22);
-  pc.fillRect(-13,-7,26,10);pc.fillRect(-10,-10,8,7);pc.fillRect(0,-9,8,6);
+  pc.fillStyle="#54244f";pc.fillRect(-14,-2,6,22);pc.fillRect(9,-2,6,22);pc.fillRect(-13,-7,26,10);pc.fillRect(-10,-10,8,7);pc.fillRect(0,-9,8,6);
   pc.fillStyle="#ffb5e8";pc.fillRect(8,-12,6,4);pc.fillRect(11,-9,3,5);
+ }else if(appearanceCharacter==="knight"){
+  pc.fillStyle="#8296b5";pc.fillRect(-14,-8,28,9);pc.fillRect(-12,-14,24,9);pc.fillRect(-16,-5,5,14);pc.fillRect(11,-5,5,14);pc.fillStyle="#dce8ff";pc.fillRect(-9,-12,18,3);pc.fillRect(-8,1,16,4);pc.fillStyle="#f6d77a";pc.fillRect(-2,-16,4,4);
+ }else if(appearanceCharacter==="ninja"){
+  pc.fillStyle="#101426";pc.fillRect(-14,-8,28,12);pc.fillRect(-13,-3,26,12);pc.fillStyle="#9b7cff";pc.fillRect(-15,-9,30,3);pc.fillRect(-12,5,24,2);pc.fillStyle="#f4fbff";pc.fillRect(-8,2,5,2);pc.fillRect(3,2,5,2);
+ }else if(appearanceCharacter==="robot"){
+  pc.fillStyle="#54758e";pc.fillRect(-14,-10,28,26);pc.fillStyle="#263d55";pc.fillRect(-12,-13,24,5);pc.fillStyle="#43f5ff";pc.shadowColor="#43f5ff";pc.shadowBlur=8;pc.fillRect(-9,0,6,5);pc.fillRect(3,0,6,5);pc.shadowBlur=0;pc.fillStyle="#dffaff";pc.fillRect(-3,10,6,2);
+ }else if(appearanceCharacter==="ghost"){
+  pc.fillStyle="rgba(190,245,255,.9)";pc.fillRect(-14,-8,28,27);pc.fillRect(-17,-2,4,18);pc.fillRect(13,-2,4,18);pc.fillStyle="#c8f5ff";pc.fillRect(-12,-12,24,7);pc.fillStyle="#fff";pc.fillRect(-8,3,5,4);pc.fillRect(3,3,5,4);pc.fillStyle="#65b9dc";pc.fillRect(-2,13,4,2);
  }else{
   pc.fillStyle="#0b1427";pc.beginPath();pc.moveTo(-13,1);pc.lineTo(-18,-8);pc.lineTo(-10,-6);pc.lineTo(-8,-18);pc.lineTo(-2,-11);pc.lineTo(3,-22);pc.lineTo(7,-12);pc.lineTo(15,-17);pc.lineTo(13,-7);pc.lineTo(19,-3);pc.lineTo(13,8);pc.lineTo(10,1);pc.lineTo(6,7);pc.lineTo(1,1);pc.lineTo(-5,8);pc.lineTo(-9,2);pc.lineTo(-14,8);pc.closePath();pc.fill();
   pc.fillStyle="#17233c";pc.beginPath();pc.moveTo(-10,-6);pc.lineTo(-2,-13);pc.lineTo(1,-5);pc.lineTo(7,-13);pc.lineTo(9,-3);pc.lineTo(4,2);pc.lineTo(-1,-2);pc.lineTo(-6,3);pc.closePath();pc.fill();
