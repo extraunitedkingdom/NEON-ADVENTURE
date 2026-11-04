@@ -249,6 +249,52 @@ body>h1{display:none}
 #profilePanel .profile-apply{margin-top:12px;background:#41677a;border:1px solid #9cecff;border-radius:0;letter-spacing:2px}
 @media(max-width:650px){#profilePanel{padding:6px}.profile-shell{margin:4px auto;padding:11px}.profile-main{grid-template-columns:1fr;gap:10px}.profile-portrait{min-height:190px}.profile-sigil{font-size:100px}.profile-portrait:after{bottom:10px}.profile-roster{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-copy{min-height:90px}}
 
+
+/* ZZZ-inspired street-tech skin shop redesign — 2.04 */
+#shopPanel{background:rgba(7,9,13,.97);color:#f5f3eb}
+#shopPanel .shop-shell{max-width:1120px;padding:clamp(10px,2vw,22px);background:#e9e7dc;color:#17191c;border:4px solid #17191c;box-shadow:12px 12px 0 #f5a623;position:relative;overflow:hidden}
+#shopPanel .shop-shell:before{content:"NEON ADVENTURE  /  VISUAL ARCHIVE";display:block;margin:-2px 0 14px;padding:7px 10px;background:#17191c;color:#f5c344;font:900 10px monospace;letter-spacing:3px}
+#shopPanel .shop-header{position:relative;z-index:1;margin-bottom:16px;padding:0 0 12px;border-bottom:3px solid #17191c}
+#shopPanel .shop-header h2{color:#17191c;font-size:clamp(25px,5vw,44px);font-style:normal;font-weight:1000;letter-spacing:-1px;text-shadow:3px 3px 0 #f5b82e;transform:skew(-5deg)}
+#shopPanel .shop-header button{background:#f4b82e;color:#17191c;border:2px solid #17191c;border-radius:0;box-shadow:4px 4px 0 #17191c;font-weight:900}
+#shopPanel .shop-coins{background:#17191c;color:#ffd45c;border:2px solid #17191c;border-radius:0;box-shadow:4px 4px 0 #f3a51e;font-family:monospace}
+#shopPanel .shop-layout{grid-template-columns:minmax(250px,.82fr) minmax(0,1.45fr);gap:16px}
+#shopPanel .shop-preview{position:relative;min-height:440px;border:3px solid #17191c;border-radius:0;background:linear-gradient(145deg,#f5c344 0 15%,#e9e7dc 15% 18%,#252a31 18% 100%);box-shadow:8px 8px 0 #17191c;justify-content:flex-end;overflow:hidden}
+#shopPanel .shop-preview:before{content:"01 / SELECTED LOOK";position:absolute;top:14px;left:14px;padding:6px 9px;background:#17191c;color:#f8ca48;font:900 11px monospace;letter-spacing:2px;transform:skew(-7deg)}
+#shopPanel .shop-preview:after{content:"STYLE  •  IDENTITY  •  ACTION";position:absolute;top:47px;left:16px;color:#e9e7dc;font:10px monospace;letter-spacing:2px}
+#shopPanel #skinPreview{height:320px;max-width:300px;filter:drop-shadow(0 10px 0 #0008)}
+#shopPanel #skinPreviewLabel{color:#f8ca48;font:900 11px monospace;letter-spacing:3px}
+#shopPanel .shop-preview-name{align-self:stretch;margin:8px -12px -12px;padding:12px 14px;background:#f5c344;color:#17191c;font-size:23px;font-weight:1000;letter-spacing:1px;text-shadow:none;text-transform:uppercase}
+#shopPanel .shop-preview-desc{align-self:stretch;margin:0 -12px;padding:8px 14px;background:#17191c;color:#e9e7dc;text-align:left;font-size:11px}
+#shopPanel .shop-catalog{border:3px solid #17191c;border-radius:0;padding:12px;background:#d5d4cc;box-shadow:8px 8px 0 #a7a59c}
+#shopPanel .shop-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:12px}
+#shopPanel .shop-tabs button{min-width:0;margin:0;padding:9px 3px;border:2px solid #17191c;border-radius:0;background:#f3f0e5;color:#17191c;box-shadow:3px 3px 0 #17191c;font-size:12px;font-weight:900}
+#shopPanel .shop-tabs button.active{background:#f5bd32;color:#17191c;border-color:#17191c;box-shadow:3px 3px 0 #17191c;transform:translate(-1px,-1px)}
+#shopPanel #skinItems{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#shopPanel .skin-card{position:relative;min-height:126px;padding:10px 8px;border:2px solid #17191c;border-radius:0;background:linear-gradient(135deg,#f6f4e9 0 72%,#d6d4c9 72%);color:#17191c;box-shadow:4px 4px 0 #17191c;transition:transform .16s,box-shadow .16s}
+#shopPanel .skin-card:after{content:"";position:absolute;right:0;top:0;border-top:20px solid #f2bd38;border-left:20px solid transparent}
+#shopPanel .skin-card.selected{border-color:#17191c;background:linear-gradient(135deg,#fff2bd 0 72%,#f5bd32 72%);box-shadow:4px 4px 0 #e89c1c;transform:translate(-2px,-2px)}
+#shopPanel .skin-swatch{width:50px;height:50px;border-radius:0;border:2px solid #17191c;box-shadow:3px 3px 0 #17191c}
+#shopPanel .skin-card strong{font-size:13px;font-weight:1000;letter-spacing:.3px}
+#shopPanel .skin-card small{color:#555b60;font-size:10px;font-weight:800}
+#shopPanel .shop-actions{gap:10px;margin-top:16px;padding-top:12px;border-top:2px dashed #777}
+#shopPanel .shop-actions button{min-height:48px;border:2px solid #17191c;border-radius:0;box-shadow:4px 4px 0 #17191c;font-weight:1000;letter-spacing:1px}
+#shopPanel #buySkin{background:#f5bd32;color:#17191c;border-color:#17191c}
+#shopPanel #equipSkin{background:#242a31;color:#f6f2e7;border-color:#17191c}
+#shopPanel .shop-actions button:disabled{opacity:.48;filter:grayscale(.6)}
+#shopPanel #shopMessage{color:#242a31;font-weight:800}
+@media(max-width:650px){
+ #shopPanel .shop-shell{padding:9px;border-width:3px;box-shadow:5px 5px 0 #f5a623}
+ #shopPanel .shop-layout{grid-template-columns:1fr;gap:12px}
+ #shopPanel .shop-preview{min-height:260px;padding:8px}
+ #shopPanel #skinPreview{height:190px;max-width:190px}
+ #shopPanel .shop-preview-name{font-size:18px;padding:8px 10px}
+ #shopPanel .shop-preview-desc{padding:6px 10px}
+ #shopPanel .shop-tabs{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #shopPanel .skin-card{min-height:112px}
+}
+@media(prefers-reduced-motion:reduce){#shopPanel .skin-card{transition:none}}
+
 </style>
 </head>
 <body>
@@ -383,7 +429,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.03</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.04</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
