@@ -325,6 +325,27 @@ body>h1{display:none}
 #shopPanel #shopMessage{color:#8af5ff}
 @media(max-width:650px){#shopPanel .shop-shell{box-shadow:5px 5px 0 #070e20}.shop-preview{box-shadow:4px 4px 0 #070e20}}
 
+
+/* Achievement archive — version 2.06 */
+#achievementPanel{display:none;position:fixed;z-index:55;inset:0;overflow-y:auto;padding:14px;background:radial-gradient(ellipse at 50% 0%,#183b69,#070d20 72%);color:#eafaff}
+.achievement-shell{width:min(100%,850px);margin:18px auto;padding:clamp(14px,3vw,26px);border:2px solid #45dfff;background:linear-gradient(145deg,#0d1e3b,#10142f 65%,#17163c);box-shadow:0 0 28px #1adfff44}
+.achievement-header{display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #3d6992;padding-bottom:14px}
+.achievement-header small{color:#8af5ff;letter-spacing:2px;font:700 10px monospace}
+.achievement-header h2{margin:5px 0;color:#f2fbff;font-size:clamp(26px,6vw,40px);letter-spacing:2px;text-shadow:0 0 14px #20dfff66}
+.achievement-header p{margin:0;color:#b6d9f5;font:700 12px monospace}
+.achievement-header button{margin:0;padding:9px 12px;background:#142b52;color:#eafaff;border:1px solid #45dfff;border-radius:5px}
+.achievement-progress{height:9px;margin:16px 0;background:#080f25;border:1px solid #315d88;overflow:hidden}
+#achievementProgressBar{height:100%;width:0;background:linear-gradient(90deg,#23cfff,#8d72ff);box-shadow:0 0 12px #23cfff;transition:width .25s}
+#achievementList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.achievement-card{display:flex;align-items:center;gap:12px;min-height:92px;padding:12px;border:1px solid #34577e;background:linear-gradient(120deg,#14294a,#10172f);color:#eafaff}
+.achievement-card.unlocked{border-color:#55dfff;background:linear-gradient(120deg,#173d5c,#191d45);box-shadow:inset 3px 0 #54eaff}
+.achievement-icon{display:grid;place-items:center;flex:0 0 48px;height:48px;background:#09152d;border:1px solid #4c79a4;font-size:24px;filter:grayscale(1);opacity:.55}
+.achievement-card.unlocked .achievement-icon{filter:none;opacity:1;border-color:#7af2ff;box-shadow:0 0 12px #21dfff44}
+.achievement-card strong{display:block;font-size:13px;letter-spacing:.4px}
+.achievement-card p{margin:4px 0 0;color:#a9c8e8;font-size:11px;line-height:1.5}
+.achievement-card small{display:block;margin-top:5px;color:#7cefff;font:700 9px monospace;letter-spacing:1px}
+@media(max-width:560px){#achievementPanel{padding:8px}.achievement-shell{margin:8px auto;padding:12px}.achievement-header{align-items:flex-start}.achievement-header button{font-size:11px;padding:8px 7px}#achievementList{grid-template-columns:1fr}.achievement-card{min-height:78px}}
+
 </style>
 </head>
 <body>
@@ -459,11 +480,12 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.05</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.06</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
 <button id="profileToggle">▣　CHARACTER FILE</button>
+<button id="achievementToggle">🏅　ACHIEVEMENTS</button>
 <button id="shopToggle">🛒　SKIN SHOP</button>
 <button id="save">▣　SAVE</button>
 <button id="ranking">🏆　RANKING</button>
@@ -496,6 +518,14 @@ body>h1{display:none}
   </div>
  </div>
 </div>
+</div>
+
+<div id="achievementPanel" role="dialog" aria-modal="true" aria-label="実績">
+ <div class="achievement-shell">
+  <header class="achievement-header"><div><small>NEON ADVENTURE / FIELD RECORD</small><h2>ACHIEVEMENTS</h2><p id="achievementProgress">0 / 8 UNLOCKED</p></div><button id="closeAchievements">✕ CLOSE</button></header>
+  <div class="achievement-progress"><div id="achievementProgressBar"></div></div>
+  <div id="achievementList"></div>
+ </div>
 </div>
 <div id="codePanel" role="dialog" aria-modal="true" style="display:none;position:fixed;z-index:50;inset:0;overflow-y:auto;max-width:none;margin:0;padding:18px 12px;background:rgba(3,7,24,.96);border:0;border-radius:0"><div style="max-width:520px;margin:24px auto;padding:18px;background:#111a3d;border:2px solid #27eaff;border-radius:14px;box-shadow:0 0 24px #27eaff66">
 <h3>CODE CENTER</h3><p>シリアルコード・管理者コードを入力</p><input id="codeInput" autocomplete="off" placeholder="コードを入力" style="width:100%;padding:12px;border-radius:8px;font-size:16px"><button id="redeemCode">コードを使う</button><p id="codeMessage" aria-live="polite"></p><hr><h3>セーブコード</h3><button id="exportSaveCode">セーブコードを発行</button><textarea id="saveCodeText" rows="3" placeholder="発行したセーブコード／読み込むセーブコード" style="width:100%;padding:10px;border-radius:8px"></textarea><button id="importSaveCode">セーブコードを読み込む</button><button id="closeCodePanel">閉じる</button></div>
@@ -533,6 +563,7 @@ let adminBeamTimer=0,adminBeamCooldown=0;
 let worldNumber=1,world2Unlocked=false,world2Cleared=false,world3Unlocked=false,world3Cleared=false;
 let facing=1,attackTimer=0,gameStarted=false;
 let playerSkin="#9b8aff",coinCount=0,camera=0,gameClear=false,bossDefeated=false,stageCleared=false;
+let achievementUnlocked=[],achievementTotalCoins=0,achievementEnemyKills=0;
 let appearanceBackground="default",appearanceEmoji="",appearanceCharacter="boy";
 let gameStart=Date.now(),currentTime=0;
 let bestTime=Number(localStorage.getItem("bestTime"))||null;
@@ -622,13 +653,14 @@ document.getElementById("closeEquipment").onclick=closeEquipment;
 document.getElementById("equipmentPanel").addEventListener("click",e=>{if(e.target.id==="equipmentPanel")closeEquipment()});
 
 function saveGame(){
- const data={version:5,appearanceBackground,appearanceEmoji,appearanceCharacter,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ const data={version:6,achievementUnlocked,achievementTotalCoins,achievementEnemyKills,appearanceBackground,appearanceEmoji,appearanceCharacter,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
  try{localStorage.setItem("gameSave",JSON.stringify(data));return true}catch(e){console.error("セーブに失敗しました",e);return false}
 }
 function loadGame(){
  let d;
  try{d=JSON.parse(localStorage.getItem("gameSave")||"null")}catch(e){console.warn("セーブデータの形式が壊れています",e);return false}
  if(!d||typeof d!=="object")return false;
+ achievementUnlocked=Array.isArray(d.achievementUnlocked)?d.achievementUnlocked.filter(x=>typeof x==="string"):[];achievementTotalCoins=Number.isFinite(d.achievementTotalCoins)?d.achievementTotalCoins:0;achievementEnemyKills=Number.isFinite(d.achievementEnemyKills)?d.achievementEnemyKills:0;
  appearanceBackground=typeof d.appearanceBackground==="string"?d.appearanceBackground:"default";appearanceEmoji=typeof d.appearanceEmoji==="string"?d.appearanceEmoji:"";appearanceCharacter=typeof d.appearanceCharacter==="string"?d.appearanceCharacter:"boy";
  coinCount=Number.isFinite(d.coinCount)?d.coinCount:coinCount;
  adminUnlocked=!!d.adminUnlocked;adminMode=adminUnlocked&&!!d.adminMode;floatMode=false;
@@ -704,7 +736,8 @@ function useAdminBeam(){
  if(!adminMode||!gameStarted||gameClear||adminBeamCooldown>0)return;
  adminBeamTimer=28;adminBeamCooldown=42;
  const px=player.x+player.w/2,py=player.y+player.h/2;
- for(const e of enemies){if(e.alive&&((facing>0&&e.x+e.w>=px&&e.x<=px+1800)||(facing<0&&e.x<=px&&e.x+e.w>=px-1800))&&Math.abs(e.y+e.h/2-py)<95)e.alive=false}
+ for(const e of enemies){if(e.alive&&((facing>0&&e.x+e.w>=px&&e.x<=px+1800)||(facing<0&&e.x<=px&&e.x+e.w>=px-1800))&&Math.abs(e.y+e.h/2-py)<95){e.alive=false;achievementEnemyKills++}}
+ checkAchievements();
  if(boss.alive&&((facing>0&&boss.x+boss.w>=px&&boss.x<=px+1800)||(facing<0&&boss.x<=px&&boss.x+boss.w>=px-1800))&&Math.abs(boss.y+boss.h/2-py)<150){boss.hp=0;boss.alive=false;bossDefeated=true;saveGame()}
 }
 function useDash(){if(gameStarted&&!gameClear&&dashTimer===0)dashTimer=90}
@@ -723,12 +756,46 @@ document.getElementById("kamehameha").addEventListener("pointerdown",e=>{e.preve
 window.addEventListener("keydown",e=>{keys[e.code]=true;if(e.code==="Space"&&!e.repeat){e.preventDefault();jump()}if(e.code==="ControlLeft"&&!e.repeat){e.preventDefault();useDash()}});
 window.addEventListener("keyup",e=>keys[e.code]=false);
 canvas.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button===0)attack()});
+
+const achievementDefs=[
+ {id:"first_run",icon:"🚀",name:"FIRST STEP",desc:"冒険を開始する",test:()=>gameStarted},
+ {id:"first_clear",icon:"🏁",name:"CLEAR!",desc:"初めてステージをクリアする",test:()=>stageCleared},
+ {id:"world1",icon:"🌿",name:"GREEN FOREST",desc:"WORLD 1をクリアする",test:()=>world2Unlocked},
+ {id:"world2",icon:"🌋",name:"LAVA LAND",desc:"WORLD 2をクリアする",test:()=>world2Cleared},
+ {id:"world3",icon:"☁️",name:"SKY KINGDOM",desc:"WORLD 3をクリアする",test:()=>world3Cleared},
+ {id:"world4",icon:"🌌",name:"COSMIC ABYSS",desc:"WORLD 4をクリアする",test:()=>world4Cleared},
+ {id:"collector",icon:"🪙",name:"COIN COLLECTOR",desc:"コインを累計10枚集める",test:()=>achievementTotalCoins>=10},
+ {id:"hunter",icon:"⚔️",name:"ENEMY HUNTER",desc:"敵を累計5体倒す",test:()=>achievementEnemyKills>=5}
+];
+function checkAchievements(){
+ let changed=false;
+ for(const a of achievementDefs)if(!achievementUnlocked.includes(a.id)&&a.test()){achievementUnlocked.push(a.id);changed=true}
+ if(changed){saveGame();renderAchievements()}
+}
+function renderAchievements(){
+ const list=document.getElementById("achievementList");if(!list)return;
+ const count=achievementDefs.filter(a=>achievementUnlocked.includes(a.id)).length;
+ document.getElementById("achievementProgress").textContent=count+" / "+achievementDefs.length+" UNLOCKED";
+ document.getElementById("achievementProgressBar").style.width=(count/achievementDefs.length*100)+"%";
+ list.innerHTML="";
+ for(const a of achievementDefs){
+  const unlocked=achievementUnlocked.includes(a.id),card=document.createElement("article");
+  card.className="achievement-card"+(unlocked?" unlocked":"");
+  card.innerHTML='<div class="achievement-icon">'+a.icon+'</div><div><strong>'+a.name+'</strong><p>'+a.desc+'</p><small>'+(unlocked?"UNLOCKED":"LOCKED")+'</small></div>';
+  list.appendChild(card);
+ }
+}
+function openAchievements(){checkAchievements();renderAchievements();document.getElementById("achievementPanel").style.display="block"}
+document.getElementById("achievementToggle").onclick=openAchievements;
+document.getElementById("closeAchievements").onclick=()=>document.getElementById("achievementPanel").style.display="none";
+document.getElementById("achievementPanel").addEventListener("click",e=>{if(e.target.id==="achievementPanel")e.currentTarget.style.display="none"});
+
 function finishGame(){
  if(gameClear)return;
  gameClear=true;stageCleared=true;if(worldNumber===1)world2Unlocked=true;else if(worldNumber===2){world2Cleared=true;world3Unlocked=true}else if(worldNumber===3){world3Cleared=true;world4Unlocked=true;world4Cleared=false;}else world4Cleared=true;currentTime=(Date.now()-gameStart)/1000;
  if(bestTime===null||currentTime<bestTime){bestTime=currentTime;localStorage.setItem("bestTime",String(bestTime))}
  timeRecords.push(currentTime);timeRecords.sort((a,b)=>a-b);timeRecords=timeRecords.slice(0,5);
- localStorage.setItem("timeRecords",JSON.stringify(timeRecords));saveGame();
+ localStorage.setItem("timeRecords",JSON.stringify(timeRecords));checkAchievements();saveGame();
  saveGame();document.getElementById("clearTitle").textContent="WORLD "+worldNumber+" CLEAR!";document.getElementById("clearPanel").style.display="block";document.getElementById("nextStageButton").style.display=worldNumber<4?"inline-block":"none";
 }
 function update(){
@@ -770,11 +837,11 @@ function update(){
   for(const e of enemies){
    if(!e.alive)continue;const oldEnemyY=e.y,oldEnemyBottom=e.y+e.h;if(worldNumber===4){e.vy=e.vy||0;e.jumpWait=e.jumpWait||0;if(e.jumpWait>0)e.jumpWait--;const ahead=e.dir>0?e.x+e.w+8:e.x-8;const foot=oldEnemyBottom;const step=platforms.find(p=>ahead>=p.x-4&&ahead<=p.x+p.w+4&&p.y<foot-18&&p.y>=foot-105);if(step&&e.vy===0&&e.jumpWait===0){e.vy=-8.5;e.jumpWait=48}e.x+=e.dir*1.15;if(e.x<e.min||e.x>e.max){e.x=Math.max(e.min,Math.min(e.max,e.x));e.dir*=-1}e.vy=Math.min(9,e.vy+.42);e.y+=e.vy;let landed=false;if(e.vy>=0){for(const p of platforms){const overlaps=e.x+e.w>p.x&&e.x<p.x+p.w;if(overlaps&&oldEnemyBottom<=p.y+2&&e.y+e.h>=p.y){e.y=p.y-e.h;e.vy=0;landed=true}}}if(!landed&&e.y+e.h>430){e.y=430-e.h;e.vy=0}}else{e.x+=e.dir*1.5;if(e.x<e.min||e.x>e.max)e.dir*=-1}
    if(player.x<e.x+e.w&&player.x+player.w>e.x&&player.y<e.y+e.h&&player.y+player.h>e.y){
-    if(player.vy>0&&oldY+player.h<=e.y+16){e.alive=false;player.vy=-8;player.jumps=1}
+    if(player.vy>0&&oldY+player.h<=e.y+16){e.alive=false;achievementEnemyKills++;checkAchievements();player.vy=-8;player.jumps=1}
     else if(!adminMode&&invincibleTimer===0){playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
    }
   }
-  for(const c of coins){if(!c.taken&&player.x<c.x+15&&player.x+player.w>c.x-15&&player.y<c.y+15&&player.y+player.h>c.y-15){c.taken=true;if(!adminMode)coinCount++}}
+  for(const c of coins){if(!c.taken&&player.x<c.x+15&&player.x+player.w>c.x-15&&player.y<c.y+15&&player.y+player.h>c.y-15){c.taken=true;if(!adminMode){coinCount++;achievementTotalCoins++;checkAchievements()}}}
   if(!adminMode&&boss.alive&&player.x<boss.x+boss.w&&player.x+player.w>boss.x&&player.y<boss.y+boss.h&&player.y+player.h>boss.y&&invincibleTimer===0){if(worldNumber===4)damagePlayer();else{playerHP--;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}}
   if(bossDefeated&&player.x<goal.x+goal.w&&player.x+player.w>goal.x&&player.y<goal.y+goal.h&&player.y+player.h>goal.y)finishGame();
   camera=Math.max(0,Math.min(worldNumber===3?2500:worldNumber===4?2800:1900,player.x-250));
