@@ -295,6 +295,36 @@ body>h1{display:none}
 }
 @media(prefers-reduced-motion:reduce){#shopPanel .skin-card{transition:none}}
 
+
+/* NEON ADVENTURE world-palette refinement — version 2.05 */
+#shopPanel{background:rgba(4,9,24,.97);color:#eafaff}
+#shopPanel .shop-shell{background:linear-gradient(145deg,#0c1b38 0%,#10132f 55%,#17133b 100%);color:#eafaff;border-color:#39dfff;box-shadow:10px 10px 0 #080d20,0 0 26px #00cfff33}
+#shopPanel .shop-shell:before{background:#071326;color:#70f4ff;border-bottom:2px solid #8d72ff}
+#shopPanel .shop-header{border-bottom-color:#315d91}
+#shopPanel .shop-header h2{color:#e9fbff;text-shadow:0 0 12px #21dfff88,2px 2px 0 #654dba}
+#shopPanel .shop-header button{background:#142b52;color:#dffaff;border-color:#43dfff;box-shadow:3px 3px 0 #070e20}
+#shopPanel .shop-coins{background:#101d3b;color:#ffe28a;border-color:#5c8eff;box-shadow:3px 3px 0 #070e20}
+#shopPanel .shop-preview{background:radial-gradient(ellipse at 50% 48%,#1d4b78 0%,#111d43 48%,#0b1028 100%);border-color:#41dfff;box-shadow:6px 6px 0 #070e20,inset 0 0 28px #29dfff20}
+#shopPanel .shop-preview:before{background:#071326;color:#79f4ff;border:1px solid #36dfff}
+#shopPanel .shop-preview:after{color:#a9c9ed}
+#shopPanel .shop-preview-name{background:linear-gradient(90deg,#123d68,#242052);color:#eafaff;border-top:2px solid #41dfff;text-shadow:0 0 10px #26dfff66}
+#shopPanel .shop-preview-desc{background:#080f26;color:#a9c8e8}
+#shopPanel #skinPreviewLabel{color:#8af5ff}
+#shopPanel .shop-catalog{background:linear-gradient(145deg,#101e3d,#12142e);border-color:#345f96;box-shadow:6px 6px 0 #070e20}
+#shopPanel .shop-tabs button{background:#14264a;color:#c8e8ff;border-color:#345f96;box-shadow:2px 2px 0 #070e20}
+#shopPanel .shop-tabs button.active{background:#176b91;color:#fff;border-color:#5beaff;box-shadow:0 0 12px #22dfff55}
+#shopPanel .skin-card{background:linear-gradient(135deg,#192d50 0%,#111a36 76%,#242052 76%);border-color:#416b9c;color:#eafaff;box-shadow:3px 3px 0 #070e20}
+#shopPanel .skin-card:after{border-top-color:#8b78e8}
+#shopPanel .skin-card.selected{background:linear-gradient(135deg,#1b456b 0%,#15264b 76%,#3a3472 76%);border-color:#5cecff;box-shadow:0 0 14px #1dcfff55,3px 3px 0 #070e20}
+#shopPanel .skin-card small{color:#a9c8e8}
+#shopPanel .skin-swatch{border-color:#a8eaff;box-shadow:0 0 12px #29dfff44}
+#shopPanel .shop-actions{border-top-color:#355477}
+#shopPanel .shop-actions button{border-color:#46dfff;box-shadow:3px 3px 0 #070e20}
+#shopPanel #buySkin{background:linear-gradient(100deg,#72572a,#a27a37);color:#fff2c6;border-color:#f2cc70}
+#shopPanel #equipSkin{background:linear-gradient(100deg,#14517c,#244a83);color:#e7faff;border-color:#51e6ff}
+#shopPanel #shopMessage{color:#8af5ff}
+@media(max-width:650px){#shopPanel .shop-shell{box-shadow:5px 5px 0 #070e20}.shop-preview{box-shadow:4px 4px 0 #070e20}}
+
 </style>
 </head>
 <body>
@@ -429,7 +459,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.04</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.05</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
