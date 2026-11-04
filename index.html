@@ -211,9 +211,46 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
  <g fill="#00dfff" stroke="#eaffff" stroke-width="3"><rect x="67" y="435" width="40" height="40"/><rect x="176" y="658" width="34" height="34"/><rect x="636" y="670" width="33" height="33"/></g>
  <g fill="#c04cff" stroke="#ffe4ff" stroke-width="3"><rect x="1290" y="655" width="34" height="34"/><rect x="1434" y="444" width="38" height="38"/><rect x="831" y="661" width="34" height="34"/></g>
 </g>
+
+<!-- premium reference-inspired detail pass -->
+<defs>
+ <linearGradient id="chromeEdge" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffffff"/><stop offset=".28" stop-color="#8df8ff"/><stop offset=".55" stop-color="#386cff"/><stop offset="1" stop-color="#ff8bfa"/></linearGradient>
+ <linearGradient id="deepPlate" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#06172f" stop-opacity=".96"/><stop offset=".5" stop-color="#09102b" stop-opacity=".88"/><stop offset="1" stop-color="#180b35" stop-opacity=".96"/></linearGradient>
+ <filter id="tightGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<!-- layered orbital rails -->
+<g fill="none" stroke-linecap="round" filter="url(#tightGlow)">
+ <path d="M52 310C190 215 350 220 500 254M1036 254C1190 220 1350 215 1484 310" stroke="#8afaff" stroke-width="4" opacity=".95"/>
+ <path d="M40 340C175 255 322 260 470 282M1066 282C1214 260 1361 255 1496 340" stroke="#00cfff" stroke-width="3" opacity=".8"/>
+ <path d="M56 500C210 576 365 558 512 515M1024 515C1171 558 1326 576 1480 500" stroke="#e95cff" stroke-width="4" opacity=".9"/>
+ <path d="M78 520C225 588 365 575 492 536M1044 536C1171 575 1311 588 1458 520" stroke="#8e54ff" stroke-width="2" opacity=".8"/>
+</g>
+<!-- extra architecture and floating platforms -->
+<g stroke-linejoin="round" filter="url(#tightGlow)">
+ <path d="M0 250V145L30 125V92L65 70V180L92 198V270H0Z" fill="#071c42" stroke="#00bfff" stroke-width="5"/>
+ <path d="M0 170H72M18 138H52M22 216H92" stroke="#7cefff" stroke-width="4" fill="none"/>
+ <path d="M1536 250V145L1506 125V92L1471 70V180L1444 198V270H1536Z" fill="#160b3d" stroke="#d94cff" stroke-width="5"/>
+ <path d="M1536 170H1464M1518 138H1484M1514 216H1444" stroke="#ff9cff" stroke-width="4" fill="none"/>
+ <path d="M70 624L212 624 244 648 220 670H82Z" fill="#071c3a" stroke="#00dfff" stroke-width="5"/>
+ <path d="M1294 648L1324 624H1466L1454 670H1316Z" fill="#170c3d" stroke="#d94cff" stroke-width="5"/>
+ <path d="M110 638H205M1330 638H1426" stroke="#c5ffff" stroke-width="3"/>
+</g>
+<!-- fine pixel sparks and directional shards -->
+<g filter="url(#tightGlow)">
+ <g fill="#baffff"><rect x="305" y="36" width="8" height="8"/><rect x="326" y="58" width="5" height="5"/><rect x="466" y="82" width="7" height="7"/><rect x="1160" y="52" width="8" height="8"/><rect x="1212" y="77" width="5" height="5"/><rect x="1320" y="112" width="7" height="7"/></g>
+ <g fill="#00eaff"><path d="M112 355l34-12-20 29Z"/><path d="M180 560l27-8-15 24Z"/><path d="M590 650l25-9-12 22Z"/></g>
+ <g fill="#ff54e9"><path d="M1424 355l-34-12 20 29Z"/><path d="M1356 560l-27-8 15 24Z"/><path d="M946 650l-25-9 12 22Z"/></g>
+ <g fill="none" stroke="url(#chromeEdge)" stroke-width="3"><path d="M245 120l18-18 18 18M1255 120l18-18 18 18M245 590l18 18 18-18M1255 590l18 18 18-18"/></g>
+</g>
+<!-- crisp chrome glints across the title -->
+<g fill="none" stroke-linecap="round" opacity=".85">
+ <path d="M530 257H690M846 257H1004" stroke="#ffffff" stroke-width="3"/>
+ <path d="M405 397H1130" stroke="#7cefff" stroke-width="2"/>
+ <path d="M490 526H1046" stroke="#ffbaff" stroke-width="2"/>
+</g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 1.99</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.00</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
