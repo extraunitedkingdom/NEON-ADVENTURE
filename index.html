@@ -113,17 +113,53 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 #home .logo-mark .blade{position:absolute;top:42%;width:9%;height:16%;border-top:3px solid #ffe36b;border-bottom:3px solid #ffe36b;filter:drop-shadow(0 0 7px #ffd34d)}
 #home .logo-mark .b1{left:27%;transform:skewY(-25deg)}#home .logo-mark .b2{right:27%;border-color:#b69aff;transform:skewY(25deg)}
 #home .logo-mark .core{width:22px;left:calc(50% - 11px);background:linear-gradient(180deg,#8fffff,#00aaff 28%,#8055ff 68%,#ff65d8)}
+#home .title-lockup.adventure-emblem{width:min(100%,900px);margin:8px auto 12px;padding:0;filter:drop-shadow(0 0 12px #24dcff66)}
+#home .adventure-logo-art{display:block;width:100%;height:auto;overflow:visible}
+@media(max-width:700px){#home .title-lockup.adventure-emblem{margin:4px auto 8px}.adventure-logo-art{width:100%}}
 </style>
 </head>
 <body>
 <h1>NEON ADVENTURE</h1>
 <div id="home">
 <h2>WELCOME TO THE WORLD</h2>
-<div class="title-lockup">
-<div class="logo-mark" role="img" aria-label="NEON ADVENTUREを囲むネオンロゴ"><span class="shape orbit"></span><span class="detail circuit-left"></span><span class="detail circuit-right"></span><span class="detail rune r1"></span><span class="detail rune r2"></span><span class="detail micro m1"></span><span class="detail micro m2"></span><span class="node n1"></span><span class="node n2"></span><span class="node n3"></span><span class="node n4"></span><span class="blade b1"></span><span class="blade b2"></span><span class="shape north"></span><span class="shape south"></span><span class="shape west"></span><span class="shape east"></span><span class="shape core"></span><span class="shape spark s1"></span><span class="shape spark s2"></span></div>
-<div class="hero-title">NEON<br>ADVENTURE</div>
+<div class="title-lockup adventure-emblem" role="img" aria-label="上部にNEON ADVENTUREのタイトル、中央に主人公、周囲に4つの世界を配置したロゴ">
+<svg class="adventure-logo-art" viewBox="0 0 900 470" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<defs>
+ <linearGradient id="logoTitle" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".48" stop-color="#8ffaff"/><stop offset="1" stop-color="#b78aff"/></linearGradient>
+ <linearGradient id="heroArmor" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8ffff"/><stop offset=".48" stop-color="#39dfff"/><stop offset="1" stop-color="#6752e8"/></linearGradient>
+ <linearGradient id="forest" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#a5ff9b"/><stop offset="1" stop-color="#168c69"/></linearGradient>
+ <linearGradient id="lava" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffdb70"/><stop offset="1" stop-color="#ed493d"/></linearGradient>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#e8ffff"/><stop offset="1" stop-color="#55aaff"/></linearGradient>
+ <linearGradient id="space" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e4b5ff"/><stop offset="1" stop-color="#6637c9"/></linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<!-- title centered at the top -->
+<text x="450" y="74" text-anchor="middle" font-size="66" font-weight="900" font-style="italic" letter-spacing="2" fill="url(#logoTitle)" stroke="#152653" stroke-width="5" paint-order="stroke" filter="url(#glow)">NEON ADVENTURE</text>
+<path d="M175 94H725" stroke="#49eaff" stroke-width="3" opacity=".8"/><path d="M260 103H640" stroke="#d58aff" stroke-width="2" opacity=".7"/>
+<!-- four transparent world vignettes around the hero -->
+<g stroke-linejoin="round" stroke-linecap="round" filter="url(#glow)">
+ <g transform="translate(78 160)"><path d="M0 92L16 35 42 54 66 0 94 54 120 28 145 92Z" fill="url(#forest)" stroke="#8dffb4" stroke-width="4"/><path d="M25 92V59M66 92V27M108 92V53" stroke="#633d2b" stroke-width="9"/><circle cx="24" cy="24" r="13" fill="#b8ff9b"/><circle cx="115" cy="9" r="9" fill="#f2ffba"/><text x="72" y="119" text-anchor="middle" fill="#baffc9" stroke="#123b38" stroke-width="3" paint-order="stroke" font-size="18" font-weight="bold">GREEN FOREST</text></g>
+ <g transform="translate(677 160)"><path d="M0 92L28 44 48 57 75 0 99 54 125 31 145 92Z" fill="#633047" stroke="#ff8c62" stroke-width="4"/><path d="M55 43L75 0 91 42 80 34 72 49Z" fill="url(#lava)"/><path d="M14 92Q35 70 52 92T92 92T135 92" fill="none" stroke="#ffbd55" stroke-width="8"/><text x="72" y="119" text-anchor="middle" fill="#ffd18b" stroke="#54252d" stroke-width="3" paint-order="stroke" font-size="18" font-weight="bold">LAVA LAND</text></g>
+ <g transform="translate(78 315)"><path d="M0 68Q24 34 48 58Q70 8 95 52Q120 22 145 68Z" fill="url(#sky)" stroke="#a9eaff" stroke-width="4"/><path d="M27 39Q37 23 54 39M89 31Q103 14 119 31" fill="none" stroke="#fff" stroke-width="8"/><path d="M72 18V-2M62 8L72 -2 82 8" fill="none" stroke="#fff" stroke-width="4"/><text x="72" y="96" text-anchor="middle" fill="#d7f6ff" stroke="#214b8b" stroke-width="3" paint-order="stroke" font-size="18" font-weight="bold">SKY KINGDOM</text></g>
+ <g transform="translate(677 315)"><path d="M72 0L85 40 127 25 102 61 145 82 96 83 72 119 50 83 0 82 42 61 17 25 59 40Z" fill="url(#space)" stroke="#d8aaff" stroke-width="4"/><circle cx="72" cy="60" r="20" fill="#1b1550" stroke="#f4d6ff" stroke-width="3"/><circle cx="67" cy="54" r="3" fill="#fff"/><circle cx="82" cy="67" r="3" fill="#fff"/><text x="72" y="145" text-anchor="middle" fill="#e7caff" stroke="#30205f" stroke-width="3" paint-order="stroke" font-size="18" font-weight="bold">COSMIC ABYSS</text></g>
+</g>
+<!-- central protagonist -->
+<g transform="translate(450 270)" filter="url(#glow)" stroke-linejoin="round">
+ <path d="M-64 8L-105 68 -78 82 -43 42M64 8L105 68 78 82 43 42" fill="none" stroke="#37eaff" stroke-width="17"/>
+ <path d="M-36 4L-53 83 -36 126 0 142 36 126 53 83 36 4Z" fill="url(#heroArmor)" stroke="#eaffff" stroke-width="5"/>
+ <path d="M-31 17L0 34 31 17 25 62 0 78 -25 62Z" fill="#15234b" stroke="#aafaff" stroke-width="4"/>
+ <path d="M-18 42L-5 47 5 47 18 42" fill="none" stroke="#fff" stroke-width="5"/>
+ <path d="M-26 81L0 94 26 81 19 121 0 130 -19 121Z" fill="#243b8b" stroke="#82efff" stroke-width="4"/>
+ <path d="M-42 91L-72 139 -43 153 -13 124M42 91L72 139 43 153 13 124" fill="#3349a0" stroke="#d8faff" stroke-width="5"/>
+ <path d="M-24 139L-34 177 0 186 34 177 24 139Z" fill="#18244b" stroke="#8df5ff" stroke-width="5"/>
+ <path d="M-34 174L-48 202 -5 202 0 185M34 174L48 202 5 202 0 185" fill="#d8faff" stroke="#6ceaff" stroke-width="4"/>
+ <path d="M-7 -25L0 -51 7 -25" fill="none" stroke="#fff" stroke-width="5"/>
+ <circle cx="0" cy="-7" r="11" fill="#fff" stroke="#28eaff" stroke-width="4"/>
+</g>
+<path d="M250 235Q330 175 390 216M510 216Q570 175 650 235M250 340Q330 405 390 370M510 370Q570 405 650 340" fill="none" stroke="#5ceeff" stroke-width="2" stroke-dasharray="7 9" opacity=".8"/>
+</svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 1.80</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 1.81</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
