@@ -216,6 +216,39 @@ body>h1{display:none}
 }
 @media(prefers-reduced-motion:reduce){.skin-card,.shop-tabs button{transition:none}}
 
+
+/* Operator dossier inspired character profile */
+#profilePanel{display:none;position:fixed;z-index:60;inset:0;overflow-y:auto;padding:16px;background:rgba(5,8,13,.97);color:#f4f6f8}
+.profile-shell{position:relative;max-width:980px;min-height:560px;margin:18px auto;padding:18px;background:linear-gradient(135deg,#242a31,#111820 58%,#20252d);border:1px solid #59636e;clip-path:polygon(0 0,98% 0,100% 3%,100% 100%,2% 100%,0 97%);box-shadow:0 18px 60px #000b}
+.profile-top{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #66717b;padding:0 0 12px;gap:12px}
+.profile-kicker{font:700 11px monospace;letter-spacing:4px;color:#8eabbc}
+.profile-top h2{margin:3px 0 0;font-size:clamp(21px,4vw,34px);letter-spacing:2px}
+.profile-top button{width:auto;margin:0;background:#303b45;border:1px solid #83909a;border-radius:0}
+.profile-main{display:grid;grid-template-columns:minmax(220px,.85fr) minmax(0,1.3fr);gap:18px;padding-top:16px}
+.profile-portrait{position:relative;min-height:390px;display:flex;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#526878,#202a34 55%,#111820);border:1px solid #71808a}
+.profile-portrait:before{content:"";position:absolute;inset:12px;border:1px solid #a7bac555;clip-path:polygon(0 0,100% 0,100% 88%,88% 100%,0 100%)}
+.profile-portrait:after{content:"NEON / FIELD RECORD";position:absolute;bottom:18px;left:18px;color:#c1d0d9;font:11px monospace;letter-spacing:3px}
+.profile-sigil{font-size:clamp(100px,18vw,180px);font-weight:900;color:#d7e9f2;text-shadow:0 0 28px #63c6df99,8px 8px 0 #15232d;z-index:1}
+.profile-code{position:absolute;top:18px;left:18px;color:#b9cbd5;font:700 11px monospace;letter-spacing:2px}
+.profile-info{min-width:0}
+.profile-name{font-size:clamp(25px,5vw,42px);font-weight:900;letter-spacing:2px;margin:0}
+.profile-sub{color:#9db4c1;font:12px monospace;letter-spacing:2px;margin:3px 0 14px}
+.profile-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.profile-tags span{padding:5px 9px;background:#35434d;border-left:3px solid #63c6df;font-size:11px}
+.profile-tabs{display:flex;gap:5px;border-bottom:1px solid #66717b;margin:14px 0}
+.profile-tabs button{width:auto;flex:1;margin:0;padding:9px 5px;border:0;border-bottom:3px solid transparent;border-radius:0;background:transparent;box-shadow:none;color:#aab8c1;font-size:12px}
+.profile-tabs button.active{color:#fff;border-bottom-color:#63c6df;background:#34414b}
+.profile-copy{min-height:116px;padding:14px;background:#151d25;border-left:3px solid #63c6df;color:#d3dce2;line-height:1.8;font-size:13px}
+.profile-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+.profile-stat{padding:10px;background:#303943;border:1px solid #58636d}
+.profile-stat small{display:block;color:#9fb0bb;font:10px monospace;letter-spacing:1px}
+.profile-stat strong{font-size:18px;color:#fff}
+.profile-roster{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}
+.profile-roster button{margin:0;padding:10px 5px;border-radius:0;background:#28333c;border:1px solid #56636e;box-shadow:none;font-size:12px}
+.profile-roster button.active{border-color:#7edcf0;background:#3a5360;box-shadow:inset 0 -3px #7edcf0}
+#profilePanel .profile-apply{margin-top:12px;background:#41677a;border:1px solid #9cecff;border-radius:0;letter-spacing:2px}
+@media(max-width:650px){#profilePanel{padding:6px}.profile-shell{margin:4px auto;padding:11px}.profile-main{grid-template-columns:1fr;gap:10px}.profile-portrait{min-height:190px}.profile-sigil{font-size:100px}.profile-portrait:after{bottom:10px}.profile-roster{grid-template-columns:repeat(2,minmax(0,1fr))}.profile-copy{min-height:90px}}
+
 </style>
 </head>
 <body>
@@ -350,14 +383,33 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.02</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.03</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
+<button id="profileToggle">▣　CHARACTER FILE</button>
 <button id="shopToggle">🛒　SKIN SHOP</button>
 <button id="save">▣　SAVE</button>
 <button id="ranking">🏆　RANKING</button>
 <button id="codeToggle">⌨️　CODE</button>
+</div>
+
+<div id="profilePanel" role="dialog" aria-modal="true" aria-label="キャラクター紹介">
+ <div class="profile-shell">
+  <div class="profile-top"><div><div class="profile-kicker">NEON ADVENTURE / PERSONNEL FILE</div><h2>CHARACTER DOSSIER</h2></div><button id="closeProfile" type="button">✕ CLOSE</button></div>
+  <div class="profile-main">
+   <div class="profile-portrait"><div class="profile-code">FILE No. 00<span id="profileNumber">01</span></div><div class="profile-sigil" id="profileSigil">✦</div></div>
+   <div class="profile-info">
+    <h3 class="profile-name" id="profileName">NEON BOY</h3><div class="profile-sub" id="profileSubtitle">EXPLORER / FIELD UNIT</div>
+    <div class="profile-tags"><span id="profileRole">ADVENTURER</span><span>NEON DIVISION</span><span id="profileRarity">★★★★</span></div>
+    <div class="profile-tabs"><button class="active" data-profile-tab="bio">PROFILE</button><button data-profile-tab="ability">ABILITY</button><button data-profile-tab="record">RECORD</button></div>
+    <div class="profile-copy" id="profileCopy">未知の世界を探索する、冒険者チームの中心メンバー。</div>
+    <div class="profile-stats"><div class="profile-stat"><small>VITALITY</small><strong id="profileHP">03</strong></div><div class="profile-stat"><small>MOBILITY</small><strong id="profileMove">A</strong></div><div class="profile-stat"><small>JUMP</small><strong>DOUBLE</strong></div><div class="profile-stat"><small>FIELD</small><strong id="profileField">ALL</strong></div></div>
+   </div>
+  </div>
+  <div class="profile-roster" id="profileRoster"></div>
+  <button class="profile-apply" id="applyProfile" type="button">このキャラクターを選択</button>
+ </div>
 </div>
 <div id="shopPanel" aria-label="スキンショップ">
  <div class="shop-shell">
@@ -1279,6 +1331,35 @@ document.getElementById("importSaveCode").onclick=()=>{
   updateWorldUnlockButtons();refreshAdminUI();document.getElementById("codeMessage").textContent="セーブデータを読み込みました。ページを再読み込みしてください";
  }catch(e){document.getElementById("codeMessage").textContent="セーブコードが正しくありません";}
 };
+
+
+const profileData=[
+ {id:"boy",name:"NEON BOY",sigil:"✦",role:"EXPLORER",rarity:"★★★★",subtitle:"FIELD UNIT / 001",bio:"未知の世界を探索する、冒険者チームの中心メンバー。",ability:"バランス型。移動・ジャンプ・攻撃を標準的に使いこなす。",record:"最初に冒険へ旅立った探索者。どんな世界にも臆せず進む。",hp:"03",move:"A",field:"ALL"},
+ {id:"girl",name:"NEON GIRL",sigil:"✧",role:"SCOUT",rarity:"★★★★",subtitle:"FIELD UNIT / 002",bio:"素早い判断力で仲間を導く、好奇心旺盛なスカウト。",ability:"軽快な身のこなしをイメージしたキャラクター。",record:"新しい景色を見つけることが大好き。",hp:"03",move:"S",field:"SKY"},
+ {id:"knight",name:"IRON KNIGHT",sigil:"♜",role:"GUARDIAN",rarity:"★★★★★",subtitle:"FIELD UNIT / 003",bio:"堅牢な装甲をまとい、仲間を守る守護者。",ability:"守りを重視した重厚なスタイル。",record:"古い遺跡を守っていたという記録が残る。",hp:"04",move:"B",field:"RUINS"},
+ {id:"ninja",name:"SHADOW NINJA",sigil:"忍",role:"ASSASSIN",rarity:"★★★★★",subtitle:"FIELD UNIT / 004",bio:"影のように静かに進む、神出鬼没の潜入者。",ability:"機動力を重視したスタイル。",record:"足音を残さず、誰よりも早く目的地へ到達する。",hp:"03",move:"S",field:"NIGHT"},
+ {id:"robot",name:"CORE ROBOT",sigil:"▣",role:"ANDROID",rarity:"★★★★★★",subtitle:"FIELD UNIT / 005",bio:"未知のエネルギーで稼働する高性能アンドロイド。",ability:"精密な動作と安定性を備えたユニット。",record:"失われた文明の技術をもとに開発された。",hp:"04",move:"A",field:"TECH"},
+ {id:"ghost",name:"PHANTOM",sigil:"◈",role:"MYSTERY",rarity:"★★★★★",subtitle:"FIELD UNIT / 006",bio:"正体不明。静かに現れ、静かに消える謎の存在。",ability:"独特な雰囲気を持つ特殊キャラクター。",record:"記録には断片的な目撃情報だけが残されている。",hp:"03",move:"A",field:"UNKNOWN"}
+];
+let profileSelected=appearanceCharacter||"boy",profileTab="bio";
+function renderProfile(){
+ const d=profileData.find(x=>x.id===profileSelected)||profileData[0];
+ document.getElementById("profileName").textContent=d.name;document.getElementById("profileSigil").textContent=d.sigil;
+ document.getElementById("profileNumber").textContent=String(profileData.indexOf(d)+1).padStart(2,"0");
+ document.getElementById("profileSubtitle").textContent=d.subtitle;document.getElementById("profileRole").textContent=d.role;
+ document.getElementById("profileRarity").textContent=d.rarity;document.getElementById("profileHP").textContent=d.hp;
+ document.getElementById("profileMove").textContent=d.move;document.getElementById("profileField").textContent=d.field;
+ document.getElementById("profileCopy").textContent=d[profileTab];
+ document.querySelectorAll("[data-profile-tab]").forEach(b=>b.classList.toggle("active",b.dataset.profileTab===profileTab));
+ const roster=document.getElementById("profileRoster");roster.innerHTML="";
+ profileData.forEach(x=>{const b=document.createElement("button");b.type="button";b.textContent=x.name;b.classList.toggle("active",x.id===profileSelected);b.onclick=()=>{profileSelected=x.id;renderProfile()};roster.appendChild(b)});
+ document.getElementById("applyProfile").textContent=appearanceCharacter===d.id?"選択中 ✓":"このキャラクターを選択";
+}
+document.getElementById("profileToggle").onclick=()=>{profileSelected=appearanceCharacter||"boy";profileTab="bio";renderProfile();document.getElementById("profilePanel").style.display="block"};
+document.getElementById("closeProfile").onclick=()=>document.getElementById("profilePanel").style.display="none";
+document.getElementById("profilePanel").addEventListener("click",e=>{if(e.target.id==="profilePanel")e.currentTarget.style.display="none"});
+document.querySelectorAll("[data-profile-tab]").forEach(b=>b.onclick=()=>{profileTab=b.dataset.profileTab;renderProfile()});
+document.getElementById("applyProfile").onclick=()=>{appearanceCharacter=profileSelected;appearanceEmoji="";saveGame();renderProfile();document.getElementById("profileApplyMessage")?.remove()};
 
 // 全ステージ変数の初期化後にセーブを復元
 renderShop();
