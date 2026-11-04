@@ -125,71 +125,94 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <div class="title-lockup adventure-emblem" role="img" aria-label="上部にNEON ADVENTUREのタイトル、中央に主人公、周囲に4つの世界を配置したロゴ">
 <svg class="adventure-logo-art" viewBox="0 0 1536 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <defs>
- <linearGradient id="neonTitle" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".22" stop-color="#bafaff"/><stop offset=".48" stop-color="#16d9ff"/><stop offset=".72" stop-color="#a52cff"/><stop offset="1" stop-color="#ff55e9"/></linearGradient>
- <linearGradient id="adventureTitle" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset=".55" stop-color="#dceaff"/><stop offset="1" stop-color="#9bbcff"/></linearGradient>
- <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#00eaff"/><stop offset=".48" stop-color="#286dff"/><stop offset=".72" stop-color="#a52bff"/><stop offset="1" stop-color="#ff37d8"/></linearGradient>
- <linearGradient id="forest" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#42ff9b"/><stop offset="1" stop-color="#006a42"/></linearGradient>
- <linearGradient id="lava" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff06a"/><stop offset=".5" stop-color="#ff9c00"/><stop offset="1" stop-color="#b52c12"/></linearGradient>
- <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#c6ffff"/><stop offset="1" stop-color="#087bff"/></linearGradient>
- <linearGradient id="cosmos" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff66f5"/><stop offset="1" stop-color="#3910a5"/></linearGradient>
+ <linearGradient id="neonTitle" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".2" stop-color="#b9ffff"/><stop offset=".48" stop-color="#08cfff"/><stop offset=".72" stop-color="#9a24ff"/><stop offset="1" stop-color="#ff55e9"/></linearGradient>
+ <linearGradient id="adventureTitle" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset=".55" stop-color="#dceaff"/><stop offset="1" stop-color="#8caeff"/></linearGradient>
+ <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#00f4ff"/><stop offset=".48" stop-color="#286dff"/><stop offset=".72" stop-color="#a52bff"/><stop offset="1" stop-color="#ff37d8"/></linearGradient>
+ <linearGradient id="forest" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#9dffb4"/><stop offset=".42" stop-color="#19db78"/><stop offset="1" stop-color="#064c45"/></linearGradient>
+ <linearGradient id="lava" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff7a0"/><stop offset=".35" stop-color="#ffb51c"/><stop offset="1" stop-color="#d52c18"/></linearGradient>
+ <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f4ffff"/><stop offset=".48" stop-color="#70dcff"/><stop offset="1" stop-color="#1763dc"/></linearGradient>
+ <linearGradient id="cosmos" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffc5ff"/><stop offset=".4" stop-color="#b23cff"/><stop offset="1" stop-color="#24105f"/></linearGradient>
  <linearGradient id="plate" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#06152e"/><stop offset=".5" stop-color="#090b29"/><stop offset="1" stop-color="#180b35"/></linearGradient>
- <filter id="neonGlow" x="-40%" y="-60%" width="180%" height="220%"><feGaussianBlur stdDeviation="7" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <filter id="neonGlow" x="-50%" y="-60%" width="200%" height="220%"><feGaussianBlur stdDeviation="6" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
 </defs>
-<!-- transparent orbital frame -->
-<ellipse cx="768" cy="265" rx="675" ry="132" fill="none" stroke="url(#ring)" stroke-width="10" filter="url(#neonGlow)"/>
-<ellipse cx="768" cy="265" rx="654" ry="112" fill="none" stroke="#d9faff" stroke-width="2" opacity=".75"/>
-<path d="M95 260L220 260 278 220 430 220M1441 260L1316 260 1258 220 1106 220" fill="none" stroke="url(#ring)" stroke-width="13" filter="url(#neonGlow)"/>
-<!-- four world scenes around the central hero -->
-<g filter="url(#neonGlow)" stroke-linejoin="round">
- <g transform="translate(170 38)">
-  <path d="M0 165L45 76 93 126 143 18 202 119 250 65 315 165Z" fill="url(#forest)" stroke="#36ff9c" stroke-width="8"/>
-  <path d="M44 165V111M143 165V54M250 165V106" stroke="#075c43" stroke-width="19"/>
-  <path d="M16 83L65 18 105 83M180 68L223 12 270 69" fill="none" stroke="#9affbd" stroke-width="7"/>
-  <path d="M45 22L65 0 85 22M230 24L250 2 270 24" fill="none" stroke="#baffd0" stroke-width="5"/>
-  <circle cx="285" cy="22" r="9" fill="#e2ff8a"/><circle cx="20" cy="132" r="8" fill="#00ffd0"/>
- </g>
- <g transform="translate(1050 35)">
-  <path d="M0 170L55 88 100 116 164 12 225 116 274 69 330 170Z" fill="#66351f" stroke="#ffb22b" stroke-width="8"/>
-  <path d="M112 118L164 12 213 118 183 91 164 111 145 91Z" fill="url(#lava)"/>
-  <path d="M20 170Q70 133 120 170T220 170T320 170" fill="none" stroke="#ff5a18" stroke-width="15"/>
-  <path d="M75 86L100 53 125 86M245 86L270 53 295 86" fill="none" stroke="#ffe66d" stroke-width="7"/>
-  <circle cx="30" cy="30" r="7" fill="#fff17a"/><circle cx="300" cy="15" r="9" fill="#ffcf54"/>
- </g>
- <g transform="translate(55 300)">
-  <path d="M0 95Q45 40 95 78Q150 -5 210 72Q260 30 315 95Z" fill="url(#sky)" stroke="#37dfff" stroke-width="8"/>
-  <path d="M40 63Q65 35 95 63M170 48Q202 17 232 48" fill="none" stroke="#fff" stroke-width="15"/>
-  <path d="M160 27V-10M142 8L160 -10 178 8" fill="none" stroke="#fff" stroke-width="7"/>
-  <path d="M18 103H285" stroke="#1d9cff" stroke-width="10"/>
- </g>
- <g transform="translate(1165 300)">
-  <path d="M155 0L182 72 258 45 211 105 300 137 205 143 155 210 105 143 10 137 99 105 52 45 128 72Z" fill="url(#cosmos)" stroke="#f15aff" stroke-width="8"/>
-  <circle cx="155" cy="105" r="47" fill="#17114d" stroke="#ffb5ff" stroke-width="6"/>
-  <path d="M126 109Q155 65 184 109Q155 145 126 109Z" fill="none" stroke="#ff7df2" stroke-width="7"/>
-  <circle cx="143" cy="96" r="6" fill="#fff"/><circle cx="170" cy="119" r="5" fill="#fff"/>
- </g>
+<!-- precision orbital frame -->
+<ellipse cx="768" cy="265" rx="680" ry="137" fill="none" stroke="url(#ring)" stroke-width="12" filter="url(#neonGlow)"/>
+<ellipse cx="768" cy="265" rx="660" ry="117" fill="none" stroke="#e4fdff" stroke-width="2.5" opacity=".85"/>
+<ellipse cx="768" cy="265" rx="695" ry="151" fill="none" stroke="#5beaff" stroke-width="2" stroke-dasharray="4 18" opacity=".8"/>
+<path d="M92 260H220L278 220H430M1444 260H1316L1258 220H1106" fill="none" stroke="url(#ring)" stroke-width="13" filter="url(#neonGlow)"/>
+<!-- GREEN FOREST: layered mountains, trees, ruins and floating leaves -->
+<g transform="translate(150 28)" stroke-linejoin="round" filter="url(#softGlow)">
+ <path d="M0 178L46 92 86 130 145 10 207 128 249 71 330 178Z" fill="#063d36" stroke="#36ff9c" stroke-width="7"/>
+ <path d="M25 178L73 102 109 139 145 47 186 139 226 94 294 178Z" fill="url(#forest)" stroke="#9affbf" stroke-width="3"/>
+ <path d="M43 178V132L68 108 92 132V178M127 178V96L151 72 175 96V178M231 178V137L254 113 278 137V178" fill="#075c43" stroke="#50ffab" stroke-width="4"/>
+ <path d="M126 96L151 72 175 96M45 132L68 108 92 132" fill="none" stroke="#d4ffe1" stroke-width="3"/>
+ <path d="M15 178H320M35 191H292" stroke="#00f6a0" stroke-width="5"/>
+ <path d="M17 75L45 36 70 75M260 63L282 25 305 63" fill="none" stroke="#baffd0" stroke-width="5"/>
+ <path d="M50 16L63 0 76 16M250 14L263 -2 276 14" fill="none" stroke="#8dffbb" stroke-width="4"/>
+ <path d="M100 48l12 -8 8 13 -12 8Z M300 105l12 -8 8 13 -12 8Z" fill="#d8ff79"/>
+ <circle cx="20" cy="116" r="6" fill="#f2ff9a"/><circle cx="300" cy="42" r="7" fill="#e6ff9a"/>
 </g>
-<!-- protagonist in the center, behind the title -->
-<g transform="translate(768 355)" filter="url(#neonGlow)" stroke-linejoin="round">
- <path d="M-58 -20L-112 34 -84 52 -37 13M58 -20L112 34 84 52 37 13" fill="#162b69" stroke="#28eaff" stroke-width="13"/>
- <path d="M-35 -32L-48 42 0 68 48 42 35 -32Z" fill="#182c65" stroke="#b7faff" stroke-width="6"/>
- <path d="M-30 -23L0 -7 30 -23 24 11 0 27 -24 11Z" fill="#08152f" stroke="#4deaff" stroke-width="5"/>
- <path d="M-18 -7L-5 -2 5 -2 18 -7" fill="none" stroke="#fff" stroke-width="5"/>
- <path d="M-28 36L-38 85 -8 103 0 74 8 103 38 85 28 36Z" fill="#263c91" stroke="#a5f7ff" stroke-width="5"/>
- <path d="M-32 84L-46 119 -5 121 0 101M32 84L46 119 5 121 0 101" fill="#d8faff" stroke="#26dfff" stroke-width="5"/>
- <path d="M-25 -37L0 -58 25 -37" fill="none" stroke="#fff" stroke-width="6"/>
+<!-- LAVA LAND: volcano, fortress silhouette, molten river and sparks -->
+<g transform="translate(1050 25)" stroke-linejoin="round" filter="url(#softGlow)">
+ <path d="M0 180L44 102 92 126 165 5 235 126 282 76 340 180Z" fill="#52251f" stroke="#ffad22" stroke-width="8"/>
+ <path d="M112 97L165 5 218 98 192 80 165 92 139 80Z" fill="url(#lava)" stroke="#fff08a" stroke-width="4"/>
+ <path d="M152 22L165 5 178 28 168 47 159 37Z" fill="#fff7b1"/>
+ <path d="M35 180V135L68 106 101 135V180M225 180V130L260 99 294 130V180" fill="#87351c" stroke="#ffcf49" stroke-width="5"/>
+ <path d="M59 137H84M247 137H275M59 154H84M247 154H275" stroke="#ffe98a" stroke-width="4"/>
+ <path d="M0 190Q45 151 92 190T185 190T280 190T350 190" fill="none" stroke="#ff5a18" stroke-width="14"/>
+ <path d="M0 190Q45 151 92 190T185 190T280 190T350 190" fill="none" stroke="#fff27a" stroke-width="3"/>
+ <path d="M24 82L48 49 72 82M260 68L284 34 308 68" fill="none" stroke="#fff08a" stroke-width="5"/>
+ <path d="M20 20l8 -16 8 16 -8 13Z M310 12l8 -16 8 16 -8 13Z M90 25l6 -12 6 12 -6 10Z" fill="#ffdf64"/>
 </g>
-<!-- bold two-line title -->
+<!-- SKY KINGDOM: floating islands, clouds, airship and distant spires -->
+<g transform="translate(35 296)" stroke-linejoin="round" filter="url(#softGlow)">
+ <path d="M0 83Q42 31 91 67Q145 -8 211 62Q267 20 330 83Z" fill="url(#sky)" stroke="#56dcff" stroke-width="7"/>
+ <path d="M28 71Q54 38 86 67M164 50Q198 14 230 48M244 69Q270 43 296 67" fill="none" stroke="#fff" stroke-width="12"/>
+ <path d="M154 31V-9M138 10L154 -9 170 10" fill="none" stroke="#fff" stroke-width="6"/>
+ <path d="M25 105L75 105 98 127 75 148 25 148 4 127Z" fill="#164b9a" stroke="#6beaff" stroke-width="5"/>
+ <path d="M220 104L274 104 300 126 274 148 220 148 198 126Z" fill="#164b9a" stroke="#6beaff" stroke-width="5"/>
+ <path d="M47 110L37 128 56 128 65 110M244 110L234 128 253 128 262 110" fill="#9ef7ff"/>
+ <path d="M120 6L132 -12 144 6M105 20L132 20" fill="none" stroke="#dfffff" stroke-width="4"/>
+ <path d="M0 93H325" stroke="#1d9cff" stroke-width="7"/>
+</g>
+<!-- COSMIC ABYSS: ringed planet, star gate and constellation -->
+<g transform="translate(1150 290)" stroke-linejoin="round" filter="url(#softGlow)">
+ <path d="M150 0L178 64 249 37 210 96 300 130 208 140 150 207 92 140 0 130 90 96 51 37 122 64Z" fill="url(#cosmos)" stroke="#f15aff" stroke-width="7"/>
+ <circle cx="150" cy="103" r="53" fill="#171044" stroke="#ffc5ff" stroke-width="6"/>
+ <ellipse cx="150" cy="103" rx="86" ry="25" transform="rotate(-25 150 103)" fill="none" stroke="#ff6af4" stroke-width="9"/>
+ <ellipse cx="150" cy="103" rx="86" ry="25" transform="rotate(-25 150 103)" fill="none" stroke="#ffe1ff" stroke-width="2"/>
+ <path d="M120 106Q150 62 180 106Q150 147 120 106Z" fill="none" stroke="#a78aff" stroke-width="6"/>
+ <circle cx="137" cy="91" r="6" fill="#fff"/><circle cx="166" cy="116" r="5" fill="#fff"/>
+ <path d="M22 27L38 11 54 27 38 43Z M248 9L260 -3 272 9 260 21Z M274 161L286 149 298 161 286 173Z" fill="none" stroke="#f6caff" stroke-width="4"/>
+ <path d="M40 52L85 72M220 55L260 32M50 170L90 145" stroke="#b78bff" stroke-width="3" stroke-dasharray="5 7"/>
+</g>
+<!-- protagonist: detailed armored explorer, visible silhouette and visor -->
+<g transform="translate(768 354)" stroke-linejoin="round" filter="url(#neonGlow)">
+ <path d="M-42 -25L-100 13 -125 57 -93 68 -48 34M42 -25L100 13 125 57 93 68 48 34" fill="#152b69" stroke="#21eaff" stroke-width="12"/>
+ <path d="M-94 58L-119 80 -94 92 -68 70M94 58L119 80 94 92 68 70" fill="#d5faff" stroke="#3beaff" stroke-width="5"/>
+ <path d="M-38 -34L-53 37 -39 75 0 91 39 75 53 37 38 -34Z" fill="#1b347c" stroke="#c5fbff" stroke-width="6"/>
+ <path d="M-31 -24L0 -10 31 -24 25 13 0 30 -25 13Z" fill="#07152e" stroke="#40eaff" stroke-width="5"/>
+ <path d="M-21 -8L-7 -3 7 -3 21 -8" fill="none" stroke="#fff" stroke-width="5"/>
+ <path d="M-33 39L-44 80 -24 103 0 87 24 103 44 80 33 39Z" fill="#3154b4" stroke="#a7faff" stroke-width="5"/>
+ <path d="M-28 48L0 62 28 48M-17 78L0 87 17 78" fill="none" stroke="#55eaff" stroke-width="4"/>
+ <path d="M-25 98L-43 139 -7 145 0 119 7 145 43 139 25 98Z" fill="#17285b" stroke="#a5f7ff" stroke-width="5"/>
+ <path d="M-43 136L-55 169 -7 172 0 146M43 136L55 169 7 172 0 146" fill="#e4fcff" stroke="#27dfff" stroke-width="5"/>
+ <path d="M-33 -39L0 -65 33 -39 20 -32 -20 -32Z" fill="#1e3f9b" stroke="#fff" stroke-width="5"/>
+ <path d="M-8 -64L0 -82 8 -64" fill="none" stroke="#fff" stroke-width="4"/>
+ <circle cx="0" cy="-47" r="6" fill="#fff" stroke="#32eaff" stroke-width="3"/>
+</g>
+<!-- title foreground -->
 <g text-anchor="middle" font-style="italic" font-weight="1000" filter="url(#neonGlow)">
- <text x="768" y="225" font-size="150" letter-spacing="5" fill="url(#neonTitle)" stroke="#080d28" stroke-width="19" paint-order="stroke">NEON</text>
- <text x="768" y="323" font-size="112" letter-spacing="-2" fill="url(#adventureTitle)" stroke="#090d28" stroke-width="18" paint-order="stroke">ADVENTURE</text>
- <path d="M250 340L1286 340" stroke="#0b102c" stroke-width="20"/>
- <path d="M250 340L1286 340" stroke="url(#ring)" stroke-width="5"/>
+ <text x="768" y="225" font-size="150" letter-spacing="5" fill="url(#neonTitle)" stroke="#080d28" stroke-width="20" paint-order="stroke">NEON</text>
+ <text x="768" y="323" font-size="112" letter-spacing="-2" fill="url(#adventureTitle)" stroke="#090d28" stroke-width="19" paint-order="stroke">ADVENTURE</text>
+ <path d="M250 340H1286" stroke="#0b102c" stroke-width="20"/><path d="M250 340H1286" stroke="url(#ring)" stroke-width="5"/>
 </g>
-<!-- nameplate-like signature panel -->
+<!-- signature plate -->
 <path d="M510 365L1026 365 1060 405 1026 445 510 445 476 405Z" fill="url(#plate)" stroke="#28eaff" stroke-width="7" filter="url(#neonGlow)"/>
 <path d="M535 376H1000L1024 405 1000 434H535L510 405Z" fill="none" stroke="#d94dff" stroke-width="3"/>
 <text x="768" y="416" text-anchor="middle" font-size="25" letter-spacing="8" font-weight="700" fill="#e9fbff">EXPLORE THE UNKNOWN</text>
-<!-- small luminous squares and shards -->
+<!-- refined energy shards and tech markers -->
 <g fill="none" stroke-width="6" filter="url(#neonGlow)">
  <rect x="85" y="255" width="25" height="25" stroke="#00eaff"/><rect x="120" y="225" width="17" height="17" stroke="#00eaff"/>
  <rect x="1380" y="252" width="25" height="25" stroke="#ff3de4"/><rect x="1345" y="222" width="17" height="17" stroke="#ff3de4"/>
@@ -198,7 +221,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 1.82</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 1.83</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
