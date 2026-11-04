@@ -697,9 +697,17 @@ function draw(){
  }
  // face, hair and cyan eyes
  ctx.shadowColor="#22dfff";ctx.shadowBlur=5;ctx.fillStyle="#f1c9b6";ctx.fillRect(-11,2,22,17);ctx.shadowBlur=0;
- ctx.fillStyle="#101827";ctx.fillRect(-13,0,25,9);ctx.fillRect(-12,5,5,7);ctx.fillRect(7,4,5,7);
- ctx.beginPath();ctx.moveTo(-12,5);ctx.lineTo(-16,1);ctx.lineTo(-8,3);ctx.lineTo(-4,-3);ctx.lineTo(0,2);ctx.lineTo(6,-2);ctx.lineTo(9,4);ctx.lineTo(14,1);ctx.lineTo(11,10);ctx.lineTo(-11,10);ctx.closePath();ctx.fill();
- ctx.fillStyle="#f4fbff";ctx.fillRect(-8,10,5,2);ctx.fillStyle="#19eaff";ctx.shadowColor="#19eaff";ctx.shadowBlur=8;
+ if(appearanceCharacter==="girl"){
+  // 女の子：長いサイドヘア＋前髪＋リボン。体格と衣装サイズは元キャラと共通
+  ctx.fillStyle="#54244f";ctx.fillRect(-14,-2,6,22);ctx.fillRect(9,-2,6,22);
+  ctx.fillRect(-13,-7,26,10);ctx.fillRect(-10,-10,8,7);ctx.fillRect(0,-9,8,6);
+  ctx.fillStyle="#ffb5e8";ctx.fillRect(8,-12,6,4);ctx.fillRect(11,-9,3,5);
+  ctx.fillStyle="#101827";ctx.fillRect(-8,4,5,5);ctx.fillRect(4,4,5,5);
+ }else{
+  ctx.fillStyle="#101827";ctx.fillRect(-13,0,25,9);ctx.fillRect(-12,5,5,7);ctx.fillRect(7,4,5,7);
+  ctx.beginPath();ctx.moveTo(-12,5);ctx.lineTo(-16,1);ctx.lineTo(-8,3);ctx.lineTo(-4,-3);ctx.lineTo(0,2);ctx.lineTo(6,-2);ctx.lineTo(9,4);ctx.lineTo(14,1);ctx.lineTo(11,10);ctx.lineTo(-11,10);ctx.closePath();ctx.fill();
+ }
+ ctx.fillStyle="#f4fbff";ctx.fillRect(-8,10,5,2);ctx.fillRect(3,10,5,2);ctx.fillStyle="#19eaff";ctx.shadowColor="#19eaff";ctx.shadowBlur=8;
  ctx.fillRect(-7,11,4,3);ctx.fillRect(3,11,4,3);ctx.shadowBlur=0;ctx.fillStyle="#142034";ctx.fillRect(-2,15,4,1);
  if(attackTimer>0){
   const progress=1-attackTimer/12,angle=-0.95+progress*1.55;
@@ -776,10 +784,15 @@ function drawSkinPreview(color){
  for(const side of [-1,1]){pc.fillStyle="#172b4a";pc.fillRect(side*12-3,19,6,18);pc.fillStyle="#eafaff";pc.fillRect(side*12-3,19,6,5);pc.fillStyle="#f1c9b6";pc.fillRect(side*12-3,35,6,7)}
  // neck and face
  pc.fillStyle="#f1c9b6";pc.fillRect(-4,8,8,10);pc.fillStyle="#f1c9b6";pc.fillRect(-11,-8,22,22);
- // hair silhouette with distinct spikes
- pc.fillStyle="#0b1427";pc.beginPath();pc.moveTo(-13,1);pc.lineTo(-18,-8);pc.lineTo(-10,-6);pc.lineTo(-8,-18);pc.lineTo(-2,-11);pc.lineTo(3,-22);pc.lineTo(7,-12);pc.lineTo(15,-17);pc.lineTo(13,-7);pc.lineTo(19,-3);pc.lineTo(13,8);pc.lineTo(10,1);pc.lineTo(6,7);pc.lineTo(1,1);pc.lineTo(-5,8);pc.lineTo(-9,2);pc.lineTo(-14,8);pc.closePath();pc.fill();
- // fringe and cyan eyes
- pc.fillStyle="#17233c";pc.beginPath();pc.moveTo(-10,-6);pc.lineTo(-2,-13);pc.lineTo(1,-5);pc.lineTo(7,-13);pc.lineTo(9,-3);pc.lineTo(4,2);pc.lineTo(-1,-2);pc.lineTo(-6,3);pc.closePath();pc.fill();
+ // 選択中キャラクターの髪型をプレビューにも反映
+ if(appearanceCharacter==="girl"){
+  pc.fillStyle="#54244f";pc.fillRect(-14,-2,6,22);pc.fillRect(9,-2,6,22);
+  pc.fillRect(-13,-7,26,10);pc.fillRect(-10,-10,8,7);pc.fillRect(0,-9,8,6);
+  pc.fillStyle="#ffb5e8";pc.fillRect(8,-12,6,4);pc.fillRect(11,-9,3,5);
+ }else{
+  pc.fillStyle="#0b1427";pc.beginPath();pc.moveTo(-13,1);pc.lineTo(-18,-8);pc.lineTo(-10,-6);pc.lineTo(-8,-18);pc.lineTo(-2,-11);pc.lineTo(3,-22);pc.lineTo(7,-12);pc.lineTo(15,-17);pc.lineTo(13,-7);pc.lineTo(19,-3);pc.lineTo(13,8);pc.lineTo(10,1);pc.lineTo(6,7);pc.lineTo(1,1);pc.lineTo(-5,8);pc.lineTo(-9,2);pc.lineTo(-14,8);pc.closePath();pc.fill();
+  pc.fillStyle="#17233c";pc.beginPath();pc.moveTo(-10,-6);pc.lineTo(-2,-13);pc.lineTo(1,-5);pc.lineTo(7,-13);pc.lineTo(9,-3);pc.lineTo(4,2);pc.lineTo(-1,-2);pc.lineTo(-6,3);pc.closePath();pc.fill();
+ }
  pc.fillStyle="#f4fbff";pc.fillRect(-8,2,5,2);pc.fillRect(3,2,5,2);pc.shadowColor="#19eaff";pc.shadowBlur=8;pc.fillStyle="#19eaff";pc.fillRect(-7,3,4,4);pc.fillRect(4,3,4,4);pc.shadowBlur=0;
  // jacket collar details
  pc.fillStyle="#07152b";pc.fillRect(-5,14,10,5);pc.fillStyle="#eafaff";pc.fillRect(-2,16,4,3);
