@@ -28,6 +28,23 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 #home .logo-mark .west{left:0;top:31%;width:25%;height:38%;border:4px solid #00eaff;clip-path:polygon(0 0,100% 0,78% 50%,100% 100%,0 100%);background:linear-gradient(90deg,#00eaff55,transparent);box-shadow:0 0 20px #00dfff}
 #home .logo-mark .east{right:0;top:31%;width:25%;height:38%;border:4px solid #ff4fd8;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,22% 50%);background:linear-gradient(270deg,#ff4fd855,transparent);box-shadow:0 0 20px #ff4fd8}
 #home .logo-mark .orbit{left:1%;top:13%;width:98%;height:74%;border:4px solid #27eaff;border-right-color:#ff4fd8;border-radius:50%;transform:rotate(-8deg);opacity:.95;box-shadow:0 0 20px #00dfff,inset 0 0 16px #a34dff}
+#home .logo-mark .detail{position:absolute;display:block;pointer-events:none}
+#home .logo-mark .detail:before,#home .logo-mark .detail:after{content:"";position:absolute;display:block}
+#home .logo-mark .circuit-left{left:5%;top:28%;width:23%;height:44%;border-top:2px solid #48f8ff;border-bottom:2px solid #48f8ff;transform:skewX(-28deg);filter:drop-shadow(0 0 7px #00dfff)}
+#home .logo-mark .circuit-left:before{left:12%;top:0;width:72%;height:100%;border-left:3px solid #36eaff;border-right:2px solid #36eaff;clip-path:polygon(0 0,100% 0,100% 22%,45% 22%,45% 78%,100% 78%,100% 100%,0 100%)}
+#home .logo-mark .circuit-right{right:5%;top:28%;width:23%;height:44%;border-top:2px solid #ff69df;border-bottom:2px solid #ff69df;transform:skewX(28deg);filter:drop-shadow(0 0 7px #ff39d1)}
+#home .logo-mark .circuit-right:before{right:12%;top:0;width:72%;height:100%;border-left:2px solid #ff69df;border-right:3px solid #ff69df;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,0 78%,55% 78%,55% 22%,0 22%)}
+#home .logo-mark .rune{width:25px;height:25px;border:2px solid #ffe36b;transform:rotate(45deg);box-shadow:0 0 10px #ffcf42,inset 0 0 8px #ffcf42}
+#home .logo-mark .rune:after{inset:5px;border:1px solid #fff}
+#home .logo-mark .r1{left:17%;top:3%}.logo-mark .r2{right:17%;bottom:3%;border-color:#a78bff;box-shadow:0 0 10px #9b6bff,inset 0 0 8px #9b6bff}
+#home .logo-mark .micro{height:5px;width:34px;background:linear-gradient(90deg,transparent,#75faff,transparent);box-shadow:0 0 9px #00eaff}
+#home .logo-mark .m1{left:30%;top:14%}.logo-mark .m2{right:30%;bottom:14%;background:linear-gradient(90deg,transparent,#ff7be5,transparent);box-shadow:0 0 9px #ff4fd8}
+#home .logo-mark .orbit{border-width:5px}
+#home .logo-mark .orbit:after{content:"";position:absolute;inset:8px;border:1px dashed #d9faff;border-radius:50%;opacity:.8}
+#home .logo-mark .west:after,#home .logo-mark .east:after{content:"";position:absolute;top:50%;width:34%;height:3px;background:#fff;box-shadow:0 0 9px currentColor}
+#home .logo-mark .west:after{left:12%}#home .logo-mark .east:after{right:12%}
+#home .logo-mark .north:after,#home .logo-mark .south:after{content:"";position:absolute;width:13px;height:13px;border:2px solid #fff;transform:rotate(45deg);box-shadow:0 0 10px #00eaff}
+#home .logo-mark .north:after{right:-8px;top:18px}#home .logo-mark .south:after{left:-8px;bottom:18px}
 #home .logo-mark .spark{width:13px;height:13px;background:#fff;transform:rotate(45deg);box-shadow:0 0 14px #fff,0 0 24px #00eaff}
 #home .logo-mark .s1{left:7%;top:8%}.logo-mark .s2{right:7%;bottom:8%}
 #home .hero-title{position:relative;z-index:1;margin:0 auto;padding:8px 6px;font-size:clamp(48px,10.5vw,94px);font-weight:1000;font-style:italic;letter-spacing:-2px;line-height:.9;color:#fff;background:linear-gradient(180deg,#ffffff 5%,#d9faff 48%,#a9cfff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(3px 4px 0 #11152f) drop-shadow(-3px -2px 0 #00dfff) drop-shadow(3px 2px 0 #b42cff) drop-shadow(0 0 18px #00dfff)}
@@ -96,7 +113,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <div id="home">
 <h2>WELCOME TO THE WORLD</h2>
 <div class="title-lockup">
-<div class="logo-mark" role="img" aria-label="NEON ADVENTUREを囲むネオンロゴ"><span class="shape orbit"></span><span class="shape north"></span><span class="shape south"></span><span class="shape west"></span><span class="shape east"></span><span class="shape core"></span><span class="shape spark s1"></span><span class="shape spark s2"></span></div>
+<div class="logo-mark" role="img" aria-label="NEON ADVENTUREを囲むネオンロゴ"><span class="shape orbit"></span><span class="detail circuit-left"></span><span class="detail circuit-right"></span><span class="detail rune r1"></span><span class="detail rune r2"></span><span class="detail micro m1"></span><span class="detail micro m2"></span><span class="shape north"></span><span class="shape south"></span><span class="shape west"></span><span class="shape east"></span><span class="shape core"></span><span class="shape spark s1"></span><span class="shape spark s2"></span></div>
 <div class="hero-title">NEON<br>ADVENTURE</div>
 </div>
 <p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p>
