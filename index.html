@@ -116,6 +116,48 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 #home .title-lockup.adventure-emblem{width:min(100%,900px);margin:8px auto 12px;padding:0;filter:drop-shadow(0 0 12px #24dcff66)}
 #home .adventure-logo-art{display:block;width:100%;height:auto;overflow:visible}
 @media(max-width:700px){#home .title-lockup.adventure-emblem{margin:4px auto 8px}.adventure-logo-art{width:100%}}
+
+/* HOME UI premium pass — version 2.01 */
+body{background:radial-gradient(ellipse at 50% -12%,#1d3470 0%,#0a102b 42%,#050817 100%);background-attachment:fixed}
+body>h1{display:none}
+#home{max-width:1080px;min-height:0;margin:18px auto;padding:clamp(18px,3vw,34px) clamp(14px,3vw,34px) 48px;border:1px solid #5ceeff;border-radius:28px;background:linear-gradient(145deg,rgba(11,28,66,.96),rgba(8,10,35,.97) 48%,rgba(30,10,57,.96));box-shadow:0 0 0 1px #9c5cff33,0 0 34px #00dfff55,0 0 80px #8d38ff22,inset 0 0 50px #147dff18}
+#home:before{opacity:.7;background-image:linear-gradient(#4ceaff0b 1px,transparent 1px),linear-gradient(90deg,#4ceaff0b 1px,transparent 1px),radial-gradient(circle at 12% 22%,#fff 0 1px,transparent 2px),radial-gradient(circle at 82% 18%,#53f6ff 0 2px,transparent 3px),radial-gradient(circle at 24% 75%,#b54cff 0 3px,transparent 4px),radial-gradient(circle at 91% 68%,#fff 0 1px,transparent 2px);background-size:42px 42px,42px 42px,auto,auto,auto,auto}
+#home h2{display:inline-block;margin:0 auto 5px;padding:8px 18px;border:1px solid #45dfff66;border-radius:999px;background:#07152dcc;color:#aafaff;font-size:11px;letter-spacing:4px;text-shadow:0 0 12px #00dfff;box-shadow:inset 0 0 12px #00dfff18,0 0 14px #00dfff22}
+#home .title-lockup.adventure-emblem{width:min(100%,980px);margin:8px auto 2px;filter:drop-shadow(0 0 16px #24dcff77) drop-shadow(0 8px 18px #050817)}
+#home .hero-subtitle{margin:0 auto 22px;color:#d4faff;font-size:clamp(10px,1.5vw,13px);font-weight:800;letter-spacing:clamp(2px,.5vw,5px);text-shadow:0 0 12px #00cfff}
+#home .home-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;max-width:560px;margin:0 auto;padding:15px;border:1px solid #56dfff66;border-radius:20px;background:linear-gradient(145deg,#07152ddd,#11143bdd);box-shadow:inset 0 0 24px #1b8dff18,0 10px 30px #02061788}
+#home button{position:relative;isolation:isolate;display:flex;align-items:center;justify-content:center;min-height:52px;width:100%;margin:0;padding:13px 12px;border:1px solid #5beaff;border-radius:12px;background:linear-gradient(115deg,#0c3868,#153c78 48%,#28206e);box-shadow:inset 0 1px #ffffff2c,0 4px 0 #06152f,0 0 15px #00dfff35;color:#f4fdff;font-size:14px;font-weight:900;letter-spacing:1.2px;text-shadow:0 1px 5px #00152c;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
+#home button:before{content:"";position:absolute;inset:4px;border:1px solid #c5faff33;border-radius:8px;pointer-events:none}
+#home button:hover:not(:disabled){transform:translateY(-2px);filter:brightness(1.2);box-shadow:inset 0 1px #ffffff55,0 5px 0 #06152f,0 0 22px #00dfff77}
+#home button:active:not(:disabled){transform:translateY(2px);box-shadow:inset 0 1px #ffffff22,0 1px 0 #06152f,0 0 10px #00dfff55}
+#home button:focus-visible{outline:3px solid #fff;outline-offset:4px}
+#home #startGame{grid-column:1/-1;min-height:62px;border:1px solid #b4ffff;background:linear-gradient(100deg,#087ba8,#1557a8 42%,#5427a4 76%,#9c268d);font-size:17px;letter-spacing:3px;box-shadow:inset 0 1px #ffffff66,0 5px 0 #07132f,0 0 24px #00dfff66,0 0 34px #a33dff33}
+#home #shopToggle{border-color:#e58cff;background:linear-gradient(110deg,#492078,#722b86);box-shadow:inset 0 1px #ffffff33,0 4px 0 #25113f,0 0 15px #d34cff44}
+#home #save{border-color:#62f5c7;background:linear-gradient(110deg,#10584f,#117b70);box-shadow:inset 0 1px #ffffff33,0 4px 0 #07342f,0 0 15px #37ffc044}
+#home #ranking{border-color:#ffd978;background:linear-gradient(110deg,#674316,#94621c);box-shadow:inset 0 1px #ffffff33,0 4px 0 #3a260d,0 0 15px #ffca5544}
+#home #codeToggle{border-color:#a9baff;background:linear-gradient(110deg,#263b70,#34327d);box-shadow:inset 0 1px #ffffff33,0 4px 0 #111a3d,0 0 15px #809cff44}
+#home #stageSelect{grid-column:1/-1;width:100%;max-width:none;margin:0;padding:14px;border:1px solid #48dfff88;border-radius:15px;background:linear-gradient(135deg,#081b3b,#11183c);box-shadow:inset 0 0 20px #00cfff12}
+#home #stageSelect>b{display:block;margin:0 0 9px;color:#aafaff;font-size:12px;letter-spacing:3px;text-shadow:0 0 10px #00dfff}
+#home #stageSelect button{min-height:44px;margin:7px 0;padding:10px 12px;font-size:12px;letter-spacing:.7px}
+#home #stageSelect button:disabled{opacity:.48;filter:saturate(.55);box-shadow:none;cursor:not-allowed}
+#home #world2Select{border-color:#ffad62;background:linear-gradient(100deg,#61251b,#9a481d)}
+#home #world3Select{border-color:#69dcff;background:linear-gradient(100deg,#10416e,#176d9c)}
+#home #world4Select{border-color:#d78aff;background:linear-gradient(100deg,#35175f,#66258b)}
+#home .game-version{right:18px;bottom:12px;padding:6px 10px;border-color:#6beeff88;background:#050b20dd;color:#c9fbff;font-size:11px;letter-spacing:1.5px;box-shadow:0 0 13px #00dfff44}
+@media(max-width:600px){
+ #home{margin:5px auto;padding:16px 10px 43px;border-radius:19px}
+ #home h2{font-size:9px;letter-spacing:2.5px;padding:7px 12px}
+ #home .title-lockup.adventure-emblem{margin:5px auto 0}
+ #home .hero-subtitle{margin-bottom:15px;letter-spacing:2px}
+ #home .home-buttons{gap:8px;padding:10px;border-radius:15px}
+ #home button{min-height:48px;padding:10px 6px;font-size:12px;letter-spacing:.4px}
+ #home #startGame{min-height:56px;font-size:15px;letter-spacing:2px}
+ #home #stageSelect{padding:10px}
+ #home #stageSelect button{font-size:11px}
+ #home .game-version{right:10px;bottom:8px}
+}
+@media(prefers-reduced-motion:reduce){#home button{transition:none}}
+
 </style>
 </head>
 <body>
@@ -250,7 +292,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.00</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.01</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
