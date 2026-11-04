@@ -158,6 +158,64 @@ body>h1{display:none}
 }
 @media(prefers-reduced-motion:reduce){#home button{transition:none}}
 
+
+/* SKIN SHOP premium UI — version 2.02 */
+#shopPanel{padding:clamp(10px,2vw,24px);background:radial-gradient(ellipse at 50% -8%,#254c91 0%,#111a42 38%,#05091d 78%);backdrop-filter:blur(8px)}
+.shop-shell{width:min(100%,1080px);padding:clamp(8px,1.5vw,18px);border:1px solid #4deaff66;border-radius:24px;background:linear-gradient(145deg,#091832d9,#090d28f2 58%,#1b0c35e8);box-shadow:0 0 0 1px #b44cff22,0 0 35px #00cfff33,inset 0 0 34px #258dff12}
+.shop-header{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:4px 2px 14px;border-bottom:1px solid #5beaff44}
+.shop-header h2{justify-self:center;font-size:clamp(24px,5vw,42px);letter-spacing:clamp(2px,.7vw,6px);background:linear-gradient(100deg,#9afaff,#fff 45%,#e3a2ff);-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 18px #00dfff55}
+.shop-header button{border-radius:10px;border-color:#5beaff;background:linear-gradient(110deg,#102d5a,#1b2760);font-size:13px;font-weight:900;box-shadow:0 0 12px #00dfff33}
+.shop-coins{padding:9px 13px;border-color:#ffd66d;background:linear-gradient(135deg,#533a13,#292044);color:#fff1b9;box-shadow:0 0 15px #ffce5544,inset 0 0 10px #ffdc5522}
+.shop-layout{grid-template-columns:minmax(245px,.78fr) minmax(0,1.5fr);gap:16px;align-items:start}
+.shop-preview{position:sticky;top:12px;min-height:440px;padding:18px 14px;border:1px solid #62eaff;background:radial-gradient(ellipse at 50% 38%,#22579b 0%,#12234d 48%,#090f2b 100%);box-shadow:0 0 0 1px #a34cff44,0 0 25px #00dfff55,inset 0 0 40px #00dfff24}
+#skinPreviewLabel{padding:7px 13px;border:1px solid #6beeff77;border-radius:999px;background:#07152dcc;color:#b9fbff;font-size:10px;letter-spacing:3px;text-shadow:0 0 10px #00dfff}
+#skinPreview{height:320px;max-width:100%;filter:drop-shadow(0 0 16px #00dfff66)}
+.shop-preview-name{margin-top:8px;font-size:clamp(18px,2vw,24px);letter-spacing:2px;text-shadow:0 0 14px #00dfff}
+.shop-preview-desc{max-width:260px;line-height:1.65;color:#d2e7ff}
+.shop-catalog{padding:14px;border:1px solid #4c79b2;border-radius:18px;background:linear-gradient(145deg,#0d1b3ddd,#090f29f2);box-shadow:inset 0 0 25px #00aaff0c}
+.shop-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:0 0 13px}
+.shop-tabs button{min-width:0;min-height:38px;padding:8px 5px;border:1px solid #456a9f;border-radius:9px;background:linear-gradient(135deg,#14284e,#101936);color:#d9eaff;font-size:12px;font-weight:900;box-shadow:inset 0 1px #ffffff16;transition:filter .15s,transform .15s,box-shadow .15s}
+.shop-tabs button.active{border-color:#71f5ff;background:linear-gradient(120deg,#087b9e,#3452b5);color:#fff;box-shadow:0 0 15px #00dfff66,inset 0 1px #ffffff55}
+.shop-tabs button:hover{filter:brightness(1.2);transform:translateY(-1px)}
+#skinItems{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.skin-card{position:relative;overflow:hidden;min-height:132px;padding:12px 8px 10px;border:1px solid #405d8e;border-radius:14px;background:linear-gradient(145deg,#1a2b52,#10162f 72%);box-shadow:inset 0 1px #ffffff18,0 5px 12px #02061755;transition:transform .16s,border-color .16s,box-shadow .16s}
+.skin-card:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,transparent,var(--skin-accent,#55eaff),transparent);opacity:.9}
+.skin-card:hover{transform:translateY(-2px);border-color:#75edff;box-shadow:0 0 16px #00dfff44,inset 0 1px #ffffff22}
+.skin-card.selected{border:2px solid #55edff;background:linear-gradient(145deg,#164a70,#171b42);box-shadow:0 0 0 1px #55edff44,0 0 18px #00dfff66,inset 0 0 18px #00dfff1f}
+.skin-swatch{width:54px;height:54px;margin:2px auto 9px;border-radius:13px;border:2px solid #ffffffaa;box-shadow:0 0 15px currentColor,inset 0 0 12px #ffffff44}
+.skin-card strong{font-size:12px;letter-spacing:.5px}
+.skin-card small{font-size:10px;line-height:1.5;color:#c4d9f8}
+.shop-actions{position:sticky;bottom:0;z-index:2;gap:9px;margin:14px -2px -2px;padding:10px 2px 2px;background:linear-gradient(180deg,transparent,#0b1537 25%)}
+.shop-actions button{min-height:48px;border-radius:11px;font-weight:900;letter-spacing:1px;box-shadow:inset 0 1px #ffffff33,0 4px 0 #050b1e,0 0 15px #00dfff22}
+#buySkin{border-color:#ffd477;background:linear-gradient(110deg,#704315,#a46a1d);color:#fff7db}
+#equipSkin{border-color:#5ceeff;background:linear-gradient(110deg,#07517e,#087da1);color:#efffff}
+#shopMessage{padding:8px 10px;border:1px solid #4c85b966;border-radius:9px;background:#07152b99;color:#bafaff;line-height:1.6}
+@media(max-width:700px){
+ #shopPanel{padding:7px}
+ .shop-shell{padding:9px;border-radius:17px}
+ .shop-header{grid-template-columns:auto 1fr auto;gap:6px;padding-bottom:10px}
+ .shop-header h2{font-size:clamp(19px,5.5vw,28px);letter-spacing:2px}
+ .shop-header button{padding:8px 9px;font-size:11px}
+ .shop-coins{padding:8px 9px;font-size:12px}
+ .shop-layout{grid-template-columns:1fr;gap:10px}
+ .shop-preview{position:relative;top:auto;min-height:0;display:grid;grid-template-columns:88px minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:12px;justify-items:start;padding:10px 12px;text-align:left}
+ #skinPreviewLabel{grid-column:1/-1;margin-bottom:5px;font-size:9px}
+ #skinPreview{grid-column:1;grid-row:2/4;width:88px;height:112px}
+ .shop-preview-name{grid-column:2;grid-row:2;align-self:end;margin:0;font-size:17px;letter-spacing:1px;overflow-wrap:anywhere}
+ .shop-preview-desc{grid-column:2;grid-row:3;align-self:start;margin:3px 0 0;text-align:left;font-size:11px}
+ .shop-catalog{padding:9px;border-radius:14px}
+ .shop-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:9px}
+ .shop-tabs button{min-height:35px;padding:7px 2px;font-size:11px}
+ #skinItems{gap:7px}
+ .skin-card{min-height:120px;padding:9px 5px}
+ .skin-swatch{width:44px;height:44px}
+ .skin-card strong{font-size:11px}
+ .skin-card small{font-size:9px}
+ .shop-actions{margin-top:10px;padding-top:8px}
+ .shop-actions button{min-height:45px;padding:10px 5px;font-size:13px}
+}
+@media(prefers-reduced-motion:reduce){.skin-card,.shop-tabs button{transition:none}}
+
 </style>
 </head>
 <body>
@@ -292,7 +350,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.01</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.02</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
