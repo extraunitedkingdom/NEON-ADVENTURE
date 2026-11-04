@@ -346,6 +346,13 @@ body>h1{display:none}
 .achievement-card small{display:block;margin-top:5px;color:#7cefff;font:700 9px monospace;letter-spacing:1px}
 @media(max-width:560px){#achievementPanel{padding:8px}.achievement-shell{margin:8px auto;padding:12px}.achievement-header{align-items:flex-start}.achievement-header button{font-size:11px;padding:8px 7px}#achievementList{grid-template-columns:1fr}.achievement-card{min-height:78px}}
 
+
+/* Achievement unlock toast — version 2.09 */
+#achievementToast{position:fixed;z-index:1000;top:18px;left:50%;width:min( calc(100% - 28px),420px);transform:translate(-50%,-150%);opacity:0;pointer-events:none;padding:13px 16px;border:1px solid #65efff;border-left:5px solid #65efff;border-radius:12px;background:linear-gradient(110deg,#102b50f5,#21194bf5);box-shadow:0 0 22px #24dfff88,0 8px 28px #0009;color:#f2fdff;text-align:left;transition:transform .35s ease,opacity .35s ease}
+#achievementToast.show{transform:translate(-50%,0);opacity:1}
+#achievementToast .toast-kicker{font:800 10px monospace;letter-spacing:2px;color:#7dfaff}
+#achievementToast .toast-name{font-size:19px;font-weight:900;margin:3px 0;text-shadow:0 0 10px #25dfff77}
+#achievementToast .toast-desc{font-size:12px;color:#c8e5ff}
 </style>
 </head>
 <body>
@@ -480,7 +487,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.08</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.09</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -520,6 +527,7 @@ body>h1{display:none}
 </div>
 </div>
 
+<div id="achievementToast" role="status" aria-live="polite"></div>
 <div id="achievementPanel" role="dialog" aria-modal="true" aria-label="実績">
  <div class="achievement-shell">
   <header class="achievement-header"><div><small>NEON ADVENTURE / FIELD RECORD</small><h2>ACHIEVEMENTS</h2><p id="achievementProgress">0 / 8 UNLOCKED</p></div><button id="closeAchievements">✕ CLOSE</button></header>
@@ -768,9 +776,25 @@ const achievementDefs=[
  {id:"collector",icon:"🪙",name:"COIN COLLECTOR",desc:"コインを累計10枚集める",test:()=>achievementTotalCoins>=10},
  {id:"hunter",icon:"⚔️",name:"ENEMY HUNTER",desc:"敵を累計5体倒す",test:()=>achievementEnemyKills>=5}
 ];
+let achievementToastQueue=[],achievementToastBusy=false;
+function showAchievementToast(a){
+ achievementToastQueue.push(a);
+ if(achievementToastBusy)return;
+ achievementToastBusy=true;
+ const toast=document.getElementById("achievementToast");
+ if(!toast){achievementToastBusy=false;return}
+ const showNext=()=>{
+  const item=achievementToastQueue.shift();
+  if(!item){achievementToastBusy=false;toast.classList.remove("show");return}
+  toast.innerHTML='<div class="toast-kicker">✦ ACHIEVEMENT UNLOCKED ✦</div><div class="toast-name">'+item.icon+' '+item.name+'</div><div class="toast-desc">'+item.desc+'</div>';
+  toast.classList.add("show");
+  setTimeout(()=>{toast.classList.remove("show");setTimeout(showNext,380)},2800);
+ };
+ showNext();
+}
 function checkAchievements(){
  let changed=false;
- for(const a of achievementDefs)if(!achievementUnlocked.includes(a.id)&&a.test()){achievementUnlocked.push(a.id);changed=true}
+ for(const a of achievementDefs)if(!achievementUnlocked.includes(a.id)&&a.test()){achievementUnlocked.push(a.id);changed=true;showAchievementToast(a)}
  if(changed){saveGame();renderAchievements()}
 }
 function renderAchievements(){
