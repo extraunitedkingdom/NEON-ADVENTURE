@@ -16,7 +16,18 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 #home{position:relative;isolation:isolate;overflow:hidden;max-width:1000px;min-height:560px;margin:12px auto;padding:24px 18px 30px;border:1px solid #27eaff;border-radius:22px;background:radial-gradient(ellipse at 50% 22%,#343b91 0%,#171b48 42%,#080b20 100%);box-shadow:0 0 24px #00d9ff88,inset 0 0 35px #713dff55}
 #home:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 12% 22%,#fff 0 1px,transparent 2px),radial-gradient(circle at 82% 18%,#53f6ff 0 2px,transparent 3px),radial-gradient(circle at 24% 75%,#b54cff 0 3px,transparent 4px),radial-gradient(circle at 91% 68%,#fff 0 1px,transparent 2px),linear-gradient(135deg,transparent 35%,#00d9ff22 50%,transparent 65%)}
 #home h2{margin:4px 0 0;color:#7dfaff;font-size:13px;letter-spacing:5px}
-#home .hero-character{font-size:clamp(76px,14vw,132px);line-height:1.25;margin:4px auto 0;filter:drop-shadow(0 0 16px #27eaff)}
+#home .hero-character{display:none}
+#home .logo-mark{position:relative;width:min(78vw,330px);height:170px;margin:18px auto 12px;filter:drop-shadow(0 0 12px #27eaffaa)}
+#home .logo-mark .shape{position:absolute;display:block}
+#home .logo-mark .core{left:calc(50% - 31px);top:48px;width:62px;height:62px;transform:rotate(45deg);border:4px solid #fff;background:linear-gradient(135deg,#00eaff,#714dff 55%,#ff4fd8);box-shadow:0 0 22px #20eaff}
+#home .logo-mark .north{left:calc(50% - 13px);top:0;width:26px;height:55px;background:linear-gradient(#72fff1,#00b9ff);clip-path:polygon(50% 0,100% 100%,50% 78%,0 100%)}
+#home .logo-mark .south{left:calc(50% - 13px);bottom:0;width:26px;height:55px;background:linear-gradient(#ffbd4a,#ff4b78);clip-path:polygon(50% 100%,100% 0,50% 22%,0 0)}
+#home .logo-mark .west{left:calc(50% - 105px);top:67px;width:88px;height:34px;background:linear-gradient(90deg,#9cff66,#00d7c7);clip-path:polygon(0 50%,35% 0,100% 0,72% 50%,100% 100%,35% 100%)}
+#home .logo-mark .east{right:calc(50% - 105px);top:67px;width:88px;height:34px;background:linear-gradient(90deg,#b04cff,#ff65ce);clip-path:polygon(0 0,65% 0,100% 50%,65% 100%,0 100%,28% 50%)}
+#home .logo-mark .orbit{left:calc(50% - 135px);top:34px;width:270px;height:102px;border:2px solid #7dfaff;border-radius:50%;transform:rotate(-18deg);opacity:.75}
+#home .logo-mark .spark{width:10px;height:10px;background:#fff;transform:rotate(45deg);box-shadow:0 0 12px #fff}
+#home .logo-mark .s1{left:22px;top:28px}.logo-mark .s2{right:22px;bottom:25px}
+@media(max-width:700px){#home .logo-mark{height:145px;margin-top:12px}#home .logo-mark .orbit{width:235px;left:calc(50% - 117px)}#home .logo-mark .west{left:calc(50% - 95px);width:78px}#home .logo-mark .east{right:calc(50% - 95px);width:78px}}
 #home .hero-title{margin:-8px auto 14px;font-size:clamp(34px,7vw,68px);font-weight:1000;font-style:italic;letter-spacing:-2px;line-height:.95;color:#fff;text-shadow:3px 3px 0 #7b2cff,-3px -2px 0 #00dfff,0 0 24px #00dfff}
 #home .hero-subtitle{margin:12px 0 18px;color:#b9faff;letter-spacing:3px;font-size:12px}
 #home .home-buttons{max-width:360px;margin:0 auto}
@@ -81,7 +92,7 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <h1>NEON ADVENTURE</h1>
 <div id="home">
 <h2>WELCOME TO THE WORLD</h2>
-<div class="hero-character" aria-hidden="true">🧑🏻‍🚀⚔️</div>
+<div class="logo-mark" role="img" aria-label="NEON ADVENTURE geometric logo"><span class="shape orbit"></span><span class="shape north"></span><span class="shape south"></span><span class="shape west"></span><span class="shape east"></span><span class="shape core"></span><span class="shape spark s1"></span><span class="shape spark s2"></span></div>
 <div class="hero-title">NEON<br>ADVENTURE</div>
 <p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p>
 <div class="home-buttons">
