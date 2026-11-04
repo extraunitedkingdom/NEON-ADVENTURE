@@ -480,7 +480,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.07</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.08</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -563,7 +563,7 @@ let adminBeamTimer=0,adminBeamCooldown=0;
 let worldNumber=1,world2Unlocked=false,world2Cleared=false,world3Unlocked=false,world3Cleared=false;
 let facing=1,attackTimer=0,gameStarted=false;
 let playerSkin="#9b8aff",coinCount=0,camera=0,gameClear=false,bossDefeated=false,stageCleared=false;
-let achievementUnlocked=[],achievementTotalCoins=0,achievementEnemyKills=0;
+let achievementUnlocked=[],achievementTotalCoins=0,achievementEnemyKills=0,bossDefeatCount=0;
 let claimedWorldRewards=[];
 let appearanceBackground="default",appearanceEmoji="",appearanceCharacter="boy";
 let gameStart=Date.now(),currentTime=0;
@@ -654,14 +654,14 @@ document.getElementById("closeEquipment").onclick=closeEquipment;
 document.getElementById("equipmentPanel").addEventListener("click",e=>{if(e.target.id==="equipmentPanel")closeEquipment()});
 
 function saveGame(){
- const data={version:6,achievementUnlocked,achievementTotalCoins,achievementEnemyKills,claimedWorldRewards,appearanceBackground,appearanceEmoji,appearanceCharacter,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ const data={version:7,achievementUnlocked,achievementTotalCoins,achievementEnemyKills,bossDefeatCount,claimedWorldRewards,appearanceBackground,appearanceEmoji,appearanceCharacter,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
  try{localStorage.setItem("gameSave",JSON.stringify(data));return true}catch(e){console.error("セーブに失敗しました",e);return false}
 }
 function loadGame(){
  let d;
  try{d=JSON.parse(localStorage.getItem("gameSave")||"null")}catch(e){console.warn("セーブデータの形式が壊れています",e);return false}
  if(!d||typeof d!=="object")return false;
- achievementUnlocked=Array.isArray(d.achievementUnlocked)?d.achievementUnlocked.filter(x=>typeof x==="string"):[];claimedWorldRewards=Array.isArray(d.claimedWorldRewards)?d.claimedWorldRewards.filter(x=>[1,2,3,4].includes(x)):[];achievementTotalCoins=Number.isFinite(d.achievementTotalCoins)?d.achievementTotalCoins:0;achievementEnemyKills=Number.isFinite(d.achievementEnemyKills)?d.achievementEnemyKills:0;
+ achievementUnlocked=Array.isArray(d.achievementUnlocked)?d.achievementUnlocked.filter(x=>typeof x==="string"):[];claimedWorldRewards=Array.isArray(d.claimedWorldRewards)?d.claimedWorldRewards.filter(x=>[1,2,3,4].includes(x)):[];achievementTotalCoins=Number.isFinite(d.achievementTotalCoins)?d.achievementTotalCoins:0;achievementEnemyKills=Number.isFinite(d.achievementEnemyKills)?d.achievementEnemyKills:0;bossDefeatCount=Number.isFinite(d.bossDefeatCount)?Math.max(0,Math.floor(d.bossDefeatCount)):0;
  appearanceBackground=typeof d.appearanceBackground==="string"?d.appearanceBackground:"default";appearanceEmoji=typeof d.appearanceEmoji==="string"?d.appearanceEmoji:"";appearanceCharacter=typeof d.appearanceCharacter==="string"?d.appearanceCharacter:"boy";
  coinCount=Number.isFinite(d.coinCount)?d.coinCount:coinCount;
  adminUnlocked=!!d.adminUnlocked;adminMode=adminUnlocked&&!!d.adminMode;floatMode=false;
@@ -729,7 +729,7 @@ function attack(){
   const bossHit=Math.hypot(px-bx,py-by)<115;
   if(bossHit){
    boss.hp=Math.max(0,boss.hp-playerAttackPower());
-   if(boss.hp===0){boss.alive=false;bossDefeated=true;saveGame()}
+   if(boss.hp===0){boss.alive=false;bossDefeated=true;bossDefeatCount++;saveGame()}
   }
  }
 }
@@ -739,7 +739,7 @@ function useAdminBeam(){
  const px=player.x+player.w/2,py=player.y+player.h/2;
  for(const e of enemies){if(e.alive&&((facing>0&&e.x+e.w>=px&&e.x<=px+1800)||(facing<0&&e.x<=px&&e.x+e.w>=px-1800))&&Math.abs(e.y+e.h/2-py)<95){e.alive=false;achievementEnemyKills++}}
  checkAchievements();
- if(boss.alive&&((facing>0&&boss.x+boss.w>=px&&boss.x<=px+1800)||(facing<0&&boss.x<=px&&boss.x+boss.w>=px-1800))&&Math.abs(boss.y+boss.h/2-py)<150){boss.hp=0;boss.alive=false;bossDefeated=true;saveGame()}
+ if(boss.alive&&((facing>0&&boss.x+boss.w>=px&&boss.x<=px+1800)||(facing<0&&boss.x<=px&&boss.x+boss.w>=px-1800))&&Math.abs(boss.y+boss.h/2-py)<150){boss.hp=0;boss.alive=false;bossDefeated=true;bossDefeatCount++;saveGame()}
 }
 function useDash(){if(gameStarted&&!gameClear&&dashTimer===0)dashTimer=90}
 function useShield(){if(!gameClear&&shieldTimer===0){shieldTimer=120;invincibleTimer=Math.max(invincibleTimer,120)}}
@@ -1420,7 +1420,7 @@ function refreshAdminUI(){
  a.style.display=adminUnlocked?"inline-block":"none";f.style.display=adminMode?"inline-block":"none";document.getElementById("kamehameha").style.display=adminMode?"inline-block":"none";
  a.textContent="ADMIN: "+(adminMode?"ON":"OFF");f.textContent="FLOAT: "+(floatMode?"ON":"OFF");
 }
-document.getElementById("codeToggle").onclick=()=>{document.getElementById("codePanel").style.display="block";document.getElementById("codeMessage").textContent="";};
+document.getElementById("codeToggle").onclick=()=>{document.getElementById("codePanel").style.display="block";document.getElementById("codeMessage").textContent=bossDefeatCount>=10000?"SECRET CODE UNLOCKED: "+ADMIN_CODE+"（管理者コード）":"ボス討伐数："+bossDefeatCount.toLocaleString()+" / 10,000";};
 document.getElementById("closeCodePanel").onclick=()=>document.getElementById("codePanel").style.display="none";
 document.getElementById("codePanel").addEventListener("click",e=>{if(e.target.id==="codePanel")document.getElementById("codePanel").style.display="none"});
 document.getElementById("redeemCode").onclick=()=>{
