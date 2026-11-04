@@ -17,17 +17,21 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 #home:before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(circle at 12% 22%,#fff 0 1px,transparent 2px),radial-gradient(circle at 82% 18%,#53f6ff 0 2px,transparent 3px),radial-gradient(circle at 24% 75%,#b54cff 0 3px,transparent 4px),radial-gradient(circle at 91% 68%,#fff 0 1px,transparent 2px),linear-gradient(135deg,transparent 35%,#00d9ff22 50%,transparent 65%)}
 #home h2{margin:4px 0 0;color:#7dfaff;font-size:13px;letter-spacing:5px}
 #home .hero-character{display:none}
-#home .title-lockup{position:relative;isolation:isolate;width:min(96%,850px);margin:24px auto 20px;padding:48px 12px 44px}
-#home .logo-mark{position:absolute;z-index:-1;inset:0;width:100%;height:100%;margin:0;filter:drop-shadow(0 0 12px #27eaffaa)}
+#home .title-lockup{position:relative;isolation:isolate;width:min(100%,960px);margin:18px auto 20px;padding:64px 12px 58px}
+#home .logo-mark{position:absolute;z-index:-1;inset:0;width:100%;height:100%;margin:0;filter:drop-shadow(0 0 13px #27eaffaa)}
+#home .logo-mark:before{content:"";position:absolute;inset:17% 3%;border:4px solid transparent;border-top-color:#00eaff;border-bottom-color:#ed4dff;border-radius:50%;transform:rotate(-7deg);box-shadow:0 0 18px #00dfff,inset 0 0 15px #a34dff}
+#home .logo-mark:after{content:"";position:absolute;left:8%;right:8%;top:8%;bottom:8%;background:repeating-linear-gradient(90deg,transparent 0 7%,#00eaff55 7.2% 7.5%,transparent 7.8% 14%),linear-gradient(135deg,transparent 20%,#00eaff22 35%,transparent 48%,#ff4fd822 65%,transparent 80%);clip-path:polygon(0 25%,12% 25%,18% 0,30% 18%,50% 0,70% 18%,82% 0,88% 25%,100% 25%,100% 75%,88% 75%,82% 100%,70% 82%,50% 100%,30% 82%,18% 100%,12% 75%,0 75%);opacity:.9}
 #home .logo-mark .shape{position:absolute;display:block}
-#home .logo-mark .core{left:calc(50% - 5px);top:0;width:10px;height:100%;background:linear-gradient(180deg,#00eaff,#684dff 50%,#ff4fd8);clip-path:polygon(50% 0,100% 18%,78% 50%,100% 82%,50% 100%,0 82%,22% 50%,0 18%);opacity:.85;filter:drop-shadow(0 0 10px #20eaff)}
-#home .logo-mark .north{left:4%;top:4px;width:27%;height:35px;border-top:4px solid #00eaff;border-left:4px solid #00eaff;transform:skewX(-35deg);box-shadow:0 0 15px #00dfff}
-#home .logo-mark .south{right:4%;bottom:4px;width:27%;height:35px;border-bottom:4px solid #ff4fd8;border-right:4px solid #ff4fd8;transform:skewX(-35deg);box-shadow:0 0 15px #ff4fd8}
-#home .logo-mark .west{left:0;top:34%;width:24%;height:32%;border:3px solid #00eaff;clip-path:polygon(0 0,100% 0,78% 50%,100% 100%,0 100%);background:linear-gradient(90deg,#00eaff33,transparent);box-shadow:0 0 18px #00dfff}
-#home .logo-mark .east{right:0;top:34%;width:24%;height:32%;border:3px solid #ff4fd8;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,22% 50%);background:linear-gradient(270deg,#ff4fd833,transparent);box-shadow:0 0 18px #ff4fd8}
-#home .logo-mark .orbit{left:2%;top:15%;width:96%;height:70%;border:3px solid #27eaff;border-right-color:#ff4fd8;border-radius:50%;transform:rotate(-8deg);opacity:.9;box-shadow:0 0 16px #00dfff,inset 0 0 12px #a34dff}
-#home .logo-mark .spark{width:10px;height:10px;background:#fff;transform:rotate(45deg);box-shadow:0 0 12px #fff}
-#home .logo-mark .s1{left:8%;top:12%}.logo-mark .s2{right:8%;bottom:12%}
+#home .logo-mark .core{left:calc(50% - 9px);top:0;width:18px;height:100%;background:linear-gradient(180deg,#00eaff,#684dff 50%,#ff4fd8);clip-path:polygon(50% 0,100% 18%,78% 50%,100% 82%,50% 100%,0 82%,22% 50%,0 18%);opacity:.95;filter:drop-shadow(0 0 13px #20eaff)}
+#home .logo-mark .north{left:3%;top:0;width:30%;height:48px;border-top:5px solid #00eaff;border-left:5px solid #00eaff;transform:skewX(-35deg);box-shadow:0 0 18px #00dfff}
+#home .logo-mark .south{right:3%;bottom:0;width:30%;height:48px;border-bottom:5px solid #ff4fd8;border-right:5px solid #ff4fd8;transform:skewX(-35deg);box-shadow:0 0 18px #ff4fd8}
+#home .logo-mark .west{left:0;top:31%;width:25%;height:38%;border:4px solid #00eaff;clip-path:polygon(0 0,100% 0,78% 50%,100% 100%,0 100%);background:linear-gradient(90deg,#00eaff55,transparent);box-shadow:0 0 20px #00dfff}
+#home .logo-mark .east{right:0;top:31%;width:25%;height:38%;border:4px solid #ff4fd8;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,22% 50%);background:linear-gradient(270deg,#ff4fd855,transparent);box-shadow:0 0 20px #ff4fd8}
+#home .logo-mark .orbit{left:1%;top:13%;width:98%;height:74%;border:4px solid #27eaff;border-right-color:#ff4fd8;border-radius:50%;transform:rotate(-8deg);opacity:.95;box-shadow:0 0 20px #00dfff,inset 0 0 16px #a34dff}
+#home .logo-mark .spark{width:13px;height:13px;background:#fff;transform:rotate(45deg);box-shadow:0 0 14px #fff,0 0 24px #00eaff}
+#home .logo-mark .s1{left:7%;top:8%}.logo-mark .s2{right:7%;bottom:8%}
+#home .hero-title{position:relative;z-index:1;margin:0 auto;padding:8px 6px;font-size:clamp(48px,10.5vw,94px);font-weight:1000;font-style:italic;letter-spacing:-2px;line-height:.9;color:#fff;background:linear-gradient(180deg,#ffffff 5%,#d9faff 48%,#a9cfff 100%);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(3px 4px 0 #11152f) drop-shadow(-3px -2px 0 #00dfff) drop-shadow(3px 2px 0 #b42cff) drop-shadow(0 0 18px #00dfff)}
+@media(max-width:700px){#home .title-lockup{padding:48px 2px;margin:16px auto}#home .logo-mark .north,#home .logo-mark .south{height:30px}#home .hero-title{font-size:clamp(42px,11vw,68px);letter-spacing:-1.5px}}
 #home .hero-subtitle{margin:12px 0 18px;color:#b9faff;letter-spacing:3px;font-size:12px}
 #home .home-buttons{max-width:360px;margin:0 auto}
 #home button{display:block;width:100%;margin:9px 0;padding:13px 16px;border-radius:12px;border:2px solid #58efff;background:linear-gradient(90deg,#112b62,#29206c);box-shadow:0 0 13px #00dfff77;color:#fff;letter-spacing:1px}
