@@ -106,6 +106,13 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 #shopMessage{min-height:20px;color:#9ffaff;font-size:12px;margin:8px 0 0}
 .small{font-size:13px;color:#c8c9df}
 @media(max-width:650px){#shopPanel{padding:9px}.shop-header{margin-bottom:8px}.shop-layout{grid-template-columns:1fr;gap:9px}.shop-preview{min-height:250px;padding:6px}#skinPreview{height:205px;max-width:220px}.shop-catalog{padding:8px}.shop-actions button{font-size:14px;padding:12px 5px}}
+#home .game-version{position:absolute;right:14px;bottom:10px;margin:0;padding:5px 9px;border:1px solid #51eaff66;border-radius:7px;background:#070d24aa;color:#a9f8ff;font:700 12px/1.2 monospace;letter-spacing:1px;text-shadow:0 0 8px #00dfff;box-shadow:0 0 9px #00dfff33}
+#home .logo-mark .node{position:absolute;width:12px;height:12px;border:2px solid #fff;transform:rotate(45deg);background:#00eaff;box-shadow:0 0 8px #00eaff,0 0 18px #00eaff}
+#home .logo-mark .n1{left:11%;top:48%}.logo-mark .n2{right:11%;top:48%;background:#ff58d8;box-shadow:0 0 8px #ff58d8,0 0 18px #ff58d8}
+#home .logo-mark .n3{left:35%;top:5%;width:7px;height:7px;background:#ffd76b}.logo-mark .n4{right:35%;bottom:5%;width:7px;height:7px;background:#a88aff}
+#home .logo-mark .blade{position:absolute;top:42%;width:9%;height:16%;border-top:3px solid #ffe36b;border-bottom:3px solid #ffe36b;filter:drop-shadow(0 0 7px #ffd34d)}
+#home .logo-mark .b1{left:27%;transform:skewY(-25deg)}#home .logo-mark .b2{right:27%;border-color:#b69aff;transform:skewY(25deg)}
+#home .logo-mark .core{width:22px;left:calc(50% - 11px);background:linear-gradient(180deg,#8fffff,#00aaff 28%,#8055ff 68%,#ff65d8)}
 </style>
 </head>
 <body>
@@ -113,10 +120,10 @@ button{background:#5743b8;color:white;border:2px solid #9b8aff;border-radius:12p
 <div id="home">
 <h2>WELCOME TO THE WORLD</h2>
 <div class="title-lockup">
-<div class="logo-mark" role="img" aria-label="NEON ADVENTUREを囲むネオンロゴ"><span class="shape orbit"></span><span class="detail circuit-left"></span><span class="detail circuit-right"></span><span class="detail rune r1"></span><span class="detail rune r2"></span><span class="detail micro m1"></span><span class="detail micro m2"></span><span class="shape north"></span><span class="shape south"></span><span class="shape west"></span><span class="shape east"></span><span class="shape core"></span><span class="shape spark s1"></span><span class="shape spark s2"></span></div>
+<div class="logo-mark" role="img" aria-label="NEON ADVENTUREを囲むネオンロゴ"><span class="shape orbit"></span><span class="detail circuit-left"></span><span class="detail circuit-right"></span><span class="detail rune r1"></span><span class="detail rune r2"></span><span class="detail micro m1"></span><span class="detail micro m2"></span><span class="node n1"></span><span class="node n2"></span><span class="node n3"></span><span class="node n4"></span><span class="blade b1"></span><span class="blade b2"></span><span class="shape north"></span><span class="shape south"></span><span class="shape west"></span><span class="shape east"></span><span class="shape core"></span><span class="shape spark s1"></span><span class="shape spark s2"></span></div>
 <div class="hero-title">NEON<br>ADVENTURE</div>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 1.80</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
