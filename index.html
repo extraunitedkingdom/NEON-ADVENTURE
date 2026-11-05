@@ -575,7 +575,7 @@ body>h1{display:none}
  </div>
 </div>
 <div id="actions">
-<button id="attack">ATTACK</button><button id="equipmentToggle">装備・ステータス</button><button id="dash">DASH</button><button id="restart">RESTART</button><button id="adminToggle" style="display:none">ADMIN: OFF</button><button id="floatToggle" style="display:none">FLOAT: OFF</button><button id="kamehameha" style="display:none;border-color:#55f5ff;background:linear-gradient(90deg,#075c9b,#12bde0)">かめはめ波</button>
+<button id="attack">ATTACK</button><button id="shoot" style="border-color:#55f5ff;background:linear-gradient(90deg,#075c9b,#12bde0)">SHOT</button><button id="equipmentToggle">装備・ステータス</button><button id="dash">DASH</button><button id="restart">RESTART</button><button id="adminToggle" style="display:none">ADMIN: OFF</button><button id="floatToggle" style="display:none">FLOAT: OFF</button><button id="kamehameha" style="display:none;border-color:#55f5ff;background:linear-gradient(90deg,#075c9b,#12bde0)">かめはめ波</button>
 </div>
 <p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p><p class="small" id="world2Hint">WORLD 2：水色のジャンプパッドでマグマを飛び越えよう。2つ目は高い壁の上へ飛び乗るためのパッド！</p>
 </div>
@@ -585,6 +585,7 @@ const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
 const W=canvas.width,H=canvas.height;
 const player={x:80,y:200,w:30,h:42,vx:0,vy:0,speed:4,jumpPower:11,jumps:0,maxJumps:2,grounded:false};
 let playerHP=3,invincibleTimer=0,attackCooldown=0,dashTimer=0,shieldTimer=0;
+let projectiles=[],shotCooldown=0;
 let adminUnlocked=false,adminMode=false,floatMode=false;
 let adminBeamTimer=0,adminBeamCooldown=0;
 let worldNumber=1,world2Unlocked=false,world2Cleared=false,world3Unlocked=false,world3Cleared=false;
@@ -621,7 +622,7 @@ let springPads=[];
 let stageWalls=[];
 let windZones=[],movingPlatforms=[],vanishPlatforms=[],lightningZones=[];
 function loadWorld2(){
- worldNumber=2;springPads=[{x:470,y:410,w:54,h:20,power:17},{x:1320,y:410,w:58,h:20,power:21}];stageWalls=[{x:1700,y:170,w:70,h:260}];player.x=80;player.y=350;player.vx=0;player.vy=0;player.jumps=0;playerHP=skinMaxHP();camera=0;
+ worldNumber=2;projectiles=[];springPads=[{x:470,y:410,w:54,h:20,power:17},{x:1320,y:410,w:58,h:20,power:21}];stageWalls=[{x:1700,y:170,w:70,h:260}];player.x=80;player.y=350;player.vx=0;player.vy=0;player.jumps=0;playerHP=skinMaxHP();camera=0;
  // 基本は平地。マグマ溜まりをジャンプパッドで越え、最後は高い壁を飛び乗る構成
  platforms=[{x:0,y:430,w:470,h:70},{x:570,y:430,w:750,h:70},{x:1420,y:430,w:280,h:70},{x:1770,y:170,w:90,h:25},{x:1860,y:300,w:500,h:130},{x:2360,y:430,w:430,h:70}];
  lavaZones=[{x:470,y:455,w:100,h:45},{x:1320,y:455,w:100,h:45},{x:1700,y:455,w:60,h:45},{x:2290,y:455,w:70,h:45}];
@@ -720,7 +721,7 @@ function loadGame(){
  renderShop();return true;
 }
 function loadWorld3(){
- worldNumber=3;springPads=[];lavaZones=[];stageWalls=[];
+ worldNumber=3;projectiles=[];springPads=[];lavaZones=[];stageWalls=[];
  // 風で上昇→浮島を渡る→雷を見て通過→消える足場を登る→風で城へ
  windZones=[{x:350,y:115,w:220,h:315,dir:1,power:1.35},{x:2580,y:70,w:230,h:360,dir:1,power:1.35}];
  movingPlatforms=[
@@ -764,6 +765,28 @@ function attack(){
   }
  }
 }
+function shootProjectile(){
+ if(!gameStarted||gameClear||shotCooldown>0)return;
+ shotCooldown=18;
+ projectiles.push({x:player.x+player.w/2+facing*20,y:player.y+player.h/2,vx:facing*9,life:105,damage:Math.max(1,playerAttackPower())});
+}
+function updateProjectiles(){
+ for(let i=projectiles.length-1;i>=0;i--){
+  const p=projectiles[i];p.x+=p.vx;p.life--;
+  let hit=false;
+  for(const e of enemies){
+   if(e.alive&&p.x>=e.x-5&&p.x<=e.x+e.w+5&&p.y>=e.y-5&&p.y<=e.y+e.h+5){
+    e.alive=false;achievementEnemyKills++;checkAchievements();hit=true;break;
+   }
+  }
+  if(!hit&&boss.alive&&p.x>=boss.x-5&&p.x<=boss.x+boss.w+5&&p.y>=boss.y-5&&p.y<=boss.y+boss.h+5){
+   boss.hp=Math.max(0,boss.hp-p.damage);
+   if(boss.hp===0){boss.alive=false;bossDefeated=true;bossDefeatCount++;saveGame()}
+   hit=true;
+  }
+  if(hit||p.life<=0||p.x<0||p.x>4000)projectiles.splice(i,1);
+ }
+}
 function useAdminBeam(){
  if(!adminMode||!gameStarted||gameClear||adminBeamCooldown>0)return;
  adminBeamTimer=28;adminBeamCooldown=42;
@@ -782,12 +805,14 @@ function bindHold(id,side){
 bindHold("left","left");bindHold("right","right");
 document.getElementById("jump").addEventListener("pointerdown",e=>{e.preventDefault();jump()});
 document.getElementById("attack").addEventListener("pointerdown",e=>{e.preventDefault();attack()});
+document.getElementById("shoot").addEventListener("pointerdown",e=>{e.preventDefault();shootProjectile()});
 document.getElementById("dash").onclick=useDash;
 document.getElementById("kamehameha").addEventListener("pointerdown",e=>{e.preventDefault();useAdminBeam()});
 
 window.addEventListener("keydown",e=>{keys[e.code]=true;if(e.code==="Space"&&!e.repeat){e.preventDefault();jump()}if(e.code==="ControlLeft"&&!e.repeat){e.preventDefault();useDash()}});
 window.addEventListener("keyup",e=>keys[e.code]=false);
-canvas.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button===0)attack()});
+canvas.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button===0)attack();else if(e.pointerType==="mouse"&&e.button===2)shootProjectile()});
+canvas.addEventListener("contextmenu",e=>e.preventDefault());
 
 function formatStatTime(seconds){const n=Math.floor(Math.max(0,seconds)),h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=n%60;return h+"時間 "+m+"分 "+s+"秒"}
 function getRealStatisticsValues(){
@@ -891,7 +916,7 @@ function update(){
  if(gameStarted&&!gameClear){
   if(worldNumber===4)updateWorld4Combat();
   if(worldNumber===4&&bossDefeated)finishGame();
-  if(adminBeamTimer>0)adminBeamTimer--;if(adminBeamCooldown>0)adminBeamCooldown--;
+  if(adminBeamTimer>0)adminBeamTimer--;if(adminBeamCooldown>0)adminBeamCooldown--;if(shotCooldown>0)shotCooldown--;updateProjectiles();
   if(dashTimer>0)dashTimer--;if(shieldTimer>0)shieldTimer--;if(invincibleTimer>0)invincibleTimer--;if(attackCooldown>0)attackCooldown--;if(attackTimer>0)attackTimer--;
   const speed=dashTimer>0?player.speed*2:player.speed;
   const left=keys.ArrowLeft||keys.KeyA||touch.left,right=keys.ArrowRight||keys.KeyD||touch.right;
@@ -1165,6 +1190,7 @@ function draw(){
  if(worldNumber===4)drawWorld4Actors();else for(let i=0;i<enemies.length;i++){const e=enemies[i];if(e.alive)drawDetailedEnemy(e,i,false)}
  if(adminBeamTimer>0&&adminMode){const bx=(player.x+player.w/2-camera)+(facing>0?14:-14),by=player.y+player.h/2;ctx.save();ctx.globalAlpha=Math.min(1,adminBeamTimer/8);ctx.shadowColor="#32eaff";ctx.shadowBlur=28;ctx.fillStyle="#19cfff";ctx.fillRect(facing>0?bx:0,by-17,facing>0?W-bx:bx,34);ctx.shadowBlur=10;ctx.fillStyle="#eaffff";ctx.fillRect(facing>0?bx:0,by-6,facing>0?W-bx:bx,12);ctx.restore()}
  if(boss.alive&&worldNumber!==4)drawDetailedEnemy(boss,0,true);
+ for(const p of projectiles){ctx.save();ctx.shadowColor="#35eaff";ctx.shadowBlur=18;ctx.fillStyle="#16dfff";ctx.beginPath();ctx.ellipse(p.x,p.y,12,5,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#efffff";ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.restore()}
  if(bossDefeated){ctx.fillStyle="#ffd700";ctx.fillRect(goal.x,goal.y,goal.w,goal.h);ctx.fillStyle="#fff";ctx.font="16px sans-serif";ctx.fillText("GOAL",goal.x-4,goal.y-10)}
  // Chibi adventurer with sheathed/drawn cyan energy blade
  ctx.save();ctx.translate(player.x+player.w/2,player.y);ctx.scale(facing,1);
@@ -1402,7 +1428,7 @@ function skinMaxHP(){
 }
 function applySkinHP(fill=true){const m=skinMaxHP();playerHP=fill?m:Math.min(playerHP,m)}
 function loadWorld4(){
- worldNumber=4;springPads=[];lavaZones=[];stageWalls=[];windZones=[];movingPlatforms=[];vanishPlatforms=[];lightningZones=[];
+ worldNumber=4;projectiles=[];springPads=[];lavaZones=[];stageWalls=[];windZones=[];movingPlatforms=[];vanishPlatforms=[];lightningZones=[];
  platforms=[{x:0,y:430,w:3700,h:70},{x:430,y:385,w:190,h:45},{x:760,y:350,w:190,h:80},{x:1080,y:390,w:210,h:40},{x:1430,y:355,w:210,h:75},{x:1780,y:385,w:190,h:45},{x:2110,y:345,w:220,h:85},{x:2490,y:385,w:190,h:45},{x:2820,y:350,w:210,h:80},{x:3100,y:390,w:180,h:40}];
  enemies=[
  {x:520,y:388,w:42,h:42,min:420,max:850,dir:1,alive:true,type:"melee",cool:70},
