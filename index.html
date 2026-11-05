@@ -545,7 +545,7 @@ body>h1{display:none}
 
 <div id="statisticsPanel" role="dialog" aria-modal="true" aria-label="統計"><div class="statistics-shell">
 <header class="statistics-header"><div><small>NEON ADVENTURE / PLAYER DATA</small><h2>STATISTICS</h2><p>YOUR ADVENTURE RECORD</p></div><button id="closeStatistics" type="button">✕ CLOSE</button></header>
-<div id="statisticsGrid" class="statistics-grid"></div><p class="statistics-note">※統計はプレイ中に記録され、セーブデータに保存されます。</p></div></div>
+<div id="statisticsGrid" class="statistics-grid"></div><div id="adminStatisticsControls" style="display:none;margin:18px 0;padding:16px;border:1px solid #ffcf5a;border-radius:14px;background:#17152b;text-align:left"></div><p class="statistics-note">※統計はプレイ中に記録され、セーブデータに保存されます。</p></div></div>
 <div id="achievementToast" role="status" aria-live="polite"></div>
 <div id="achievementPanel" role="dialog" aria-modal="true" aria-label="実績">
  <div class="achievement-shell">
@@ -593,6 +593,7 @@ let playerSkin="#9b8aff",coinCount=0,camera=0,gameClear=false,bossDefeated=false
 let achievementUnlocked=[],achievementTotalCoins=0,achievementEnemyKills=0,bossDefeatCount=0;
 let claimedWorldRewards=[];
 let gameStats={totalPlaySeconds:0,playCount:0,stageClears:0,worldClears:[0,0,0,0],totalDamageTaken:0,totalCoinsEarned:0,totalCoinsSpent:0};
+let adminStatsOverride=null;
 let appearanceBackground="default",appearanceEmoji="",appearanceCharacter="boy";
 let gameStart=Date.now(),currentTime=0;
 let bestTime=Number(localStorage.getItem("bestTime"))||null;
@@ -694,7 +695,7 @@ function loadGame(){
  achievementUnlocked=Array.isArray(d.achievementUnlocked)?d.achievementUnlocked.filter(x=>typeof x==="string"):[];claimedWorldRewards=Array.isArray(d.claimedWorldRewards)?d.claimedWorldRewards.filter(x=>[1,2,3,4].includes(x)):[];achievementTotalCoins=Number.isFinite(d.achievementTotalCoins)?d.achievementTotalCoins:0;achievementEnemyKills=Number.isFinite(d.achievementEnemyKills)?d.achievementEnemyKills:0;bossDefeatCount=Number.isFinite(d.bossDefeatCount)?Math.max(0,Math.floor(d.bossDefeatCount)):0;
  appearanceBackground=typeof d.appearanceBackground==="string"?d.appearanceBackground:"default";appearanceEmoji=typeof d.appearanceEmoji==="string"?d.appearanceEmoji:"";appearanceCharacter=typeof d.appearanceCharacter==="string"?d.appearanceCharacter:"boy";
  coinCount=Number.isFinite(d.coinCount)?d.coinCount:coinCount;
- adminUnlocked=!!d.adminUnlocked;adminMode=adminUnlocked&&!!d.adminMode;floatMode=false;
+ adminUnlocked=!!d.adminUnlocked;adminMode=adminUnlocked&&!!d.adminMode;adminStatsOverride=adminMode?getRealStatisticsValues():null;floatMode=false;
  worldNumber=[1,2,3,4].includes(d.worldNumber)?d.worldNumber:1;
  world2Unlocked=!!d.world2Unlocked;world2Cleared=!!d.world2Cleared;
  world3Unlocked=!!d.world3Unlocked;world3Cleared=!!d.world3Cleared;
@@ -789,17 +790,36 @@ window.addEventListener("keyup",e=>keys[e.code]=false);
 canvas.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button===0)attack()});
 
 function formatStatTime(seconds){const n=Math.floor(Math.max(0,seconds)),h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=n%60;return h+"時間 "+m+"分 "+s+"秒"}
+function getRealStatisticsValues(){
+ return {bossDefeatCount,achievementEnemyKills,totalDamageTaken:gameStats.totalDamageTaken,totalPlaySeconds:gameStats.totalPlaySeconds,playCount:gameStats.playCount,stageClears:gameStats.stageClears,world1Clears:gameStats.worldClears[0],world2Clears:gameStats.worldClears[1],world3Clears:gameStats.worldClears[2],world4Clears:gameStats.worldClears[3],totalCoinsEarned:gameStats.totalCoinsEarned,totalCoinsSpent:gameStats.totalCoinsSpent,achievementCount:achievementUnlocked.length,bestTime:bestTime===null?0:bestTime};
+}
+function getStatisticsValue(key){const real=getRealStatisticsValues();return adminMode&&adminStatsOverride&&Number.isFinite(adminStatsOverride[key])?adminStatsOverride[key]:real[key]}
+function renderAdminStatisticsControls(){
+ const panel=document.getElementById("adminStatisticsControls");if(!panel)return;
+ if(!adminMode){panel.style.display="none";panel.innerHTML="";return}
+ if(!adminStatsOverride)adminStatsOverride=getRealStatisticsValues();
+ const fields=[["bossDefeatCount","ボス討伐数"],["achievementEnemyKills","通常敵討伐数"],["totalDamageTaken","総被ダメージ"],["totalPlaySeconds","総プレイ時間（秒）"],["playCount","プレイ回数"],["stageClears","ステージクリア回数"],["world1Clears","WORLD 1 クリア回数"],["world2Clears","WORLD 2 クリア回数"],["world3Clears","WORLD 3 クリア回数"],["world4Clears","WORLD 4 クリア回数"],["totalCoinsEarned","累計獲得コイン"],["totalCoinsSpent","累計消費コイン"],["achievementCount","実績解除数"],["bestTime","最速クリアタイム（秒・0で未記録）"]];
+ panel.style.display="block";
+ panel.innerHTML='<div style="font-weight:900;color:#ffdf83;font-size:18px;margin-bottom:6px">⚙ ADMIN STATISTICS EDITOR</div><p style="font-size:12px;color:#c7c4dc;margin:0 0 12px">管理者ONの間だけ有効。OFFにすると本来の記録に戻ります。実績条件の判定にも反映されます。</p><div id="adminStatisticsFields" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:9px"></div><button id="applyAdminStatistics" type="button" style="width:100%;margin-top:12px;background:#71551b;border-color:#ffcf5a">数値を適用して実績を判定</button>';
+ const box=document.getElementById("adminStatisticsFields");
+ for(const [key,label] of fields){const wrap=document.createElement("label");wrap.style.cssText="display:flex;flex-direction:column;gap:5px;font-size:13px;color:#e7e5ff";const title=document.createElement("span");title.textContent=label;const input=document.createElement("input");input.type="number";input.min="0";input.step=key==="bestTime"?"0.01":"1";input.id="adminStat_"+key;input.value=adminStatsOverride[key]??0;input.style.cssText="width:100%;padding:9px;border-radius:8px;border:1px solid #665c9b;background:#090d24;color:white;font-size:16px";wrap.append(title,input);box.appendChild(wrap)}
+ document.getElementById("applyAdminStatistics").onclick=()=>{
+  for(const [key] of fields){const value=Number(document.getElementById("adminStat_"+key).value);if(!Number.isFinite(value)||value<0){alert("0以上の数値を入力してください");return}adminStatsOverride[key]=key==="bestTime"?value:Math.floor(value)}
+  checkAchievements();renderStatistics();
+ };
+}
 function renderStatistics(){
  const grid=document.getElementById("statisticsGrid");if(!grid)return;
  const secret=achievementUnlocked.includes("secret_code");
  const groups=[
- ["⚔️ BATTLE",[["ボス討伐数",bossDefeatCount+"体"],["通常敵討伐数",achievementEnemyKills+"体"],["総被ダメージ",gameStats.totalDamageTaken]]],
- ["🏃 PLAY",[["総プレイ時間",formatStatTime(gameStats.totalPlaySeconds+(gameStarted&&!gameClear?(Date.now()-gameStart)/1000:0))],["プレイ回数",gameStats.playCount+"回"],["ステージクリア回数",gameStats.stageClears+"回"],["WORLD 1 クリア",gameStats.worldClears[0]+"回"],["WORLD 2 クリア",gameStats.worldClears[1]+"回"],["WORLD 3 クリア",gameStats.worldClears[2]+"回"],["WORLD 4 クリア",gameStats.worldClears[3]+"回"]]],
- ["💰 COLLECTION",[["累計獲得コイン",gameStats.totalCoinsEarned+"枚"],["累計消費コイン",gameStats.totalCoinsSpent+"枚"]]],
- ["🏆 RECORDS",[["実績解除数",achievementUnlocked.length+"/"+achievementDefs.length],["最速クリアタイム",bestTime===null?"--":bestTime.toFixed(2)+"秒"],["秘密のコード",secret?"解除済み":"未解除"]]]
+ ["⚔️ BATTLE",[["ボス討伐数",getStatisticsValue("bossDefeatCount")+"体"],["通常敵討伐数",getStatisticsValue("achievementEnemyKills")+"体"],["総被ダメージ",getStatisticsValue("totalDamageTaken")]]],
+ ["🏃 PLAY",[["総プレイ時間",formatStatTime(getStatisticsValue("totalPlaySeconds")+(gameStarted&&!gameClear?(Date.now()-gameStart)/1000:0))],["プレイ回数",getStatisticsValue("playCount")+"回"],["ステージクリア回数",getStatisticsValue("stageClears")+"回"],["WORLD 1 クリア",getStatisticsValue("world1Clears")+"回"],["WORLD 2 クリア",getStatisticsValue("world2Clears")+"回"],["WORLD 3 クリア",getStatisticsValue("world3Clears")+"回"],["WORLD 4 クリア",getStatisticsValue("world4Clears")+"回"]]],
+ ["💰 COLLECTION",[["累計獲得コイン",getStatisticsValue("totalCoinsEarned")+"枚"],["累計消費コイン",getStatisticsValue("totalCoinsSpent")+"枚"]]],
+ ["🏆 RECORDS",[["実績解除数",getStatisticsValue("achievementCount")+"/"+achievementDefs.length],["最速クリアタイム",getStatisticsValue("bestTime")===0?"--":getStatisticsValue("bestTime").toFixed(2)+"秒"],["秘密のコード",secret?"解除済み":"未解除"]]]
  ];
  grid.innerHTML="";
  for(const [heading,items] of groups){const title=document.createElement("div");title.className="statistics-section";title.textContent=heading;grid.appendChild(title);for(const [label,value] of items){const card=document.createElement("div");card.className="statistics-card";const small=document.createElement("small");small.textContent=label;const strong=document.createElement("strong");strong.textContent=value;card.append(small,strong);grid.appendChild(card)}}
+ renderAdminStatisticsControls();
 }
 document.getElementById("statisticsToggle").onclick=()=>{renderStatistics();document.getElementById("statisticsPanel").style.display="block"};
 document.getElementById("closeStatistics").onclick=()=>document.getElementById("statisticsPanel").style.display="none";
@@ -812,9 +832,9 @@ const achievementDefs=[
  {id:"world2",icon:"🌋",name:"LAVA LAND",desc:"WORLD 2をクリアする",test:()=>world2Cleared},
  {id:"world3",icon:"☁️",name:"SKY KINGDOM",desc:"WORLD 3をクリアする",test:()=>world3Cleared},
  {id:"world4",icon:"🌌",name:"COSMIC ABYSS",desc:"WORLD 4をクリアする",test:()=>world4Cleared},
- {id:"collector",icon:"🪙",name:"COIN COLLECTOR",desc:"コインを累計10枚集める",test:()=>achievementTotalCoins>=10},
- {id:"hunter",icon:"⚔️",name:"ENEMY HUNTER",desc:"敵を累計5体倒す",test:()=>achievementEnemyKills>=5},
- {id:"secret_code",icon:"🔐",name:"SECRET ARCHIVE",desc:"ボスを累計10,000体倒して秘密のコードを入手する",test:()=>bossDefeatCount>=10000}
+ {id:"collector",icon:"🪙",name:"COIN COLLECTOR",desc:"コインを累計10枚集める",test:()=>getStatisticsValue("totalCoinsEarned")>=10},
+ {id:"hunter",icon:"⚔️",name:"ENEMY HUNTER",desc:"敵を累計5体倒す",test:()=>getStatisticsValue("achievementEnemyKills")>=5},
+ {id:"secret_code",icon:"🔐",name:"SECRET ARCHIVE",desc:"ボスを累計10,000体倒して秘密のコードを入手する",test:()=>getStatisticsValue("bossDefeatCount")>=10000}
 ];
 let achievementToastQueue=[],achievementToastBusy=false;
 function showAchievementToast(a){
@@ -1524,10 +1544,10 @@ document.getElementById("redeemCode").onclick=()=>{
  document.getElementById("codeMessage").textContent="成功！ "+SERIAL_CODES[code]+"コインを獲得しました";
 };
 document.getElementById("adminToggle").onclick=()=>{
- if(!adminUnlocked)return;adminMode=!adminMode;floatMode=false;
+ if(!adminUnlocked)return;adminMode=!adminMode;floatMode=false;adminStatsOverride=adminMode?getRealStatisticsValues():null;
  if(adminMode){world2Unlocked=world3Unlocked=world4Unlocked=true;}
  else{world2Unlocked=!!world2Cleared;world3Unlocked=!!world3Cleared;world4Unlocked=!!world4Cleared;}
- updateWorldUnlockButtons();refreshAdminUI();saveGame();
+ updateWorldUnlockButtons();refreshAdminUI();if(document.getElementById("statisticsPanel").style.display==="block")renderStatistics();saveGame();
 };
 document.getElementById("floatToggle").onclick=()=>{if(!adminMode)return;floatMode=!floatMode;refreshAdminUI();};
 document.getElementById("exportSaveCode").onclick=()=>{
