@@ -487,7 +487,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.10</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.11</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -774,7 +774,8 @@ const achievementDefs=[
  {id:"world3",icon:"☁️",name:"SKY KINGDOM",desc:"WORLD 3をクリアする",test:()=>world3Cleared},
  {id:"world4",icon:"🌌",name:"COSMIC ABYSS",desc:"WORLD 4をクリアする",test:()=>world4Cleared},
  {id:"collector",icon:"🪙",name:"COIN COLLECTOR",desc:"コインを累計10枚集める",test:()=>achievementTotalCoins>=10},
- {id:"hunter",icon:"⚔️",name:"ENEMY HUNTER",desc:"敵を累計5体倒す",test:()=>achievementEnemyKills>=5}
+ {id:"hunter",icon:"⚔️",name:"ENEMY HUNTER",desc:"敵を累計5体倒す",test:()=>achievementEnemyKills>=5},
+ {id:"secret_code",icon:"🔐",name:"SECRET ARCHIVE",desc:"ボスを累計10,000体倒して秘密のコードを入手する",test:()=>bossDefeatCount>=10000}
 ];
 let achievementToastQueue=[],achievementToastBusy=false;
 function showAchievementToast(a){
@@ -806,7 +807,8 @@ function renderAchievements(){
  for(const a of achievementDefs){
   const unlocked=achievementUnlocked.includes(a.id),card=document.createElement("article");
   card.className="achievement-card"+(unlocked?" unlocked":"");
-  card.innerHTML='<div class="achievement-icon">'+a.icon+'</div><div><strong>'+a.name+'</strong><p>'+a.desc+'</p><small>'+(unlocked?"UNLOCKED":"LOCKED")+'</small></div>';
+  const reward=a.id==="secret_code"&&unlocked?'<p style="margin-top:8px;padding:9px;border:1px solid #65efff;border-radius:8px;background:#07152f;color:#8ffaff;font-weight:900;overflow-wrap:anywhere">SECRET CODE: '+ADMIN_CODE+'</p>':"";
+  card.innerHTML='<div class="achievement-icon">'+a.icon+'</div><div><strong>'+a.name+'</strong><p>'+a.desc+'</p>'+reward+'<small>'+(unlocked?"UNLOCKED":"LOCKED")+'</small></div>';
   list.appendChild(card);
  }
 }
@@ -1444,7 +1446,7 @@ function refreshAdminUI(){
  a.style.display=adminUnlocked?"inline-block":"none";f.style.display=adminMode?"inline-block":"none";document.getElementById("kamehameha").style.display=adminMode?"inline-block":"none";
  a.textContent="ADMIN: "+(adminMode?"ON":"OFF");f.textContent="FLOAT: "+(floatMode?"ON":"OFF");
 }
-document.getElementById("codeToggle").onclick=()=>{document.getElementById("codePanel").style.display="block";const msg=document.getElementById("codeMessage");msg.style.cssText="display:block;white-space:pre-line;margin:14px 0;padding:14px;border:1px solid #55eaff;border-radius:10px;background:#07152f;color:#f4fdff;font-size:15px;font-weight:800;line-height:1.8;overflow-wrap:anywhere;";msg.textContent=bossDefeatCount>=10000?"✦ SECRET CODE UNLOCKED ✦\\n"+ADMIN_CODE+"\\n管理者コード":"BOSS DEFEATS\\n"+bossDefeatCount.toLocaleString()+" / 10,000\\nあと "+Math.max(0,10000-bossDefeatCount).toLocaleString()+" 体でシークレットコード解放！";};
+document.getElementById("codeToggle").onclick=()=>{document.getElementById("codePanel").style.display="block";document.getElementById("codeMessage").textContent="シリアルコード・管理者コードを入力してください。秘密のコードは実績「SECRET ARCHIVE」で確認できます。";};
 document.getElementById("closeCodePanel").onclick=()=>document.getElementById("codePanel").style.display="none";
 document.getElementById("codePanel").addEventListener("click",e=>{if(e.target.id==="codePanel")document.getElementById("codePanel").style.display="none"});
 document.getElementById("redeemCode").onclick=()=>{
