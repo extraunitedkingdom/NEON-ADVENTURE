@@ -776,11 +776,13 @@ function updateProjectiles(){
   let hit=false;
   for(const e of enemies){
    if(e.alive&&p.x>=e.x-5&&p.x<=e.x+e.w+5&&p.y>=e.y-5&&p.y<=e.y+e.h+5){
-    e.alive=false;achievementEnemyKills++;checkAchievements();hit=true;break;
+    e.projectileHits=(e.projectileHits||0)+1;
+    if(e.projectileHits>=3){e.alive=false;achievementEnemyKills++;checkAchievements()}
+    hit=true;break;
    }
   }
   if(!hit&&boss.alive&&p.x>=boss.x-5&&p.x<=boss.x+boss.w+5&&p.y>=boss.y-5&&p.y<=boss.y+boss.h+5){
-   boss.hp=Math.max(0,boss.hp-p.damage);
+   boss.hp=Math.max(0,boss.hp-boss.maxHP/10);
    if(boss.hp===0){boss.alive=false;bossDefeated=true;bossDefeatCount++;saveGame()}
    hit=true;
   }
