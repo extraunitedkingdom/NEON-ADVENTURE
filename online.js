@@ -30,6 +30,12 @@
   let lastChatSentAt = 0;
 
   function el(id) { return document.getElementById(id); }
+  function saveRoomSession(roomId, isHost) {
+    try { sessionStorage.setItem("neonOnlineRoomId", roomId); sessionStorage.setItem("neonOnlineRoomHost", isHost ? "1" : "0"); } catch (_) {}
+  }
+  function clearRoomSession() {
+    try { sessionStorage.removeItem("neonOnlineRoomId"); sessionStorage.removeItem("neonOnlineRoomHost"); } catch (_) {}
+  }
   function setMessage(message) {
     state.reason = message;
     const status = el("onlineStatusText");
@@ -93,6 +99,14 @@
         });
       });
       state.reason = "Firebase接続・匿名認証を確認しました。ルーム機能を利用できます。";
+      let savedRoomId = null, wasHost = false;
+      try { savedRoomId = sessionStorage.getItem("neonOnlineRoomId"); wasHost = sessionStorage.getItem("neonOnlineRoomHost") === "1"; } catch (_) {}
+      if (savedRoomId && !wasHost) {
+        try { await joinRoom(savedRoomId); setMessage("前回参加していたルームに再接続しました。"); }
+        catch (_) { clearRoomSession(); }
+      } else if (wasHost) {
+        clearRoomSession();
+      }
       return { ok: true, ...state };
     } catch (error) {
       state.connected = false;
@@ -117,6 +131,7 @@
       uid: state.uid,
       name: cleanName(el("playerNameInput")?.value),
       character: "boy",
+      admin: !!window.NEON_GAME_ADMIN?.(),
       joinedAt: Date.now(),
       online: true
     };
@@ -180,6 +195,7 @@
       const data = snapshot.val();
       if (!data) {
         currentRoom = null;
+        clearRoomSession();
         if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
         renderChatMessages({});
         notifyPlayerSync({});
@@ -276,7 +292,7 @@
     requireConnection();
     if (!currentRoom) throw new Error("先にルームへ参加してください。");
     const input = el("onlineChatInput");
-    const text = String(input?.value || "").replace(/[\\u0000-\\u001f]/g, " ").trim().slice(0, 200);
+    const text = String(input?.value || "").replace(/\s+/g, " ").trim().slice(0, 200);
     if (!text) return;
     const now = Date.now();
     if (now - lastChatSentAt < 700) return;
@@ -338,6 +354,7 @@
         throw presenceError;
       }
       currentRoom = { id: code, meta: room.meta, players: room.players };
+      saveRoomSession(code, true);
       watchCurrentRoom(code);
       setMessage(visibility === "public" ?
         "公開ルームを作成しました。" : "プライベートルームを作成しました。参加コード: " + code);
@@ -386,6 +403,7 @@
         throw new Error("このルームは満員です。");
       }
       currentRoom = { id: roomCode, meta: data.meta, players };
+      saveRoomSession(roomCode, false);
       watchCurrentRoom(roomCode);
       setMessage("ルームに参加しました。");
       await refreshRooms().catch(() => {});
@@ -416,6 +434,7 @@
       }
     } finally {
       currentRoom = null;
+      clearRoomSession();
       if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
       renderChatMessages({});
       notifyPlayerSync({});
