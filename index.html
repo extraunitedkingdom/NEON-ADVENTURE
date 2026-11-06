@@ -368,6 +368,14 @@ body>h1{display:none}
 #achievementToast .toast-kicker{font:800 10px monospace;letter-spacing:2px;color:#7dfaff}
 #achievementToast .toast-name{font-size:19px;font-weight:900;margin:3px 0;text-shadow:0 0 10px #25dfff77}
 #achievementToast .toast-desc{font-size:12px;color:#c8e5ff}
+
+/* NEON ADVENTURE ONLINE foundation */
+#onlinePanel{display:none;position:fixed;inset:0;z-index:1200;background:rgba(3,7,24,.88);backdrop-filter:blur(8px);padding:18px;overflow:auto}
+#onlinePanel .online-shell{width:min(100%,560px);margin:8vh auto;padding:22px;border:1px solid #32eaff;border-radius:18px;background:linear-gradient(145deg,#101d43,#090d25);box-shadow:0 0 28px #00dfff55;color:#effcff;text-align:left}
+#onlinePanel h2{margin:0 0 8px;color:#8cf8ff;letter-spacing:2px}
+#onlinePanel .online-status{display:flex;align-items:center;gap:9px;margin:16px 0;padding:12px;border:1px solid #f2c66d88;border-radius:10px;background:#5a421d33;color:#ffe6a5;font-weight:800}
+#onlinePanel .online-note{color:#c7d9f5;line-height:1.7;font-size:14px}
+#onlinePanel button{margin-top:14px}
 </style>
 </head>
 <body>
@@ -502,7 +510,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.17</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.18</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -512,9 +520,20 @@ body>h1{display:none}
 <button id="shopToggle">🛒　SKIN SHOP</button>
 <button id="save">▣　SAVE</button>
 <button id="ranking">🏆　RANKING</button>
+<button id="onlineToggle" type="button">🌐　ONLINE</button>
 <button id="codeToggle">⌨️　CODE</button>
 </div>
 
+<div id="onlinePanel" role="dialog" aria-modal="true" aria-labelledby="onlineTitle">
+ <div class="online-shell">
+  <h2 id="onlineTitle">NEON ADVENTURE ONLINE</h2>
+  <p class="online-note">オンラインマルチプレイの準備を進めています。</p>
+  <div class="online-status"><span aria-hidden="true">●</span><span id="onlineStatusText">接続機能の準備中 — まだ通信は行いません</span></div>
+  <p class="online-note">公開ルーム・プライベートルーム、最大16人での協力プレイを予定しています。現在はソロプレイが通常どおり利用できます。</p>
+  <p class="online-note">無料プラン限定で開発します。有料プランへの変更、請求先の追加、支払い方法の登録は行いません。</p>
+  <button id="closeOnlinePanel" type="button">閉じる</button>
+ </div>
+</div>
 <div id="profilePanel" role="dialog" aria-modal="true" aria-label="キャラクター紹介">
  <div class="profile-shell">
   <div class="profile-top"><div><div class="profile-kicker">NEON ADVENTURE / PERSONNEL FILE</div><h2>CHARACTER DOSSIER</h2></div><button id="closeProfile" type="button">✕ CLOSE</button></div>
@@ -585,6 +604,7 @@ body>h1{display:none}
 </div>
 <p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p><p class="small" id="world2Hint">WORLD 2：水色のジャンプパッドでマグマを飛び越えよう。2つ目は高い壁の上へ飛び乗るためのパッド！</p>
 </div>
+<script src="./online.js"></script>
 <script>
 "use strict";
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
@@ -1360,6 +1380,9 @@ document.getElementById("homeButton").onclick=returnHome;
 document.getElementById("clearHomeButton").onclick=returnHome;
 document.getElementById("clearRestartButton").onclick=restart;
 document.getElementById("nextStageButton").onclick=()=>{if(worldNumber===1&&world2Unlocked){loadWorld2();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}else if(worldNumber===2&&world3Unlocked){loadWorld3();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}else if(worldNumber===3&&world4Unlocked){loadWorld4();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}};
+document.getElementById("onlineToggle").onclick=()=>{document.getElementById("onlinePanel").style.display="block";};
+document.getElementById("closeOnlinePanel").onclick=()=>{document.getElementById("onlinePanel").style.display="none";};
+document.getElementById("onlinePanel").addEventListener("click",e=>{if(e.target.id==="onlinePanel")e.currentTarget.style.display="none"});
 document.getElementById("startGame").onclick=()=>{document.getElementById("stageSelect").style.display=document.getElementById("stageSelect").style.display==="block"?"none":"block"};
 document.getElementById("world1Select").onclick=()=>{worldNumber=1;springPads=[];lavaZones=[];platforms=[{x:0,y:430,w:500,h:70},{x:560,y:380,w:180,h:25},{x:800,y:330,w:180,h:25},{x:1050,y:390,w:180,h:25},{x:1300,y:330,w:180,h:25},{x:1550,y:280,w:180,h:25},{x:1800,y:350,w:250,h:100},{x:2150,y:300,w:180,h:25},{x:2450,y:350,w:350,h:100}];enemies=[{x:650,y:350,w:30,h:30,min:600,max:700,dir:1,alive:true},{x:1100,y:360,w:30,h:30,min:1050,max:1200,dir:-1,alive:true},{x:1900,y:320,w:30,h:30,min:1850,max:2000,dir:1,alive:true}];coins=[{x:300,y:395,taken:false},{x:650,y:340,taken:false},{x:900,y:290,taken:false},{x:1150,y:350,taken:false},{x:1400,y:290,taken:false},{x:1650,y:240,taken:false},{x:2250,y:260,taken:false}];goal={x:2650,y:270,w:45,h:80};boss={x:2500,y:270,w:80,h:80,hp:10,maxHP:10,alive:true};bossDefeated=false;gameClear=false;stageCleared=false;player.x=80;player.y=200;player.vx=0;player.vy=0;playerHP=3;camera=0;currentTime=0;document.querySelector(".stage-top p").textContent="WORLD 1 : GREEN FOREST";beginSelectedWorld()};
 document.getElementById("world2Select").onclick=()=>{if(!world2Unlocked)return;loadWorld2();beginSelectedWorld()};
