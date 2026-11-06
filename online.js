@@ -25,7 +25,9 @@
   let connectedUnsubscribe = null, roomUnsubscribe = null, currentRoom = null;
   let roomBusy = false;
   let playerSyncHandler = null;
+  let chatUnsubscribe = null;
   let lastPositionSentAt = 0;
+  let lastChatSentAt = 0;
 
   function el(id) { return document.getElementById(id); }
   function setMessage(message) {
@@ -178,6 +180,8 @@
       const data = snapshot.val();
       if (!data) {
         currentRoom = null;
+        if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+        renderChatMessages({});
         notifyPlayerSync({});
         if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
         setMessage("ルームが閉じられました。");
@@ -186,13 +190,14 @@
         return;
       }
       currentRoom = { id: roomId, meta: data.meta || {}, players: data.players || {} };
+      watchChat(roomId);
       notifyPlayerSync(currentRoom.players);
       renderCurrentRoom();
     }, error => showError(error));
   }
   function notifyPlayerSync(players) {
     if (typeof playerSyncHandler !== "function") return;
-    const remote = Object.values(players || {}).filter(p => p && p.uid !== state.uid);
+    const remote = Object.entries(players || {}).filter(([uid, p]) => p && uid !== state.uid && p.uid !== state.uid).map(([uid, p]) => ({ ...p, uid: p.uid || uid }));
     try { playerSyncHandler(remote); } catch (error) { console.error("Player sync handler:", error); }
   }
   function setPlayerSyncHandler(handler) {
@@ -209,15 +214,82 @@
     if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
     lastPositionSentAt = now;
     const payload = {
+      uid: state.uid,
+      name: cleanName(el("playerNameInput")?.value),
+      online: true,
       x, y,
       facing: Number(position.facing) < 0 ? -1 : 1,
       world: Math.max(1, Math.min(4, Math.floor(Number(position.world) || 1))),
       skin: /^#[0-9a-f]{6}$/i.test(String(position.skin || "")) ? position.skin : "#9b8aff",
-      character: String(position.character || "boy").slice(0, 16)
+      character: String(position.character || "boy").slice(0, 16),
+      admin: !!position.admin
     };
     const playerRef = modules.ref(database, "rooms/" + currentRoom.id + "/players/" + state.uid);
     modules.update(playerRef, payload).catch(showError);
     return true;
+  }
+  function renderChatMessages(messages) {
+    const list = el("onlineChatMessages");
+    if (!list) return;
+    list.textContent = "";
+    const entries = Object.values(messages || {}).sort((a, b) =>
+      Number(a?.createdAt || 0) - Number(b?.createdAt || 0)
+    ).slice(-60);
+    if (!entries.length) {
+      const empty = document.createElement("p");
+      empty.className = "online-chat-empty";
+      empty.textContent = "まだメッセージはありません。";
+      list.appendChild(empty);
+      return;
+    }
+    entries.forEach(message => {
+      if (!message || typeof message.text !== "string") return;
+      const row = document.createElement("div");
+      row.className = "online-chat-message";
+      const heading = document.createElement("div");
+      heading.className = "online-chat-heading";
+      const name = document.createElement("strong");
+      name.textContent = cleanName(message.name);
+      heading.appendChild(name);
+      if (message.admin) {
+        const admin = document.createElement("span");
+        admin.className = "online-chat-admin";
+        admin.textContent = "ADMIN";
+        heading.appendChild(admin);
+      }
+      const body = document.createElement("div");
+      body.className = "online-chat-text";
+      body.textContent = message.text;
+      row.append(heading, body);
+      list.appendChild(row);
+    });
+    list.scrollTop = list.scrollHeight;
+  }
+  function watchChat(roomId) {
+    if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+    const chatRef = modules.ref(database, "rooms/" + roomId + "/chat");
+    chatUnsubscribe = modules.onValue(chatRef, snapshot => {
+      renderChatMessages(snapshot.val() || {});
+    }, error => showError(error));
+  }
+  async function sendChatMessage() {
+    requireConnection();
+    if (!currentRoom) throw new Error("先にルームへ参加してください。");
+    const input = el("onlineChatInput");
+    const text = String(input?.value || "").replace(/[\\u0000-\\u001f]/g, " ").trim().slice(0, 200);
+    if (!text) return;
+    const now = Date.now();
+    if (now - lastChatSentAt < 700) return;
+    lastChatSentAt = now;
+    const message = {
+      senderUid: state.uid,
+      name: cleanName(el("playerNameInput")?.value),
+      text,
+      admin: !!window.NEON_GAME_ADMIN?.(),
+      createdAt: now
+    };
+    await modules.set(modules.push(modules.ref(database, "rooms/" + currentRoom.id + "/chat")), message);
+    if (input) input.value = "";
   }
   function renderCurrentRoom() {
     const panel = el("onlineCurrentRoom");
@@ -253,8 +325,13 @@
       }
       await modules.update(modules.ref(database), writes);
       try {
-        await modules.onDisconnect(playerRef).remove();
+        // ホストが切断・ページ離脱した場合はルーム全体を閉じる。
+        await modules.onDisconnect(roomRef).remove();
+        if (visibility === "public") {
+          await modules.onDisconnect(modules.ref(database, "publicRooms/" + code)).remove();
+        }
       } catch (presenceError) {
+        await modules.onDisconnect(roomRef).cancel().catch(() => {});
         const cleanup = { ["rooms/" + code]: null };
         if (visibility === "public") cleanup["publicRooms/" + code] = null;
         await modules.update(modules.ref(database), cleanup);
@@ -323,18 +400,24 @@
     const roomRef = modules.ref(database, "rooms/" + room.id);
     try {
       const ownPlayerRef = modules.ref(database, "rooms/" + room.id + "/players/" + state.uid);
-      await modules.onDisconnect(ownPlayerRef).cancel();
       if (room.meta.ownerUid === state.uid) {
+        await modules.onDisconnect(roomRef).cancel();
+        if (room.meta.visibility === "public") {
+          await modules.onDisconnect(modules.ref(database, "publicRooms/" + room.id)).cancel();
+        }
         const deletePaths = { ["rooms/" + room.id]: null };
         if (room.meta.visibility === "public") deletePaths["publicRooms/" + room.id] = null;
         await modules.update(modules.ref(database), deletePaths);
         setMessage("ホストが退出したため、ルームを閉じました。");
       } else {
+        await modules.onDisconnect(ownPlayerRef).cancel();
         await modules.remove(modules.ref(database, "rooms/" + room.id + "/players/" + state.uid));
         setMessage("ルームから退出しました。");
       }
     } finally {
       currentRoom = null;
+      if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+      renderChatMessages({});
       notifyPlayerSync({});
       renderCurrentRoom();
       await refreshRooms().catch(() => {});
@@ -361,7 +444,7 @@
   }
   window.NEON_ONLINE = Object.freeze({
     getStatus, connect, disconnect, createRoom, joinRoom, leaveRoom, refreshRooms,
-    setPlayerSyncHandler, publishPosition
+    setPlayerSyncHandler, publishPosition, sendChatMessage
   });
   function bind(id, handler) {
     const node = el(id);
@@ -377,6 +460,14 @@
     bind("onlineRefreshRooms", refreshRooms);
     bind("onlineJoinByCode", () => joinRoom(el("onlineJoinCode")?.value));
     bind("onlineLeaveRoom", leaveRoom);
+    bind("onlineChatSend", sendChatMessage);
+    const chatInput = el("onlineChatInput");
+    if (chatInput && chatInput.dataset.chatBound !== "true") {
+      chatInput.dataset.chatBound = "true";
+      chatInput.addEventListener("keydown", event => {
+        if (event.key === "Enter") { event.preventDefault(); sendChatMessage().catch(showError); }
+      });
+    }
     updateUI(state.reason);
   }
   if (document.readyState === "loading") {
