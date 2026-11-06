@@ -560,6 +560,12 @@ body>h1{display:none}
 <div id="stage">
 <div class="stage-top"><p>WORLD 1 : GREEN FOREST</p><button id="homeButton" type="button">⌂ HOME</button></div>
 <canvas id="game" width="900" height="500"></canvas>
+<div id="playerNameControls" style="display:flex;justify-content:center;align-items:center;gap:7px;flex-wrap:wrap;max-width:900px;margin:8px auto;padding:9px;border:1px solid #27eaff88;border-radius:12px;background:#0b1738">
+ <label for="playerNameInput" style="font-weight:bold;color:#9ffaff">PLAYER NAME</label>
+ <input id="playerNameInput" type="text" maxlength="16" autocomplete="off" placeholder="名前を入力（16文字まで）" style="width:min(230px,55vw);padding:9px 10px;border:1px solid #43dfff;border-radius:8px;background:#08132d;color:#fff;font-size:15px">
+ <button id="setPlayerName" type="button" style="margin:0;padding:9px 13px;border-color:#55f5ff;background:linear-gradient(90deg,#075c9b,#12bde0)">名前を設定</button>
+ <span id="playerNameMessage" class="small" aria-live="polite">頭上に表示される名前を設定できます</span>
+</div>
 <div id="clearPanel"><h3 id="clearTitle">STAGE CLEAR!</h3><p id="worldRewardText" style="margin:8px 0 14px;color:#ffe28a;font-weight:900;text-shadow:0 0 10px #e8b84a">WORLD CLEAR REWARD +50 COINS</p><button id="clearHomeButton">⌂ HOME</button><button id="clearRestartButton">↻ RESTART</button><button id="nextStageButton">▶ NEXT STAGE</button></div>
 <p class="small">移動：← → / A・D　ジャンプ：Space　ダッシュ：左Ctrl</p>
 <div class="controls">
@@ -596,6 +602,7 @@ let claimedWorldRewards=[];
 let gameStats={totalPlaySeconds:0,playCount:0,stageClears:0,worldClears:[0,0,0,0],totalDamageTaken:0,totalCoinsEarned:0,totalCoinsSpent:0};
 let adminStatsOverride=null;
 let appearanceBackground="default",appearanceEmoji="",appearanceCharacter="boy";
+let playerName="PLAYER";
 let gameStart=Date.now(),currentTime=0;
 let bestTime=Number(localStorage.getItem("bestTime"))||null;
 let timeRecords=[];
@@ -684,7 +691,7 @@ document.getElementById("closeEquipment").onclick=closeEquipment;
 document.getElementById("equipmentPanel").addEventListener("click",e=>{if(e.target.id==="equipmentPanel")closeEquipment()});
 
 function saveGame(){
- const data={version:8,gameStats,achievementUnlocked,achievementTotalCoins,achievementEnemyKills,bossDefeatCount,claimedWorldRewards,appearanceBackground,appearanceEmoji,appearanceCharacter,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ const data={version:8,gameStats,achievementUnlocked,achievementTotalCoins,achievementEnemyKills,bossDefeatCount,claimedWorldRewards,appearanceBackground,appearanceEmoji,appearanceCharacter,playerName,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
  try{localStorage.setItem("gameSave",JSON.stringify(data));return true}catch(e){console.error("セーブに失敗しました",e);return false}
 }
 function loadGame(){
@@ -694,7 +701,7 @@ function loadGame(){
  const gs=d.gameStats&&typeof d.gameStats==="object"?d.gameStats:{};
  gameStats={totalPlaySeconds:Number.isFinite(gs.totalPlaySeconds)?Math.max(0,gs.totalPlaySeconds):0,playCount:Number.isFinite(gs.playCount)?Math.max(0,gs.playCount):0,stageClears:Number.isFinite(gs.stageClears)?Math.max(0,gs.stageClears):0,worldClears:Array.isArray(gs.worldClears)?[0,1,2,3].map(i=>Math.max(0,Number(gs.worldClears[i])||0)):[0,0,0,0],totalDamageTaken:Number.isFinite(gs.totalDamageTaken)?Math.max(0,gs.totalDamageTaken):0,totalCoinsEarned:Number.isFinite(gs.totalCoinsEarned)?Math.max(0,gs.totalCoinsEarned):0,totalCoinsSpent:Number.isFinite(gs.totalCoinsSpent)?Math.max(0,gs.totalCoinsSpent):0};
  achievementUnlocked=Array.isArray(d.achievementUnlocked)?d.achievementUnlocked.filter(x=>typeof x==="string"):[];claimedWorldRewards=Array.isArray(d.claimedWorldRewards)?d.claimedWorldRewards.filter(x=>[1,2,3,4].includes(x)):[];achievementTotalCoins=Number.isFinite(d.achievementTotalCoins)?d.achievementTotalCoins:0;achievementEnemyKills=Number.isFinite(d.achievementEnemyKills)?d.achievementEnemyKills:0;bossDefeatCount=Number.isFinite(d.bossDefeatCount)?Math.max(0,Math.floor(d.bossDefeatCount)):0;
- appearanceBackground=typeof d.appearanceBackground==="string"?d.appearanceBackground:"default";appearanceEmoji=typeof d.appearanceEmoji==="string"?d.appearanceEmoji:"";appearanceCharacter=typeof d.appearanceCharacter==="string"?d.appearanceCharacter:"boy";
+ appearanceBackground=typeof d.appearanceBackground==="string"?d.appearanceBackground:"default";appearanceEmoji=typeof d.appearanceEmoji==="string"?d.appearanceEmoji:"";appearanceCharacter=typeof d.appearanceCharacter==="string"?d.appearanceCharacter:"boy";playerName=typeof d.playerName==="string"&&d.playerName.trim()?Array.from(d.playerName.trim()).slice(0,16).join(""):"PLAYER";
  coinCount=Number.isFinite(d.coinCount)?d.coinCount:coinCount;
  adminUnlocked=!!d.adminUnlocked;adminMode=adminUnlocked&&!!d.adminMode;adminStatsOverride=adminMode?getRealStatisticsValues():null;floatMode=false;
  worldNumber=[1,2,3,4].includes(d.worldNumber)?d.worldNumber:1;
@@ -1307,6 +1314,13 @@ function draw(){
  }
  ctx.restore();
  ctx.restore();
+ // プレイヤー名のネームタグ（カメラ移動・ジャンプに追従）
+ const tagX=player.x+player.w/2-camera,tagY=player.y-48;
+ ctx.save();ctx.font="bold 13px sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";
+ const tagWidth=Math.max(54,ctx.measureText(playerName).width+18);
+ ctx.fillStyle="rgba(5,13,34,.88)";ctx.fillRect(tagX-tagWidth/2,tagY-10,tagWidth,20);
+ ctx.strokeStyle="#45eaff";ctx.lineWidth=1.5;ctx.strokeRect(tagX-tagWidth/2,tagY-10,tagWidth,20);
+ ctx.shadowColor="#19dfff";ctx.shadowBlur=8;ctx.fillStyle="#f4ffff";ctx.fillText(playerName,tagX,tagY);ctx.restore();
  ctx.fillStyle="white";ctx.font="bold 19px sans-serif";ctx.fillText(worldNumber===1?"WORLD 1 : GREEN FOREST":worldNumber===2?"WORLD 2 : LAVA LAND":worldNumber===3?"WORLD 3 : SKY KINGDOM":"WORLD 4 : COSMIC ABYSS",18,28);
  ctx.font="16px sans-serif";ctx.fillStyle="#ffd700";ctx.fillText("COINS: "+coinCount,18,58);
  ctx.fillStyle="#00ffff";ctx.fillText("TIME: "+(gameClear?currentTime:(Date.now()-gameStart)/1000).toFixed(2),18,84);
@@ -1318,6 +1332,14 @@ function draw(){
  if(appearanceBackground!=="default"){const t={forest:"rgba(30,170,95,.13)",lava:"rgba(255,75,20,.16)",sky:"rgba(75,180,255,.16)",space:"rgba(80,35,180,.20)"}[appearanceBackground];if(t){ctx.fillStyle=t;ctx.fillRect(0,0,W,H)}}
  
 }
+function applyPlayerName(){
+ const input=document.getElementById("playerNameInput");
+ const cleaned=Array.from((input.value||"").replace(/[\\u0000-\\u001f\\u007f]/g,"").trim()).slice(0,16).join("");
+ playerName=cleaned||"PLAYER";input.value=playerName;saveGame();
+ document.getElementById("playerNameMessage").textContent="ネームタグを「"+playerName+"」に設定しました";
+}
+document.getElementById("setPlayerName").onclick=applyPlayerName;
+document.getElementById("playerNameInput").addEventListener("keydown",e=>{if(e.key==="Enter")applyPlayerName()});
 function restart(){
  document.getElementById("clearPanel").style.display="none";
  player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=skinMaxHP();
@@ -1624,6 +1646,7 @@ document.getElementById("applyProfile").onclick=()=>{appearanceCharacter=profile
 // 全ステージ変数の初期化後にセーブを復元
 renderShop();
 const hasSave=loadGame();
+document.getElementById("playerNameInput").value=playerName;
 if(!hasSave)worldNumber=1;
 updateWorldUnlockButtons();refreshAdminUI();
 document.getElementById("world2Select").disabled=!world2Unlocked;
