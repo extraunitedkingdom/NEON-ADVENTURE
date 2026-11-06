@@ -285,10 +285,9 @@
       const ownPlayerRef = modules.ref(database, "rooms/" + room.id + "/players/" + state.uid);
       await modules.onDisconnect(ownPlayerRef).cancel();
       if (room.meta.ownerUid === state.uid) {
-        await modules.update(modules.ref(database), {
-          ["rooms/" + room.id]: null,
-          ["publicRooms/" + room.id]: null
-        });
+        const deletePaths = { ["rooms/" + room.id]: null };
+        if (room.meta.visibility === "public") deletePaths["publicRooms/" + room.id] = null;
+        await modules.update(modules.ref(database), deletePaths);
         setMessage("ホストが退出したため、ルームを閉じました。");
       } else {
         await modules.remove(modules.ref(database, "rooms/" + room.id + "/players/" + state.uid));
