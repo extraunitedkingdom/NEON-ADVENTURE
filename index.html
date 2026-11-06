@@ -526,7 +526,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.21</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.22</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -640,7 +640,7 @@ body>h1{display:none}
 </div>
 <p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p><p class="small" id="world2Hint">WORLD 2：水色のジャンプパッドでマグマを飛び越えよう。2つ目は高い壁の上へ飛び乗るためのパッド！</p>
 </div>
-<script src="./online.js?v=20261107-1"></script>
+<script src="./online.js?v=20261107-2"></script>
 <script>
 "use strict";
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
@@ -1117,7 +1117,7 @@ function drawRemotePlayers(){
  for(const p of onlineRemotePlayers){
   if(!p||!Number.isFinite(Number(p.x))||!Number.isFinite(Number(p.y)))continue;
   if(Number(p.world||1)!==worldNumber)continue;
-  const x=Number(p.x)+15-camera,y=Number(p.y),color=/^#[0-9a-f]{6}$/i.test(String(p.skin||""))?p.skin:"#39eaff";
+  const x=Number(p.x)+15,y=Number(p.y),color=/^#[0-9a-f]{6}$/i.test(String(p.skin||""))?p.skin:"#39eaff";
   if(x < -45 || x > W+45 || y < -65 || y > H+30)continue;
   ctx.save();ctx.translate(x,y);ctx.scale(Number(p.facing)<0?-1:1,1);
   ctx.globalAlpha=p.character==="ghost"?.78:1;
