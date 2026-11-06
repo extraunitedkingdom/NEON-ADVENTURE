@@ -24,6 +24,8 @@
   let modules = null, app = null, auth = null, database = null;
   let connectedUnsubscribe = null, roomUnsubscribe = null, currentRoom = null;
   let roomBusy = false;
+  let playerSyncHandler = null;
+  let lastPositionSentAt = 0;
 
   function el(id) { return document.getElementById(id); }
   function setMessage(message) {
@@ -176,6 +178,7 @@
       const data = snapshot.val();
       if (!data) {
         currentRoom = null;
+        notifyPlayerSync({});
         if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
         setMessage("ルームが閉じられました。");
         renderCurrentRoom();
@@ -183,8 +186,38 @@
         return;
       }
       currentRoom = { id: roomId, meta: data.meta || {}, players: data.players || {} };
+      notifyPlayerSync(currentRoom.players);
       renderCurrentRoom();
     }, error => showError(error));
+  }
+  function notifyPlayerSync(players) {
+    if (typeof playerSyncHandler !== "function") return;
+    const remote = Object.values(players || {}).filter(p => p && p.uid !== state.uid);
+    try { playerSyncHandler(remote); } catch (error) { console.error("Player sync handler:", error); }
+  }
+  function setPlayerSyncHandler(handler) {
+    playerSyncHandler = typeof handler === "function" ? handler : null;
+    if (currentRoom) notifyPlayerSync(currentRoom.players);
+    else if (playerSyncHandler) playerSyncHandler([]);
+    return true;
+  }
+  function publishPosition(position) {
+    if (!currentRoom || !state.connected || !modules || !position) return false;
+    const now = Date.now();
+    if (now - lastPositionSentAt < 100) return false;
+    const x = Number(position.x), y = Number(position.y);
+    if (!Number.isFinite(x) || !Number.isFinite(y)) return false;
+    lastPositionSentAt = now;
+    const payload = {
+      x, y,
+      facing: Number(position.facing) < 0 ? -1 : 1,
+      world: Math.max(1, Math.min(4, Math.floor(Number(position.world) || 1))),
+      skin: /^#[0-9a-f]{6}$/i.test(String(position.skin || "")) ? position.skin : "#9b8aff",
+      character: String(position.character || "boy").slice(0, 16)
+    };
+    const playerRef = modules.ref(database, "rooms/" + currentRoom.id + "/players/" + state.uid);
+    modules.update(playerRef, payload).catch(showError);
+    return true;
   }
   function renderCurrentRoom() {
     const panel = el("onlineCurrentRoom");
@@ -302,6 +335,7 @@
       }
     } finally {
       currentRoom = null;
+      notifyPlayerSync({});
       renderCurrentRoom();
       await refreshRooms().catch(() => {});
     }
@@ -316,6 +350,7 @@
     if (connectedUnsubscribe) { connectedUnsubscribe(); connectedUnsubscribe = null; }
     if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
     state.connected = false;
+    notifyPlayerSync({});
     state.reason = "接続監視を停止しました。";
     updateUI(state.reason);
     return { ok: true, ...state };
@@ -325,7 +360,8 @@
       roomId: currentRoom?.id || null };
   }
   window.NEON_ONLINE = Object.freeze({
-    getStatus, connect, disconnect, createRoom, joinRoom, leaveRoom, refreshRooms
+    getStatus, connect, disconnect, createRoom, joinRoom, leaveRoom, refreshRooms,
+    setPlayerSyncHandler, publishPosition
   });
   function bind(id, handler) {
     const node = el(id);
