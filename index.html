@@ -376,6 +376,22 @@ body>h1{display:none}
 #onlinePanel .online-status{display:flex;align-items:center;gap:9px;margin:16px 0;padding:12px;border:1px solid #f2c66d88;border-radius:10px;background:#5a421d33;color:#ffe6a5;font-weight:800}
 #onlinePanel .online-note{color:#c7d9f5;line-height:1.7;font-size:14px}
 #onlinePanel button{margin-top:14px}
+#onlinePanel .online-room-tools{display:grid;gap:8px;margin:14px 0;padding:12px;border:1px solid #3476a8;border-radius:12px;background:#0b1738}
+#onlinePanel .online-room-tools label{font-size:13px;color:#9ffaff;font-weight:800}
+#onlinePanel .online-room-tools input{width:100%;padding:10px;border:1px solid #43dfff;border-radius:8px;background:#08132d;color:#fff;font-size:15px}
+#onlinePanel .online-room-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+#onlinePanel .online-room-actions button{margin:0;padding:10px 6px;font-size:13px}
+#onlinePanel .online-code-card{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;border:1px dashed #55eaff;border-radius:9px;color:#c7eaff;font-size:12px}
+#onlinePanel .online-code-card strong{font:900 18px monospace;letter-spacing:2px;color:#ffe28a;overflow-wrap:anywhere}
+#onlinePanel .online-room-heading{display:flex;align-items:center;justify-content:space-between;margin-top:16px;color:#9ffaff}
+#onlinePanel .online-room-heading button{margin:0;padding:7px 10px;font-size:12px}
+#onlinePanel .online-room-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px;margin:7px 0;border:1px solid #31598c;border-radius:9px;background:#12234a}
+#onlinePanel .online-room-row small{display:block;margin-top:4px;color:#b7cce9}
+#onlinePanel .online-room-row button{margin:0;padding:7px 12px}
+#onlinePanel .online-current-room{margin-top:14px;padding:12px;border:1px solid #55eaff;border-radius:10px;background:#0b2840}
+#onlinePanel .online-current-room p{white-space:pre-line;overflow-wrap:anywhere;color:#d8edff}
+#onlinePanel .online-current-room button{width:100%;border-color:#ff8d9d;background:#642b4b}
+@media(max-width:480px){#onlinePanel .online-room-actions{grid-template-columns:1fr}#onlinePanel .online-shell{padding:16px}}
 </style>
 </head>
 <body>
@@ -510,7 +526,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.19</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.20</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -527,10 +543,29 @@ body>h1{display:none}
 <div id="onlinePanel" role="dialog" aria-modal="true" aria-labelledby="onlineTitle">
  <div class="online-shell">
   <h2 id="onlineTitle">NEON ADVENTURE ONLINE</h2>
-  <p class="online-note">オンラインマルチプレイの準備を進めています。</p>
-  <div class="online-status"><span aria-hidden="true">●</span><span id="onlineStatusText">接続機能の準備中 — まだ通信は行いません</span></div>
-  <p class="online-note">公開ルーム・プライベートルーム、最大16人での協力プレイを予定しています。現在はソロプレイが通常どおり利用できます。</p>
-  <p class="online-note">無料プラン限定で開発します。有料プランへの変更、請求先の追加、支払い方法の登録は行いません。</p>
+  <p class="online-note">ONLINE ROOM SYSTEM / PHASE 1</p>
+  <div class="online-status"><span aria-hidden="true">●</span><span id="onlineStatusText">接続テストを行ってください。</span></div>
+  <p class="online-note">無料Sparkプラン限定。公開・プライベートルームを作成して参加できます。最大16人は現段階ではクライアント側の目安で、厳密な不正防止は未実装です。</p>
+  <div class="online-room-tools">
+   <label for="onlineRoomName">ルーム名</label>
+   <input id="onlineRoomName" type="text" maxlength="20" placeholder="ルーム名（省略可）">
+   <div class="online-room-actions">
+    <button id="onlineCreatePublic" type="button">🌐 公開ルームを作成</button>
+    <button id="onlineCreatePrivate" type="button">🔒 プライベートルームを作成</button>
+   </div>
+   <div class="online-code-card"><span>作成したルームの参加コード</span><strong id="onlineRoomCode">未作成</strong></div>
+   <label for="onlineJoinCode">参加コード（8文字）</label>
+   <input id="onlineJoinCode" type="text" maxlength="8" autocomplete="off" placeholder="例：ABCD2345">
+   <button id="onlineJoinByCode" type="button">コードで参加</button>
+  </div>
+  <div class="online-room-heading"><strong>公開ルーム一覧</strong><button id="onlineRefreshRooms" type="button">更新</button></div>
+  <div id="onlineRoomList"><p class="online-note">接続後に一覧を読み込めます。</p></div>
+  <div id="onlineCurrentRoom" class="online-current-room" style="display:none">
+   <strong>参加中のルーム</strong>
+   <p id="onlineCurrentRoomDetails"></p>
+   <button id="onlineLeaveRoom" type="button">ルームから退出</button>
+  </div>
+  <p class="online-note">ホストが退出すると、現在の仕様ではルーム全体が閉じます。切断後の自動復帰・プレイヤー同期・チャットは次の段階で実装します。</p>
   <button id="onlineConnectTest" type="button">接続テスト</button>
   <button id="closeOnlinePanel" type="button">閉じる</button>
  </div>
@@ -605,7 +640,7 @@ body>h1{display:none}
 </div>
 <p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p><p class="small" id="world2Hint">WORLD 2：水色のジャンプパッドでマグマを飛び越えよう。2つ目は高い壁の上へ飛び乗るためのパッド！</p>
 </div>
-<script src="./online.js?v=20261106-2"></script>
+<script src="./online.js?v=20261106-3"></script>
 <script>
 "use strict";
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
