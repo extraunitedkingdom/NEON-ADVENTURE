@@ -148,9 +148,29 @@
   }
 
   window.NEON_ONLINE = Object.freeze({ getStatus, connect, disconnect });
-  document.addEventListener("DOMContentLoaded", () => {
+
+  // GitHub Pages / iOS Safari: bind immediately when the DOM is already ready,
+  // otherwise wait for DOMContentLoaded. This avoids a missed click handler.
+  function initializeOnlineUI() {
     const button = document.getElementById("onlineConnectTest");
-    if (button) button.addEventListener("click", connect);
+    if (button && button.dataset.onlineBound !== "true") {
+      button.dataset.onlineBound = "true";
+      button.addEventListener("click", () => {
+        connect().catch(error => {
+          state.connecting = false;
+          state.connected = false;
+          state.reason = "接続できませんでした: " +
+            (error && error.message ? error.message : String(error));
+          updateUI(state.reason);
+        });
+      });
+    }
     updateUI(state.reason);
-  });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initializeOnlineUI, { once: true });
+  } else {
+    initializeOnlineUI();
+  }
 })();
