@@ -2,7 +2,7 @@
 
 更新日: 2026-11-06
 対象リポジトリ: extraunitedkingdom/NEON-ADVENTURE
-現行ゲーム: VER 2.17
+現行ゲーム: VER 2.18
 
 ## 絶対条件：無料運営
 
@@ -64,4 +64,7 @@
 - index.html に VER 2.18 と ONLINE ボタン・案内パネルを追加。既存ソロ画面・ゲーム処理は変更していない。
 - online.js を追加。通信機能は disabled、Firebase SDK/設定値なし、ネットワーク要求なし。接続メソッドは未設定理由を返すだけ。
 - フェーズ1完了。Firebase プロジェクトはまだ作成・接続されていない。有料プラン・請求先・支払い方法の設定は行っていない。
-- 次は Firebase の最新 Spark 条件を再確認し、無料枠だけで必要機能が実現可能か確認してからフェーズ2へ進む。Firebase プロジェクト作成時も支払い情報・Blaze 設定には触れない。
+- Firebase Spark プロジェクトをユーザーが作成。Realtime Database はロックモードで作成済み。Authentication の匿名プロバイダを有効化済み。Webアプリを登録し、CDN SDK 13.2.0 の構成情報を取得済み。
+- フェーズ2の初回実装をコミット：online.js に Firebase App/Auth/Realtime Database SDK の動的CDN読み込み、匿名認証、.info/connected の接続確認を追加。ONLINE画面に「接続テスト」ボタンを追加。
+- この段階ではデータベースへの書き込み・ルーム機能・チャットは実装していない。DBルールはロックモードのまま。接続テストの実機確認待ち。
+- フェーズ2はユーザーのGitHub Pages実機テストと接続確認が完了するまで未完了とする。課金設定・Blaze変更は行わない。
