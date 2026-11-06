@@ -502,7 +502,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.12</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.17</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -1317,10 +1317,17 @@ function draw(){
  // プレイヤー名のネームタグ（カメラ移動・ジャンプに追従）
  const tagX=player.x+player.w/2-camera,tagY=player.y-48;
  ctx.save();ctx.font="bold 13px sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";
- const tagWidth=Math.max(54,ctx.measureText(playerName).width+18);
- ctx.fillStyle="rgba(5,13,34,.88)";ctx.fillRect(tagX-tagWidth/2,tagY-10,tagWidth,20);
- ctx.strokeStyle="#45eaff";ctx.lineWidth=1.5;ctx.strokeRect(tagX-tagWidth/2,tagY-10,tagWidth,20);
- ctx.shadowColor="#19dfff";ctx.shadowBlur=8;ctx.fillStyle="#f4ffff";ctx.fillText(playerName,tagX,tagY);ctx.restore();
+ const hasAdminTag=adminUnlocked;
+ const adminPrefix=hasAdminTag?"ADMIN:":"";
+ const adminWidth=hasAdminTag?ctx.measureText(adminPrefix).width:0;
+ const nameWidth=ctx.measureText(playerName).width;
+ const tagWidth=Math.max(54,adminWidth+nameWidth+18);
+ ctx.fillStyle="rgba(5,13,34,.9)";ctx.fillRect(tagX-tagWidth/2,tagY-10,tagWidth,20);
+ ctx.strokeStyle=hasAdminTag?"#ffbd55":"#45eaff";ctx.lineWidth=1.5;ctx.strokeRect(tagX-tagWidth/2,tagY-10,tagWidth,20);
+ ctx.shadowColor=hasAdminTag?"#ff9d35":"#19dfff";ctx.shadowBlur=8;
+ if(hasAdminTag){ctx.textAlign="left";ctx.fillStyle="#ffbd55";ctx.fillText(adminPrefix,tagX-(adminWidth+nameWidth)/2,tagY);ctx.fillStyle="#f4ffff";ctx.fillText(playerName,tagX-(adminWidth+nameWidth)/2+adminWidth,tagY)}
+ else{ctx.fillStyle="#f4ffff";ctx.fillText(playerName,tagX,tagY)}
+ ctx.restore();
  ctx.fillStyle="white";ctx.font="bold 19px sans-serif";ctx.fillText(worldNumber===1?"WORLD 1 : GREEN FOREST":worldNumber===2?"WORLD 2 : LAVA LAND":worldNumber===3?"WORLD 3 : SKY KINGDOM":"WORLD 4 : COSMIC ABYSS",18,28);
  ctx.font="16px sans-serif";ctx.fillStyle="#ffd700";ctx.fillText("COINS: "+coinCount,18,58);
  ctx.fillStyle="#00ffff";ctx.fillText("TIME: "+(gameClear?currentTime:(Date.now()-gameStart)/1000).toFixed(2),18,84);
