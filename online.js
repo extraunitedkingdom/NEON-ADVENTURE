@@ -203,11 +203,13 @@
     try {
       const code = makeRoomCode();
       const roomRef = modules.ref(database, "rooms/" + code);
+      const playerRef = modules.ref(database, "rooms/" + code + "/players/" + state.uid);
       const name = cleanName(el("onlineRoomName")?.value || getPlayerInfo().name + "のルーム").slice(0, 20);
       const room = {
         meta: { name, visibility, ownerUid: state.uid, createdAt: Date.now(), maxPlayers: MAX_PLAYERS },
         players: { [state.uid]: getPlayerInfo() }
       };
+      await modules.onDisconnect(playerRef).remove();
       await modules.set(roomRef, room);
       currentRoom = { id: code, meta: room.meta, players: room.players };
       watchCurrentRoom(code);
@@ -234,7 +236,9 @@
       const players = data.players || {};
       if (Object.keys(players).length >= MAX_PLAYERS) throw new Error("このルームは満員です。");
       if (players[state.uid]) throw new Error("すでに参加しています。");
-      await modules.set(modules.ref(database, "rooms/" + roomCode + "/players/" + state.uid), getPlayerInfo());
+      const playerRef = modules.ref(database, "rooms/" + roomCode + "/players/" + state.uid);
+      await modules.onDisconnect(playerRef).remove();
+      await modules.set(playerRef, getPlayerInfo());
       currentRoom = { id: roomCode, meta: data.meta, players: { ...players, [state.uid]: getPlayerInfo() } };
       watchCurrentRoom(roomCode);
       setMessage("ルームに参加しました。");
@@ -249,6 +253,8 @@
     if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
     const roomRef = modules.ref(database, "rooms/" + room.id);
     try {
+      const ownPlayerRef = modules.ref(database, "rooms/" + room.id + "/players/" + state.uid);
+      await modules.onDisconnect(ownPlayerRef).cancel();
       if (room.meta.ownerUid === state.uid) {
         await modules.remove(roomRef);
         setMessage("ホストが退出したため、ルームを閉じました。");
