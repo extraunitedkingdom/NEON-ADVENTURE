@@ -214,12 +214,19 @@
         meta: { name, visibility, ownerUid: state.uid, createdAt: Date.now(), maxPlayers: MAX_PLAYERS },
         players: { [state.uid]: getPlayerInfo() }
       };
-      await modules.onDisconnect(playerRef).remove();
       const writes = { ["rooms/" + code]: room };
       if (visibility === "public") {
         writes["publicRooms/" + code] = { name, ownerUid: state.uid, createdAt: Date.now() };
       }
       await modules.update(modules.ref(database), writes);
+      try {
+        await modules.onDisconnect(playerRef).remove();
+      } catch (presenceError) {
+        const cleanup = { ["rooms/" + code]: null };
+        if (visibility === "public") cleanup["publicRooms/" + code] = null;
+        await modules.update(modules.ref(database), cleanup);
+        throw presenceError;
+      }
       currentRoom = { id: code, meta: room.meta, players: room.players };
       watchCurrentRoom(code);
       setMessage(visibility === "public" ?
