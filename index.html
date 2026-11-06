@@ -1334,7 +1334,7 @@ function draw(){
 }
 function applyPlayerName(){
  const input=document.getElementById("playerNameInput");
- const cleaned=Array.from((input.value||"").replace(/[\\u0000-\\u001f\\u007f]/g,"").trim()).slice(0,16).join("");
+ const cleaned=Array.from((input.value||"").replace(/[\u0000-\u001f\u007f]/g,"").trim()).slice(0,16).join("");
  playerName=cleaned||"PLAYER";input.value=playerName;saveGame();
  document.getElementById("playerNameMessage").textContent="ネームタグを「"+playerName+"」に設定しました";
 }
