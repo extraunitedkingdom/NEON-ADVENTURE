@@ -25,7 +25,7 @@
   let connectedUnsubscribe = null, roomUnsubscribe = null, currentRoom = null;
   let roomBusy = false;
   let playerSyncHandler = null;
-  let chatUnsubscribe = null;
+  let chatUnsubscribe = null, chatRoomId = null;
   let lastPositionSentAt = 0;
   let lastChatSentAt = 0;
 
@@ -102,7 +102,7 @@
       let savedRoomId = null, wasHost = false;
       try { savedRoomId = sessionStorage.getItem("neonOnlineRoomId"); wasHost = sessionStorage.getItem("neonOnlineRoomHost") === "1"; } catch (_) {}
       if (savedRoomId && !wasHost) {
-        try { await joinRoom(savedRoomId); setMessage("前回参加していたルームに再接続しました。"); }
+        try { await joinRoom(savedRoomId, true); setMessage("前回参加していたルームに再接続しました。"); }
         catch (_) { clearRoomSession(); }
       } else if (wasHost) {
         clearRoomSession();
@@ -197,6 +197,7 @@
         currentRoom = null;
         clearRoomSession();
         if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+        chatRoomId = null;
         renderChatMessages({});
         notifyPlayerSync({});
         if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
@@ -282,7 +283,9 @@
     list.scrollTop = list.scrollHeight;
   }
   function watchChat(roomId) {
+    if (chatUnsubscribe && chatRoomId === roomId) return;
     if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+    chatRoomId = roomId;
     const chatRef = modules.ref(database, "rooms/" + roomId + "/chat");
     chatUnsubscribe = modules.onValue(chatRef, snapshot => {
       renderChatMessages(snapshot.val() || {});
@@ -366,7 +369,7 @@
       return { ok: true, code };
     } finally { roomBusy = false; renderCurrentRoom(); }
   }
-  async function joinRoom(code) {
+  async function joinRoom(code, isReconnect = false) {
     requireConnection();
     if (roomBusy) throw new Error("ルーム処理中です。");
     if (currentRoom) throw new Error("先に現在のルームから退出してください。");
@@ -385,8 +388,9 @@
         canReadBeforeJoin = false;
       }
       if (canReadBeforeJoin && (!data || !data.meta)) throw new Error("ルームが見つかりません。");
-      if (data?.players?.[state.uid]) throw new Error("すでに参加しています。");
-      if (canReadBeforeJoin && Object.keys(data.players || {}).length >= MAX_PLAYERS) throw new Error("このルームは満員です。");
+      if (data?.players?.[state.uid] && !isReconnect) throw new Error("すでに参加しています。");
+      const existingPlayerCount = Object.keys(data?.players || {}).filter(uid => uid !== state.uid).length;
+      if (canReadBeforeJoin && existingPlayerCount >= MAX_PLAYERS) throw new Error("このルームは満員です。");
       await modules.onDisconnect(playerRef).remove();
       await modules.set(playerRef, getPlayerInfo());
       if (!data) {
@@ -438,6 +442,7 @@
       currentRoom = null;
       clearRoomSession();
       if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+      chatRoomId = null;
       renderChatMessages({});
       notifyPlayerSync({});
       renderCurrentRoom();
