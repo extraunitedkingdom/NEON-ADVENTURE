@@ -113,7 +113,7 @@
       uid: state.uid,
       name: cleanName(el("playerNameInput")?.value),
       character: "boy",
-      joinedAt: modules.serverTimestamp ? modules.serverTimestamp() : Date.now(),
+      joinedAt: Date.now(),
       online: true
     };
   }
