@@ -155,13 +155,18 @@
   }
   async function refreshRooms() {
     requireConnection();
-    const snapshot = await modules.get(modules.ref(database, "rooms"));
-    const value = snapshot.val() || {};
-    const rooms = Object.entries(value).map(([id, data]) => ({
-      id, name: data?.meta?.name || "PLAYER ROOM",
-      visibility: data?.meta?.visibility || "private",
-      players: data?.players ? Object.keys(data.players).length : 0
-    })).filter(room => room.visibility === "public" && room.players < MAX_PLAYERS);
+    const snapshot = await modules.get(modules.ref(database, "publicRooms"));
+    const index = snapshot.val() || {};
+    const rooms = [];
+    for (const [id, entry] of Object.entries(index)) {
+      try {
+        const roomSnap = await modules.get(modules.ref(database, "rooms/" + id));
+        const data = roomSnap.val();
+        if (!data || !data.meta || data.meta.visibility !== "public") continue;
+        const count = data.players ? Object.keys(data.players).length : 0;
+        if (count < MAX_PLAYERS) rooms.push({ id, name: entry.name || data.meta.name || "PLAYER ROOM", players: count });
+      } catch (_) {}
+    }
     renderRoomList(rooms);
     return rooms;
   }
@@ -210,7 +215,11 @@
         players: { [state.uid]: getPlayerInfo() }
       };
       await modules.onDisconnect(playerRef).remove();
-      await modules.set(roomRef, room);
+      const writes = { ["rooms/" + code]: room };
+      if (visibility === "public") {
+        writes["publicRooms/" + code] = { name, ownerUid: state.uid, createdAt: Date.now() };
+      }
+      await modules.update(modules.ref(database), writes);
       currentRoom = { id: code, meta: room.meta, players: room.players };
       watchCurrentRoom(code);
       setMessage(visibility === "public" ?
@@ -230,16 +239,36 @@
     roomBusy = true;
     try {
       const roomRef = modules.ref(database, "rooms/" + roomCode);
-      const snapshot = await modules.get(roomRef);
-      const data = snapshot.val();
-      if (!data || !data.meta) throw new Error("ルームが見つかりません。");
-      const players = data.players || {};
-      if (Object.keys(players).length >= MAX_PLAYERS) throw new Error("このルームは満員です。");
-      if (players[state.uid]) throw new Error("すでに参加しています。");
       const playerRef = modules.ref(database, "rooms/" + roomCode + "/players/" + state.uid);
+      let data = null;
+      let canReadBeforeJoin = true;
+      try {
+        const snapshot = await modules.get(roomRef);
+        data = snapshot.val();
+      } catch (_) {
+        canReadBeforeJoin = false;
+      }
+      if (canReadBeforeJoin && (!data || !data.meta)) throw new Error("ルームが見つかりません。");
+      if (data?.players?.[state.uid]) throw new Error("すでに参加しています。");
+      if (canReadBeforeJoin && Object.keys(data.players || {}).length >= MAX_PLAYERS) throw new Error("このルームは満員です。");
       await modules.onDisconnect(playerRef).remove();
       await modules.set(playerRef, getPlayerInfo());
-      currentRoom = { id: roomCode, meta: data.meta, players: { ...players, [state.uid]: getPlayerInfo() } };
+      if (!data) {
+        const joinedSnapshot = await modules.get(roomRef);
+        data = joinedSnapshot.val();
+      }
+      if (!data || !data.meta) {
+        await modules.onDisconnect(playerRef).cancel();
+        await modules.remove(playerRef);
+        throw new Error("ルームが見つからないか、参加コードが違います。");
+      }
+      const players = data.players || {};
+      if (Object.keys(players).length > MAX_PLAYERS) {
+        await modules.onDisconnect(playerRef).cancel();
+        await modules.remove(playerRef);
+        throw new Error("このルームは満員です。");
+      }
+      currentRoom = { id: roomCode, meta: data.meta, players };
       watchCurrentRoom(roomCode);
       setMessage("ルームに参加しました。");
       await refreshRooms().catch(() => {});
@@ -256,7 +285,10 @@
       const ownPlayerRef = modules.ref(database, "rooms/" + room.id + "/players/" + state.uid);
       await modules.onDisconnect(ownPlayerRef).cancel();
       if (room.meta.ownerUid === state.uid) {
-        await modules.remove(roomRef);
+        await modules.update(modules.ref(database), {
+          ["rooms/" + room.id]: null,
+          ["publicRooms/" + room.id]: null
+        });
         setMessage("ホストが退出したため、ルームを閉じました。");
       } else {
         await modules.remove(modules.ref(database, "rooms/" + room.id + "/players/" + state.uid));
