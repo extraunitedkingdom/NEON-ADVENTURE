@@ -311,8 +311,10 @@
     const panel = el("onlineCurrentRoom");
     const details = el("onlineCurrentRoomDetails");
     const leave = el("onlineLeaveRoom");
+    const chatDock = el("onlineChatDock");
     if (!panel) return;
     panel.style.display = currentRoom ? "block" : "none";
+    if (chatDock) chatDock.style.display = currentRoom ? "block" : "none";
     if (leave) leave.style.display = currentRoom ? "inline-block" : "none";
     if (details && currentRoom) {
       const players = Object.values(currentRoom.players || {});
