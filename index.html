@@ -539,7 +539,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.26</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.27</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -661,7 +661,7 @@ body>h1{display:none}
 </div>
 <p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p><p class="small" id="world2Hint">WORLD 2：水色のジャンプパッドでマグマを飛び越えよう。2つ目は高い壁の上へ飛び乗るためのパッド！</p>
 </div>
-<script src="./online.js?v=20261107-5"></script>
+<script src="./online.js?v=20261107-6"></script>
 <script>
 "use strict";
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
@@ -671,6 +671,7 @@ let playerHP=3,invincibleTimer=0,attackCooldown=0,dashTimer=0,shieldTimer=0;
 let projectiles=[],shotCooldown=0;
 let adminUnlocked=false,adminMode=false,floatMode=false;
 window.NEON_GAME_ADMIN=()=>adminMode;
+window.NEON_GAME_ADMIN_BADGE=()=>adminUnlocked;
 let adminBeamTimer=0,adminBeamCooldown=0;
 let worldNumber=1,world2Unlocked=false,world2Cleared=false,world3Unlocked=false,world3Cleared=false;
 let facing=1,attackTimer=0,gameStarted=false;
