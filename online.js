@@ -499,7 +499,13 @@
       roomId: currentRoom?.id || null };
   }
   function getRoomPlayers() {
-    return currentRoom ? Object.entries(currentRoom.players || {}).map(([uid, player]) => ({ ...player, uid })) : [];
+    if (!currentRoom) return [];
+    const players = Object.entries(currentRoom.players || {}).map(([uid, player]) => ({ ...player, uid }));
+    // joinRoom直後の初回スナップショット前でも、自分を参加者一覧に含める。
+    if (state.uid && !players.some(player => player.uid === state.uid)) {
+      players.push({ ...getPlayerInfo(), uid: state.uid });
+    }
+    return players;
   }
   window.NEON_ONLINE = Object.freeze({
     getStatus, getRoomPlayers, connect, disconnect, createRoom, joinRoom, leaveRoom, refreshRooms,
