@@ -539,7 +539,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.24</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.25</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -1051,7 +1051,7 @@ function update(){
   if(bossDefeated&&player.x<goal.x+goal.w&&player.x+player.w>goal.x&&player.y<goal.y+goal.h&&player.y+player.h>goal.y)finishGame();
   camera=Math.max(0,Math.min(worldNumber===3?2500:worldNumber===4?2800:1900,player.x-250));
   if(window.NEON_ONLINE?.publishPosition){
-   window.NEON_ONLINE.publishPosition({x:player.x,y:player.y,facing,world:worldNumber,skin:playerSkin,character:appearanceCharacter,admin:adminMode});
+   window.NEON_ONLINE.publishPosition({x:player.x,y:player.y,facing,world:worldNumber,skin:playerSkin,character:appearanceCharacter,admin:!!window.NEON_GAME_ADMIN?.()});
   }
  }
  draw();requestAnimationFrame(update);
