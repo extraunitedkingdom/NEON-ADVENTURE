@@ -539,7 +539,7 @@ body>h1{display:none}
 </g>
 </svg>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.25</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.26</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -661,7 +661,7 @@ body>h1{display:none}
 </div>
 <p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p><p class="small" id="world2Hint">WORLD 2：水色のジャンプパッドでマグマを飛び越えよう。2つ目は高い壁の上へ飛び乗るためのパッド！</p>
 </div>
-<script src="./online.js?v=20261107-4"></script>
+<script src="./online.js?v=20261107-5"></script>
 <script>
 "use strict";
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
@@ -1141,7 +1141,8 @@ function drawRemotePlayers(){
   if(!p||!p.uid||p.uid===ownUid||!Number.isFinite(Number(p.x))||!Number.isFinite(Number(p.y)))continue;
   if(Number(p.world||1)!==worldNumber)continue;
   const x=Number(p.x)+15,y=Number(p.y),color=/^#[0-9a-f]{6}$/i.test(String(p.skin||""))?p.skin:"#39eaff";
-  if(x < -45 || x > W+45 || y < -65 || y > H+30)continue;
+  const screenX=x-camera;
+  if(screenX < -45 || screenX > W+45 || y < -65 || y > H+30)continue;
   ctx.save();ctx.translate(x,y);ctx.scale(Number(p.facing)<0?-1:1,1);
   ctx.globalAlpha=p.character==="ghost"?.78:1;
   ctx.shadowColor=color;ctx.shadowBlur=12;
@@ -1483,7 +1484,17 @@ document.getElementById("world1Select").onclick=()=>{worldNumber=1;springPads=[]
 document.getElementById("world2Select").onclick=()=>{if(!world2Unlocked)return;loadWorld2();beginSelectedWorld()};
 document.getElementById("world3Select").onclick=()=>{if(!world3Unlocked)return;loadWorld3();beginSelectedWorld()};
 document.getElementById("world4Select").onclick=()=>{if(!world4Unlocked)return;loadWorld4();beginSelectedWorld()};
-function beginSelectedWorld(){gameStats.playCount++;document.getElementById("codePanel").style.display="none";floatMode=false;refreshAdminUI();touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;player.vx=0;player.vy=0;player.grounded=false;gameStarted=true;gameStart=Date.now();document.getElementById("stageSelect").style.display="none";document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";document.getElementById("clearPanel").style.display="none";saveGame()}
+function beginSelectedWorld(){
+ gameStats.playCount++;
+ const onlineStatus=window.NEON_ONLINE?.getStatus?.();
+ if(onlineStatus?.roomId){
+  const members=window.NEON_ONLINE?.getRoomPlayers?.()||[];
+  const ordered=members.map(p=>p.uid).filter(Boolean).sort();
+  const slot=Math.max(0,ordered.indexOf(onlineStatus.uid));
+  player.x=70+(slot%8)*50;
+  player.y=200-Math.floor(slot/8)*58;
+ }
+ document.getElementById("codePanel").style.display="none";floatMode=false;refreshAdminUI();touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;player.vx=0;player.vy=0;player.grounded=false;gameStarted=true;gameStart=Date.now();document.getElementById("stageSelect").style.display="none";document.getElementById("home").style.display="none";document.getElementById("stage").style.display="block";document.getElementById("clearPanel").style.display="none";saveGame()}
 document.getElementById("onlineStartGame").onclick=()=>{const status=window.NEON_ONLINE?.getStatus?.();if(!status?.roomId){alert("先に公開ルームまたはプライベートルームへ参加してください。");return;}document.getElementById("onlinePanel").style.display="none";document.getElementById("world1Select").click();};
 document.getElementById("onlineChatMinimize").onclick=()=>{const body=document.getElementById("onlineChatBody"),button=document.getElementById("onlineChatMinimize");const hidden=body.style.display==="none";body.style.display=hidden?"block":"none";button.textContent=hidden?"−":"+";};
 document.getElementById("save").onclick=()=>{alert(saveGame()?"GAME SAVED!":"セーブに失敗しました。ブラウザの保存領域を確認してください。")};
