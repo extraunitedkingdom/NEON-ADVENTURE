@@ -85,7 +85,17 @@
       const sdk = await loadFirebase();
       state.reason = "匿名認証を確認しています...";
       updateUI(state.reason);
-      const credential = auth.currentUser ? { user: auth.currentUser } : await sdk.signInAnonymously(auth);
+      const restoredUser = await new Promise((resolve, reject) => {
+        let unsubscribe = null;
+        unsubscribe = sdk.onAuthStateChanged(auth, user => {
+          if (unsubscribe) unsubscribe();
+          resolve(user);
+        }, error => {
+          if (unsubscribe) unsubscribe();
+          reject(error);
+        });
+      });
+      const credential = restoredUser ? { user: restoredUser } : await sdk.signInAnonymously(auth);
       state.authenticated = true;
       state.uid = credential.user.uid;
       state.reason = "Realtime Databaseへの接続を確認しています...";
@@ -442,34 +452,32 @@
     requireConnection();
     if (!currentRoom) return { ok: true };
     const room = currentRoom;
-    if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
     const roomRef = modules.ref(database, "rooms/" + room.id);
-    try {
-      const ownPlayerRef = modules.ref(database, "rooms/" + room.id + "/players/" + state.uid);
-      if (room.meta.ownerUid === state.uid) {
-        await modules.onDisconnect(roomRef).cancel();
-        if (room.meta.visibility === "public") {
-          await modules.onDisconnect(modules.ref(database, "publicRooms/" + room.id)).cancel();
-        }
-        const deletePaths = { ["rooms/" + room.id]: null };
-        if (room.meta.visibility === "public") deletePaths["publicRooms/" + room.id] = null;
-        await modules.update(modules.ref(database), deletePaths);
-        setMessage("ホストが退出したため、ルームを閉じました。");
-      } else {
-        await modules.onDisconnect(ownPlayerRef).cancel();
-        await modules.remove(modules.ref(database, "rooms/" + room.id + "/players/" + state.uid));
-        setMessage("ルームから退出しました。");
+    const ownPlayerRef = modules.ref(database, "rooms/" + room.id + "/players/" + state.uid);
+    // DB削除を先に成功させる。失敗時はonDisconnectを残して孤立ルームを防ぐ。
+    if (room.meta.ownerUid === state.uid) {
+      const deletePaths = { ["rooms/" + room.id]: null };
+      if (room.meta.visibility === "public") deletePaths["publicRooms/" + room.id] = null;
+      await modules.update(modules.ref(database), deletePaths);
+      await modules.onDisconnect(roomRef).cancel().catch(() => {});
+      if (room.meta.visibility === "public") {
+        await modules.onDisconnect(modules.ref(database, "publicRooms/" + room.id)).cancel().catch(() => {});
       }
-    } finally {
-      currentRoom = null;
-      clearRoomSession();
-      if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
-      chatRoomId = null;
-      renderChatMessages({});
-      notifyPlayerSync({});
-      renderCurrentRoom();
-      await refreshRooms().catch(() => {});
+      setMessage("ホストが退出したため、ルームを閉じました。");
+    } else {
+      await modules.remove(ownPlayerRef);
+      await modules.onDisconnect(ownPlayerRef).cancel().catch(() => {});
+      setMessage("ルームから退出しました。");
     }
+    if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
+    currentRoom = null;
+    clearRoomSession();
+    if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+    chatRoomId = null;
+    renderChatMessages({});
+    notifyPlayerSync({});
+    renderCurrentRoom();
+    await refreshRooms().catch(() => {});
     return { ok: true };
   }
   function showError(error) {
@@ -490,8 +498,11 @@
     return { ...state, provider: "Firebase", allowedPlan: "Spark", maxPlayers: MAX_PLAYERS,
       roomId: currentRoom?.id || null };
   }
+  function getRoomPlayers() {
+    return currentRoom ? Object.entries(currentRoom.players || {}).map(([uid, player]) => ({ ...player, uid })) : [];
+  }
   window.NEON_ONLINE = Object.freeze({
-    getStatus, connect, disconnect, createRoom, joinRoom, leaveRoom, refreshRooms,
+    getStatus, getRoomPlayers, connect, disconnect, createRoom, joinRoom, leaveRoom, refreshRooms,
     setPlayerSyncHandler, publishPosition, sendChatMessage
   });
   function bind(id, handler) {
@@ -517,6 +528,8 @@
       });
     }
     updateUI(state.reason);
+    // ページ復帰時に認証を復元し、ゲストなら前回のルームへ自動再参加。
+    connect().catch(showError);
   }
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initializeOnlineUI, { once: true });
