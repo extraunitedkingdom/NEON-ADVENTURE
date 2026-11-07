@@ -117,12 +117,11 @@
         });
       });
       state.reason = "Firebase接続・匿名認証を確認しました。ルーム機能を利用できます。";
-      let savedRoomId = null, wasHost = false;
+      let savedRoomId = null;
       try {
         savedRoomId = localStorage.getItem("neonOnlineRoomId");
-        wasHost = localStorage.getItem("neonOnlineRoomHost") === "1";
       } catch (_) {}
-      if (savedRoomId && !wasHost) {
+      if (savedRoomId) {
         try {
           await joinRoom(savedRoomId, true);
           setMessage("前回参加していたルームに再接続しました。オンラインでスタートしてください。");
@@ -130,8 +129,6 @@
           clearRoomSession();
           setMessage("前回のルームに再接続できませんでした。ルームが終了した可能性があります。");
         }
-      } else if (wasHost) {
-        clearRoomSession();
       }
       return { ok: true, ...state };
     } catch (error) {
@@ -384,13 +381,9 @@
       }
       await modules.update(modules.ref(database), writes);
       try {
-        // ホストが切断・ページ離脱した場合はルーム全体を閉じる。
-        await modules.onDisconnect(roomRef).remove();
-        if (visibility === "public") {
-          await modules.onDisconnect(modules.ref(database, "publicRooms/" + code)).remove();
-        }
+        // ホストがページを離れてもルームは維持し、ホスト本人の参加状態だけを解除する。
+        await modules.onDisconnect(playerRef).remove();
       } catch (presenceError) {
-        await modules.onDisconnect(roomRef).cancel().catch(() => {});
         const cleanup = { ["rooms/" + code]: null };
         if (visibility === "public") cleanup["publicRooms/" + code] = null;
         await modules.update(modules.ref(database), cleanup);
@@ -447,7 +440,8 @@
         throw new Error("このルームは満員です。");
       }
       currentRoom = { id: roomCode, meta: data.meta, players };
-      saveRoomSession(roomCode, false);
+      const isRoomHost = data.meta.ownerUid === state.uid;
+      saveRoomSession(roomCode, isRoomHost);
       watchCurrentRoom(roomCode);
       setMessage("ルームに参加しました。");
       await refreshRooms().catch(() => {});
@@ -458,25 +452,13 @@
     requireConnection();
     if (!currentRoom) return { ok: true };
     const room = currentRoom;
-    const roomRef = modules.ref(database, "rooms/" + room.id);
     const ownPlayerRef = modules.ref(database, "rooms/" + room.id + "/players/" + state.uid);
-    // DB削除を先に成功させる。失敗時はonDisconnectを残して孤立ルームを防ぐ。
-    if (room.meta.ownerUid === state.uid) {
-      // ルーム本体と公開一覧を別々に削除し、どちらで失敗したか明確にする。
-      await modules.remove(roomRef);
-      if (room.meta.visibility === "public") {
-        await modules.remove(modules.ref(database, "publicRooms/" + room.id));
-      }
-      await modules.onDisconnect(roomRef).cancel().catch(() => {});
-      if (room.meta.visibility === "public") {
-        await modules.onDisconnect(modules.ref(database, "publicRooms/" + room.id)).cancel().catch(() => {});
-      }
-      setMessage("ホストが退出したため、ルームを閉じました。");
-    } else {
-      await modules.remove(ownPlayerRef);
-      await modules.onDisconnect(ownPlayerRef).cancel().catch(() => {});
-      setMessage("ルームから退出しました。");
-    }
+    // ホストも参加者も、自分の参加情報だけを削除する。ルーム本体と公開一覧は維持する。
+    await modules.remove(ownPlayerRef);
+    await modules.onDisconnect(ownPlayerRef).cancel().catch(() => {});
+    setMessage(room.meta.ownerUid === state.uid
+      ? "ホストとして退出しました。ルームはそのまま残ります。"
+      : "ルームから退出しました。");
     if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
     currentRoom = null;
     clearRoomSession();
