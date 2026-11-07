@@ -28,6 +28,8 @@
   let chatUnsubscribe = null, chatRoomId = null;
   let lastPositionSentAt = 0;
   let lastChatSentAt = 0;
+  let connectionEverEstablished = false;
+  let presenceRestorePromise = null;
 
   function el(id) { return document.getElementById(id); }
   // ゲストの再接続情報はタブを閉じても残るよう localStorage に保存する。
@@ -108,10 +110,21 @@
         }, 12000);
         connectedUnsubscribe = sdk.onValue(sdk.ref(database, ".info/connected"), snapshot => {
           const isConnected = snapshot.val() === true;
+          const wasConnected = state.connected;
           state.connected = isConnected;
           if (isConnected && !settled) { settled = true; clearTimeout(timeout); resolve(); }
-          if (!isConnected) { state.reason = "Firebaseとの接続が切れています。"; updateUI(state.reason); }
-          else { state.reason = "Firebase接続・匿名認証を確認しました。"; updateUI(state.reason); }
+          if (!isConnected) {
+            state.reason = "Firebaseとの接続が切れています。";
+            updateUI(state.reason);
+          } else {
+            state.reason = "Firebase接続・匿名認証を確認しました。";
+            updateUI(state.reason);
+            // 一度接続した後に切断→復帰した場合、onDisconnectで消えた自分の参加情報を復元する。
+            if (connectionEverEstablished && !wasConnected && currentRoom) {
+              restoreRoomPresence().catch(showError);
+            }
+          }
+          connectionEverEstablished = true;
         }, error => {
           if (!settled) { settled = true; clearTimeout(timeout); reject(error); }
         });
@@ -139,6 +152,37 @@
       state.connecting = false;
       updateUI(state.reason);
     }
+  }
+  async function restoreRoomPresence() {
+    if (!currentRoom || !state.connected || !state.uid || !modules) return;
+    if (presenceRestorePromise) return presenceRestorePromise;
+    const roomId = currentRoom.id;
+    const roomRef = modules.ref(database, "rooms/" + roomId);
+    const playerRef = modules.ref(database, "rooms/" + roomId + "/players/" + state.uid);
+    presenceRestorePromise = (async () => {
+      // onDisconnectは接続ごとに再登録が必要。
+      await modules.onDisconnect(playerRef).remove();
+      await modules.set(playerRef, getPlayerInfo());
+      const snapshot = await modules.get(roomRef);
+      const data = snapshot.val();
+      if (!data || !data.meta) {
+        currentRoom = null;
+        clearRoomSession();
+        if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
+        if (chatUnsubscribe) { chatUnsubscribe(); chatUnsubscribe = null; }
+        chatRoomId = null;
+        renderChatMessages({});
+        notifyPlayerSync({});
+        renderCurrentRoom();
+        throw new Error("接続中にルームが削除されました。");
+      }
+      currentRoom = { id: roomId, meta: data.meta, players: data.players || {} };
+      lastPositionSentAt = 0;
+      notifyPlayerSync(currentRoom.players);
+      renderCurrentRoom();
+      setMessage("接続が復帰しました。ルームに再参加しました。");
+    })().finally(() => { presenceRestorePromise = null; });
+    return presenceRestorePromise;
   }
   function requireConnection() {
     if (!state.connected || !state.authenticated || !database || !modules) {
@@ -360,7 +404,11 @@
     if (!panel) return;
     panel.style.display = currentRoom ? "block" : "none";
     if (chatDock) chatDock.style.display = currentRoom ? "block" : "none";
-    if (leave) leave.style.display = currentRoom ? "inline-block" : "none";
+    if (leave) {
+      leave.style.display = currentRoom ? "inline-block" : "none";
+      leave.textContent = currentRoom && currentRoom.meta.ownerUid === state.uid
+        ? "部屋を削除" : "ルームを退出";
+    }
     if (details && currentRoom) {
       const players = Object.values(currentRoom.players || {});
       details.textContent = (currentRoom.meta.name || "PLAYER ROOM") + " / " +
@@ -459,13 +507,33 @@
     requireConnection();
     if (!currentRoom) return { ok: true };
     const room = currentRoom;
+    const isHost = room.meta.ownerUid === state.uid;
     const ownPlayerRef = modules.ref(database, "rooms/" + room.id + "/players/" + state.uid);
-    // ホストも参加者も、自分の参加情報だけを削除する。ルーム本体と公開一覧は維持する。
-    await modules.remove(ownPlayerRef);
-    await modules.onDisconnect(ownPlayerRef).cancel().catch(() => {});
-    setMessage(room.meta.ownerUid === state.uid
-      ? "ホストとして退出しました。ルームはそのまま残ります。"
-      : "ルームから退出しました。");
+    if (isHost) {
+      if (!window.confirm("この部屋を削除しますか？参加者全員が退出し、チャット履歴も削除されます。")) return { ok: false, cancelled: true };
+      const roomRef = modules.ref(database, "rooms/" + room.id);
+      const publicRef = modules.ref(database, "publicRooms/" + room.id);
+      // 公開一覧を先に消し、続けてルーム本体を削除する。チャットもルームと一緒に消える。
+      if (room.meta.visibility === "public") await modules.remove(publicRef);
+      try {
+        await modules.remove(roomRef);
+      } catch (error) {
+        if (room.meta.visibility === "public") {
+          await modules.set(publicRef, {
+            name: room.meta.name || "PLAYER ROOM",
+            ownerUid: state.uid,
+            createdAt: room.meta.createdAt || Date.now()
+          }).catch(() => {});
+        }
+        throw error;
+      }
+      await modules.onDisconnect(ownPlayerRef).cancel().catch(() => {});
+      setMessage("部屋を削除しました。");
+    } else {
+      await modules.remove(ownPlayerRef);
+      await modules.onDisconnect(ownPlayerRef).cancel().catch(() => {});
+      setMessage("ルームから退出しました。");
+    }
     if (roomUnsubscribe) { roomUnsubscribe(); roomUnsubscribe = null; }
     currentRoom = null;
     clearRoomSession();
