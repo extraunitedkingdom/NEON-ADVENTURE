@@ -1136,9 +1136,9 @@ function drawDetailedEnemy(e,index,isBoss){
  ctx.restore();
 }
 function drawRemotePlayers(){
- const ownUid=window.NEON_ONLINE?.getStatus?.().uid;
+ const ownUid=window.NEON_ONLINE?.getStatus?.().uid||null;
  for(const p of onlineRemotePlayers){
-  if(!p||p.uid===ownUid||!Number.isFinite(Number(p.x))||!Number.isFinite(Number(p.y)))continue;
+  if(!p||!p.uid||p.uid===ownUid||!Number.isFinite(Number(p.x))||!Number.isFinite(Number(p.y)))continue;
   if(Number(p.world||1)!==worldNumber)continue;
   const x=Number(p.x)+15,y=Number(p.y),color=/^#[0-9a-f]{6}$/i.test(String(p.skin||""))?p.skin:"#39eaff";
   if(x < -45 || x > W+45 || y < -65 || y > H+30)continue;
