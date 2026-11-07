@@ -150,10 +150,17 @@
     return name || "PLAYER";
   }
   function getPlayerInfo() {
+    const position = typeof window.NEON_GAME_POSITION === "function"
+      ? window.NEON_GAME_POSITION() : {};
     return {
       uid: state.uid,
       name: cleanName(el("playerNameInput")?.value),
-      character: "boy",
+      x: Number.isFinite(Number(position.x)) ? Number(position.x) : 80,
+      y: Number.isFinite(Number(position.y)) ? Number(position.y) : 200,
+      facing: Number(position.facing) < 0 ? -1 : 1,
+      world: Math.max(1, Math.min(4, Math.floor(Number(position.world) || 1))),
+      skin: /^#[0-9a-f]{6}$/i.test(String(position.skin || "")) ? position.skin : "#9b8aff",
+      character: String(position.character || "boy").slice(0, 16),
       admin: typeof window.NEON_GAME_ADMIN_BADGE === "function"
         ? !!window.NEON_GAME_ADMIN_BADGE()
         : !!window.NEON_GAME_ADMIN?.(),
