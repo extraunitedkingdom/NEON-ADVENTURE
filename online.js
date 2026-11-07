@@ -30,11 +30,19 @@
   let lastChatSentAt = 0;
 
   function el(id) { return document.getElementById(id); }
+  // ゲストの再接続情報はタブを閉じても残るよう localStorage に保存する。
+  // ホストは切断時にルームを閉じる仕様なので、自動再接続の対象にはしない。
   function saveRoomSession(roomId, isHost) {
-    try { sessionStorage.setItem("neonOnlineRoomId", roomId); sessionStorage.setItem("neonOnlineRoomHost", isHost ? "1" : "0"); } catch (_) {}
+    try {
+      localStorage.setItem("neonOnlineRoomId", roomId);
+      localStorage.setItem("neonOnlineRoomHost", isHost ? "1" : "0");
+    } catch (_) {}
   }
   function clearRoomSession() {
-    try { sessionStorage.removeItem("neonOnlineRoomId"); sessionStorage.removeItem("neonOnlineRoomHost"); } catch (_) {}
+    try {
+      localStorage.removeItem("neonOnlineRoomId");
+      localStorage.removeItem("neonOnlineRoomHost");
+    } catch (_) {}
   }
   function setMessage(message) {
     state.reason = message;
@@ -100,10 +108,18 @@
       });
       state.reason = "Firebase接続・匿名認証を確認しました。ルーム機能を利用できます。";
       let savedRoomId = null, wasHost = false;
-      try { savedRoomId = sessionStorage.getItem("neonOnlineRoomId"); wasHost = sessionStorage.getItem("neonOnlineRoomHost") === "1"; } catch (_) {}
+      try {
+        savedRoomId = localStorage.getItem("neonOnlineRoomId");
+        wasHost = localStorage.getItem("neonOnlineRoomHost") === "1";
+      } catch (_) {}
       if (savedRoomId && !wasHost) {
-        try { await joinRoom(savedRoomId, true); setMessage("前回参加していたルームに再接続しました。"); }
-        catch (_) { clearRoomSession(); }
+        try {
+          await joinRoom(savedRoomId, true);
+          setMessage("前回参加していたルームに再接続しました。オンラインでスタートしてください。");
+        } catch (reconnectError) {
+          clearRoomSession();
+          setMessage("前回のルームに再接続できませんでした。ルームが終了した可能性があります。");
+        }
       } else if (wasHost) {
         clearRoomSession();
       }
@@ -214,7 +230,10 @@
   }
   function notifyPlayerSync(players) {
     if (typeof playerSyncHandler !== "function") return;
-    const remote = Object.entries(players || {}).filter(([uid, p]) => p && uid !== state.uid && p.uid !== state.uid).map(([uid, p]) => ({ ...p, uid: p.uid || uid }));
+    const ownUid = state.uid || auth?.currentUser?.uid || null;
+    const remote = Object.entries(players || {})
+      .filter(([uid, p]) => p && uid !== ownUid && p.uid !== ownUid)
+      .map(([uid, p]) => ({ ...p, uid: uid }));
     try { playerSyncHandler(remote); } catch (error) { console.error("Player sync handler:", error); }
   }
   function setPlayerSyncHandler(handler) {
@@ -239,7 +258,10 @@
       world: Math.max(1, Math.min(4, Math.floor(Number(position.world) || 1))),
       skin: /^#[0-9a-f]{6}$/i.test(String(position.skin || "")) ? position.skin : "#9b8aff",
       character: String(position.character || "boy").slice(0, 16),
-      admin: !!position.admin
+      // 管理者状態はゲーム本体の現在値を優先して送信する。
+      admin: typeof window.NEON_GAME_ADMIN === "function"
+        ? !!window.NEON_GAME_ADMIN()
+        : !!position.admin
     };
     const playerRef = modules.ref(database, "rooms/" + currentRoom.id + "/players/" + state.uid);
     modules.update(playerRef, payload).catch(showError);
