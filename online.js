@@ -157,7 +157,9 @@
       uid: state.uid,
       name: cleanName(el("playerNameInput")?.value),
       character: "boy",
-      admin: !!window.NEON_GAME_ADMIN?.(),
+      admin: typeof window.NEON_GAME_ADMIN_BADGE === "function"
+        ? !!window.NEON_GAME_ADMIN_BADGE()
+        : !!window.NEON_GAME_ADMIN?.(),
       joinedAt: Date.now(),
       online: true
     };
@@ -269,9 +271,11 @@
       skin: /^#[0-9a-f]{6}$/i.test(String(position.skin || "")) ? position.skin : "#9b8aff",
       character: String(position.character || "boy").slice(0, 16),
       // 管理者状態はゲーム本体の現在値を優先して送信する。
-      admin: typeof window.NEON_GAME_ADMIN === "function"
-        ? !!window.NEON_GAME_ADMIN()
-        : !!position.admin
+      admin: typeof window.NEON_GAME_ADMIN_BADGE === "function"
+        ? !!window.NEON_GAME_ADMIN_BADGE()
+        : (typeof window.NEON_GAME_ADMIN === "function"
+          ? !!window.NEON_GAME_ADMIN()
+          : !!position.admin)
     };
     const playerRef = modules.ref(database, "rooms/" + currentRoom.id + "/players/" + state.uid);
     modules.update(playerRef, payload).catch(showError);
@@ -336,7 +340,9 @@
       senderUid: state.uid,
       name: cleanName(el("playerNameInput")?.value),
       text,
-      admin: !!window.NEON_GAME_ADMIN?.(),
+      admin: typeof window.NEON_GAME_ADMIN_BADGE === "function"
+        ? !!window.NEON_GAME_ADMIN_BADGE()
+        : !!window.NEON_GAME_ADMIN?.(),
       createdAt: now
     };
     await modules.set(modules.push(modules.ref(database, "rooms/" + currentRoom.id + "/chat")), message);
@@ -425,10 +431,10 @@
       if (canReadBeforeJoin && existingPlayerCount >= MAX_PLAYERS) throw new Error("このルームは満員です。");
       await modules.onDisconnect(playerRef).remove();
       await modules.set(playerRef, getPlayerInfo());
-      if (!data) {
-        const joinedSnapshot = await modules.get(roomRef);
-        data = joinedSnapshot.val();
-      }
+      // 参加者を書き込んだ後に必ず最新のルーム全体を読み直す。
+      // 参加前の古い players 一覧を保持すると、開始位置や表示人数がずれる。
+      const joinedSnapshot = await modules.get(roomRef);
+      data = joinedSnapshot.val();
       if (!data || !data.meta) {
         await modules.onDisconnect(playerRef).cancel();
         await modules.remove(playerRef);
@@ -456,9 +462,11 @@
     const ownPlayerRef = modules.ref(database, "rooms/" + room.id + "/players/" + state.uid);
     // DB削除を先に成功させる。失敗時はonDisconnectを残して孤立ルームを防ぐ。
     if (room.meta.ownerUid === state.uid) {
-      const deletePaths = { ["rooms/" + room.id]: null };
-      if (room.meta.visibility === "public") deletePaths["publicRooms/" + room.id] = null;
-      await modules.update(modules.ref(database), deletePaths);
+      // ルーム本体と公開一覧を別々に削除し、どちらで失敗したか明確にする。
+      await modules.remove(roomRef);
+      if (room.meta.visibility === "public") {
+        await modules.remove(modules.ref(database, "publicRooms/" + room.id));
+      }
       await modules.onDisconnect(roomRef).cancel().catch(() => {});
       if (room.meta.visibility === "public") {
         await modules.onDisconnect(modules.ref(database, "publicRooms/" + room.id)).cancel().catch(() => {});
@@ -495,7 +503,8 @@
     return { ok: true, ...state };
   }
   function getStatus() {
-    return { ...state, provider: "Firebase", allowedPlan: "Spark", maxPlayers: MAX_PLAYERS,
+    return { ...state, uid: state.uid || auth?.currentUser?.uid || null,
+      provider: "Firebase", allowedPlan: "Spark", maxPlayers: MAX_PLAYERS,
       roomId: currentRoom?.id || null };
   }
   function getRoomPlayers() {
