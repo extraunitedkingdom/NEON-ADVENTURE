@@ -672,6 +672,7 @@ let projectiles=[],shotCooldown=0;
 let adminUnlocked=false,adminMode=false,floatMode=false;
 window.NEON_GAME_ADMIN=()=>adminMode;
 window.NEON_GAME_ADMIN_BADGE=()=>adminUnlocked;
+window.NEON_GAME_POSITION=()=>({x:player.x,y:player.y,facing,world:worldNumber,skin:playerSkin,character:appearanceCharacter});
 let adminBeamTimer=0,adminBeamCooldown=0;
 let worldNumber=1,world2Unlocked=false,world2Cleared=false,world3Unlocked=false,world3Cleared=false;
 let facing=1,attackTimer=0,gameStarted=false;
