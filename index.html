@@ -1020,7 +1020,7 @@ let spaceHellClimbCamera=0,spaceHellVoidY=1480,spaceHellClimbTime=0;
 let spaceHellComboCamera=0,spaceHellComboTime=0;
 let spaceHellShootTime=0,spaceHellShootAimZ=.5,spaceHellShootShots=[],spaceHellShootKeys=0,spaceHellShootCamera=0,spaceHellShootCleared=false,spaceHellShootClearTimer=0;
 let spaceHellFortressTime=0,spaceHellFortressCamera=0,spaceHellFortressDragonHP=6,spaceHellFortressDragonAlive=true,spaceHellFortressShots=[],spaceHellFortressCleared=false;
-const spaceHellFortressEnemies=[{x:330,y:390,hp:1,speed:1.2},{x:590,y:390,hp:2,speed:1.5},{x:850,y:390,hp:1,speed:1.1},{x:1120,y:390,hp:2,speed:1.7},{x:1420,y:390,hp:1,speed:1.4},{x:1740,y:390,hp:2,speed:1.6},{x:2040,y:390,hp:1,speed:1.3}].map(e=>({...e,alive:true,baseX:e.x,dir:-1}));
+const spaceHellFortressEnemies=[{x:330,y:390,hp:1,speed:1.2},{x:590,y:390,hp:2,speed:1.5},{x:850,y:390,hp:1,speed:1.1},{x:1120,y:390,hp:2,speed:1.7},{x:1420,y:390,hp:1,speed:1.4},{x:1740,y:390,hp:2,speed:1.6},{x:2040,y:390,hp:1,speed:1.3}].map(e=>({...e,alive:true,baseX:e.x,baseHP:e.hp,dir:-1}));
 const spaceHellShootEnemies=[{x:430,z:.18,key:true,phase:0},{x:720,z:.78,key:false,phase:1.2},{x:1010,z:.52,key:true,phase:2.4},{x:1320,z:.30,key:false,phase:3.1},{x:1640,z:.86,key:false,phase:4.2},{x:1940,z:.62,key:true,phase:5.1}].map(e=>({...e,alive:true,baseZ:e.z,baseX:e.x}));
 const spaceHellComboPlatforms=[{x:0,y:430,w:260,h:70},{x:330,y:385,w:145,h:18},{x:535,y:335,w:145,h:18},{x:745,y:405,w:130,h:25},{x:940,y:350,w:140,h:18,crumble:true,timer:0,hidden:false},{x:1145,y:295,w:150,h:18},{x:1360,y:390,w:140,h:18,crumble:true,timer:0,hidden:false},{x:1570,y:335,w:150,h:18},{x:1780,y:280,w:160,h:18},{x:2010,y:380,w:160,h:18,crumble:true,timer:0,hidden:false},{x:2240,y:430,w:420,h:70}];
 const spaceHellComboLasers=[{x:475,phase:0,period:170,on:82},{x:875,phase:55,period:170,on:82},{x:1090,phase:110,period:170,on:82},{x:1515,phase:30,period:170,on:82},{x:1745,phase:90,period:170,on:82},{x:2195,phase:5,period:170,on:82}];
@@ -1044,7 +1044,7 @@ function loadSpaceHell(){
 function spaceHellRespawn(){
  spaceHellDeathTimer=0;spaceHellTransitionTimer=0;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;playerHP=skinMaxHP();invincibleTimer=0;
  if(spaceHellArea===1){spaceHellRound=0;generateSpaceHellPattern();player.x=435;player.y=388;spaceHellMessage="CHECKPOINT 01";}
- else if(spaceHellArea===2){player.x=115;player.y=1358;spaceHellVoidY=1480;spaceHellClimbCamera=1058;spaceHellClimbTime=0;spaceHellMessage="CHECKPOINT 02";}else if(spaceHellArea===3){resetSpaceHellComboPlatforms();player.x=65;player.y=388;spaceHellComboCamera=0;spaceHellComboTime=0;spaceHellMessage="CHECKPOINT 03";}else{resetSpaceHellShooting();player.x=75;player.y=350;spaceHellShootAimZ=.5;spaceHellShootCamera=0;spaceHellShootTime=0;spaceHellMessage="CHECKPOINT 04";}
+ else if(spaceHellArea===2){player.x=115;player.y=1358;spaceHellVoidY=1480;spaceHellClimbCamera=1058;spaceHellClimbTime=0;spaceHellMessage="CHECKPOINT 02";}else if(spaceHellArea===3){resetSpaceHellComboPlatforms();player.x=65;player.y=388;spaceHellComboCamera=0;spaceHellComboTime=0;spaceHellMessage="CHECKPOINT 03";}else if(spaceHellArea===4){resetSpaceHellShooting();player.x=75;player.y=350;spaceHellShootAimZ=.5;spaceHellShootCamera=0;spaceHellShootTime=0;spaceHellMessage="CHECKPOINT 04";}else{resetSpaceHellFortress();player.x=65;player.y=388;spaceHellMessage="CHECKPOINT 05";}
  spaceHellMessageTimer=85;saveGame();
 }
 function startSpaceHellArea2(){
@@ -1197,7 +1197,7 @@ function drawSpaceHellShooting(){
  if(spaceHellDeathTimer>0){ctx.fillStyle="rgba(0,0,0,.72)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff5267";ctx.font="900 34px sans-serif";ctx.fillText("RETRY",W/2,H/2);ctx.fillStyle="#fff";ctx.font="bold 16px sans-serif";ctx.fillText("CHECKPOINT 04",W/2,H/2+30);}
  if(spaceHellShootCleared){ctx.fillStyle="rgba(0,0,0,.78)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff8794";ctx.font="900 34px sans-serif";ctx.fillText("AREA 4 CLEAR",W/2,H/2-18);ctx.fillStyle="#fff";ctx.font="bold 16px sans-serif";ctx.fillText("3 KEYS COLLECTED",W/2,H/2+22);}
 }
-function resetSpaceHellFortress(){spaceHellFortressTime=0;spaceHellFortressCamera=0;spaceHellFortressDragonHP=6;spaceHellFortressDragonAlive=true;spaceHellFortressShots=[];spaceHellFortressCleared=false;spaceHellFortressEnemies.forEach(e=>{e.alive=true;e.hp=e.baseHP||e.hp;e.x=e.baseX;e.dir=-1;});}
+function resetSpaceHellFortress(){spaceHellFortressTime=0;spaceHellFortressCamera=0;spaceHellFortressDragonHP=6;spaceHellFortressDragonAlive=true;spaceHellFortressShots=[];spaceHellFortressCleared=false;spaceHellFortressEnemies.forEach(e=>{e.alive=true;e.hp=e.baseHP;e.x=e.baseX;e.dir=-1;});}
 function startSpaceHellArea5(){spaceHellArea=5;spaceHellCheckpoint=5;spaceHellDeathTimer=0;spaceHellTransitionTimer=0;resetSpaceHellFortress();player.x=65;player.y=388;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;playerHP=skinMaxHP();spaceHellMessage="AREA 5 : DEMON FORTRESS";spaceHellMessageTimer=140;saveGame();}
 function spaceHellFortressHit(){
  if(spaceHellArea!==5||spaceHellDeathTimer>0||attackCooldown>0)return;attackCooldown=20;attackTimer=12;
