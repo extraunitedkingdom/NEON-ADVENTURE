@@ -781,7 +781,7 @@ document.getElementById("closeEquipment").onclick=closeEquipment;
 document.getElementById("equipmentPanel").addEventListener("click",e=>{if(e.target.id==="equipmentPanel")closeEquipment()});
 
 function saveGame(){
- const data={version:9,spaceHellArea,spaceHellRound,spaceHellPattern,spaceHellCheckpoint,spaceHellCleared,gameStats,achievementUnlocked,achievementTotalCoins,achievementEnemyKills,bossDefeatCount,claimedWorldRewards,appearanceBackground,appearanceEmoji,appearanceCharacter,playerName,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ const data={version:10,spaceHellArea,spaceHellRound,spaceHellPattern,spaceHellCheckpoint,spaceHellCleared,spaceHellClimbCamera,spaceHellVoidY,spaceHellClimbTime,gameStats,achievementUnlocked,achievementTotalCoins,achievementEnemyKills,bossDefeatCount,claimedWorldRewards,appearanceBackground,appearanceEmoji,appearanceCharacter,playerName,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
  try{localStorage.setItem("gameSave",JSON.stringify(data));return true}catch(e){console.error("セーブに失敗しました",e);return false}
 }
 function loadGame(){
@@ -805,14 +805,14 @@ function loadGame(){
  ownedEquipment=Array.isArray(d.ownedEquipment)?d.ownedEquipment:ownedEquipment;
  equippedEquipment=d.equippedEquipment&&typeof d.equippedEquipment==="object"?{...equippedEquipment,...d.equippedEquipment}:equippedEquipment;
  if(worldNumber===2)loadWorld2();else if(worldNumber===3)loadWorld3();else if(worldNumber===4)loadWorld4();else if(worldNumber===5)loadSpaceHell();
- if(worldNumber===5){spaceHellArea=Number.isInteger(d.spaceHellArea)?Math.max(1,d.spaceHellArea):1;spaceHellRound=Number.isInteger(d.spaceHellRound)?Math.max(0,Math.min(5,d.spaceHellRound)):0;generateSpaceHellPattern();spaceHellCheckpoint=Number.isInteger(d.spaceHellCheckpoint)?Math.max(1,d.spaceHellCheckpoint):1;spaceHellCleared=!!d.spaceHellCleared||spaceHellRound>=5;gameClear=spaceHellCleared;}
+ if(worldNumber===5){spaceHellArea=Number.isInteger(d.spaceHellArea)?Math.max(1,Math.min(2,d.spaceHellArea)):1;spaceHellRound=Number.isInteger(d.spaceHellRound)?Math.max(0,Math.min(5,d.spaceHellRound)):0;generateSpaceHellPattern();spaceHellCheckpoint=Number.isInteger(d.spaceHellCheckpoint)?Math.max(1,d.spaceHellCheckpoint):1;spaceHellClimbCamera=Number.isFinite(d.spaceHellClimbCamera)?Math.max(0,Math.min(1058,d.spaceHellClimbCamera)):1058;spaceHellVoidY=Number.isFinite(d.spaceHellVoidY)?d.spaceHellVoidY:1480;spaceHellClimbTime=Number.isFinite(d.spaceHellClimbTime)?d.spaceHellClimbTime:0;spaceHellCleared=!!d.spaceHellCleared;gameClear=spaceHellCleared;}
  checkpoint4=!!d.checkpoint4;
  if(Array.isArray(d.coins))coins.forEach((c,i)=>{if(i<d.coins.length)c.taken=!!d.coins[i]});
  if(Array.isArray(d.enemyAlive))enemies.forEach((e,i)=>{if(i<d.enemyAlive.length)e.alive=d.enemyAlive[i]!==false});
  if(Number.isFinite(d.bossHP))boss.hp=Math.max(0,Math.min(boss.maxHP,d.bossHP));
  if(typeof d.bossAlive==="boolean")boss.alive=d.bossAlive;
  bossDefeated=!!d.bossDefeated;
- if(d.player&&Number.isFinite(d.player.x)&&Number.isFinite(d.player.y)){player.x=Math.max(0,d.player.x);player.y=Math.max(-500,Math.min(H-player.h,d.player.y))}
+ if(d.player&&Number.isFinite(d.player.x)&&Number.isFinite(d.player.y)){player.x=Math.max(0,d.player.x);player.y=worldNumber===5&&spaceHellArea===2?Math.max(0,Math.min(1450,d.player.y)):Math.max(-500,Math.min(H-player.h,d.player.y))}
  if(Number.isFinite(d.playerHP))playerHP=Math.max(1,Math.min(playerMaxHP(),d.playerHP));
  gameClear=!!d.gameClear;if(worldNumber===5)gameClear=spaceHellCleared;currentTime=Number.isFinite(d.currentTime)?d.currentTime:0;
  if(gameClear)gameStart=Date.now()-currentTime*1000;
@@ -1016,13 +1016,15 @@ function finishGame(){
 /* SPACE HELL — hidden stage, first area implementation */
 let spaceHellArea=1,spaceHellRound=0,spaceHellPattern=[],spaceHellCheckpoint=1;
 let spaceHellDeathTimer=0,spaceHellTransitionTimer=0,spaceHellCleared=false;
+let spaceHellClimbCamera=0,spaceHellVoidY=1480,spaceHellClimbTime=0;
+const spaceHellClimbPlatforms=[{x:90,y:1400,w:190,h:18},{x:250,y:1290,w:170,h:18},{x:410,y:1180,w:170,h:18},{x:250,y:1070,w:170,h:18},{x:90,y:960,w:170,h:18},{x:250,y:850,w:170,h:18},{x:410,y:740,w:170,h:18},{x:250,y:630,w:170,h:18},{x:90,y:520,w:170,h:18},{x:250,y:410,w:170,h:18},{x:410,y:300,w:170,h:18},{x:250,y:190,w:170,h:18},{x:410,y:80,w:220,h:18}];
 let spaceHellMessage="",spaceHellMessageTimer=0;
 function generateSpaceHellPattern(){
  // 正解位置は固定。0=A、1=B。再挑戦・再読み込みでも同じ順番。
  spaceHellPattern=[0,1,0,1,0];
 }
 function loadSpaceHell(){
- worldNumber=5;spaceHellArea=1;spaceHellRound=0;spaceHellCheckpoint=1;
+ worldNumber=5;spaceHellArea=1;spaceHellRound=0;spaceHellCheckpoint=1;spaceHellClimbCamera=0;spaceHellVoidY=1480;spaceHellClimbTime=0;
  generateSpaceHellPattern();spaceHellDeathTimer=0;spaceHellTransitionTimer=0;
  spaceHellCleared=false;spaceHellMessage="";spaceHellMessageTimer=0;
  projectiles=[];springPads=[];lavaZones=[];stageWalls=[];windZones=[];movingPlatforms=[];vanishPlatforms=[];lightningZones=[];
@@ -1033,16 +1035,23 @@ function loadSpaceHell(){
  document.getElementById("world2Hint").textContent="SPACE HELL / HELL GATE：左右に移動して二つの扉から一つを選べ。5回連続で正解すれば突破。";
 }
 function spaceHellRespawn(){
- spaceHellRound=0;generateSpaceHellPattern();spaceHellDeathTimer=0;spaceHellTransitionTimer=0;
- player.x=435;player.y=388;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;
- playerHP=skinMaxHP();invincibleTimer=0;spaceHellMessage="CHECKPOINT 01";spaceHellMessageTimer=85;saveGame();
+ spaceHellDeathTimer=0;spaceHellTransitionTimer=0;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;playerHP=skinMaxHP();invincibleTimer=0;
+ if(spaceHellArea===1){spaceHellRound=0;generateSpaceHellPattern();player.x=435;player.y=388;spaceHellMessage="CHECKPOINT 01";}
+ else{player.x=115;player.y=1358;spaceHellVoidY=1480;spaceHellClimbCamera=1058;spaceHellClimbTime=0;spaceHellMessage="CHECKPOINT 02";}
+ spaceHellMessageTimer=85;saveGame();
 }
+function startSpaceHellArea2(){
+ spaceHellArea=2;spaceHellCheckpoint=2;spaceHellDeathTimer=0;spaceHellTransitionTimer=0;spaceHellClimbCamera=1058;spaceHellVoidY=1480;spaceHellClimbTime=0;
+ player.x=115;player.y=1358;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;spaceHellMessage="AREA 2 : THE RISING VOID";spaceHellMessageTimer=110;saveGame();
+}
+function spaceHellFall(){if(spaceHellDeathTimer>0)return;spaceHellDeathTimer=45;spaceHellMessage="THE VOID CONSUMED YOU";spaceHellMessageTimer=45;}
 function spaceHellWrongChoice(){
  if(spaceHellDeathTimer>0||spaceHellTransitionTimer>0||spaceHellCleared)return;
  playerHP=0;spaceHellDeathTimer=55;spaceHellMessage="WRONG CHOICE";spaceHellMessageTimer=55;
 }
 function updateSpaceHell(){
  if(spaceHellCleared)return;
+ if(spaceHellArea===2){updateSpaceHellClimb();return;}
  if(spaceHellDeathTimer>0){
   spaceHellDeathTimer--;
   if(spaceHellDeathTimer===0)spaceHellRespawn();
@@ -1052,7 +1061,7 @@ function updateSpaceHell(){
   spaceHellTransitionTimer--;
   if(spaceHellTransitionTimer===0){
    if(spaceHellRound>=5){
-    spaceHellCleared=true;gameClear=true;currentTime=(Date.now()-gameStart)/1000;saveGame();
+     startSpaceHellArea2();
    }else{
     player.x=435;player.y=388;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;
     spaceHellMessage="CORRECT";spaceHellMessageTimer=55;
@@ -1094,7 +1103,37 @@ function drawSpaceHellPortal(x,label){
  ctx.fillStyle="#fff0f0";ctx.font="900 25px sans-serif";ctx.textAlign="center";ctx.fillText(label,cx,y+h-17);
  ctx.restore();
 }
+function updateSpaceHellClimb(){
+ if(spaceHellDeathTimer>0){spaceHellDeathTimer--;if(spaceHellDeathTimer===0)spaceHellRespawn();return;}
+ if(spaceHellMessageTimer>0)spaceHellMessageTimer--;if(invincibleTimer>0)invincibleTimer--;spaceHellClimbTime++;
+ const speed=dashTimer>0?player.speed*2:player.speed,left=keys.ArrowLeft||keys.KeyA||touch.left,right=keys.ArrowRight||keys.KeyD||touch.right;
+ player.vx=(right?speed:0)-(left?speed:0);if(player.vx)facing=player.vx>0?1:-1;player.x=Math.max(8,Math.min(W-player.w-8,player.x+player.vx));
+ const oldY=player.y;player.vy=Math.min(13,player.vy+.48);player.y+=player.vy;player.grounded=false;
+ for(const p of spaceHellClimbPlatforms)if(player.vy>=0&&oldY+player.h<=p.y+3&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;}
+ spaceHellVoidY-=.34;if(player.y+player.h>=spaceHellVoidY){spaceHellFall();return;}
+ if(player.y<42){spaceHellCleared=true;gameClear=true;currentTime=(Date.now()-gameStart)/1000;spaceHellMessage="AREA 2 CLEAR";spaceHellMessageTimer=120;saveGame();return;}
+ spaceHellClimbCamera=Math.max(0,Math.min(1058,player.y-300));
+}
+function drawSpaceHellClimb(){
+ ctx.clearRect(0,0,W,H);const cam=spaceHellClimbCamera;
+ const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#030308");sky.addColorStop(.55,"#18030b");sky.addColorStop(1,"#35050c");ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+ for(let i=0;i<105;i++){const x=(i*97)%W,y=(i*53)%H;ctx.fillStyle=i%6===0?"#ff5b70":"#b9a8b4";ctx.globalAlpha=.25+(i%4)*.12;ctx.fillRect(x,y,1+(i%3),1+(i%3));}ctx.globalAlpha=1;
+ ctx.fillStyle="#10070d";ctx.beginPath();ctx.arc(720,105,78,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#8e1a31";ctx.lineWidth=4;ctx.beginPath();ctx.ellipse(720,105,118,26,-.2,0,Math.PI*2);ctx.stroke();
+ ctx.save();ctx.translate(0,-cam);
+ for(let i=0;i<12;i++){const x=i*82-20,h=75+(i%4)*28;ctx.fillStyle=i%2?"#16070d":"#21080f";ctx.beginPath();ctx.moveTo(x,1480);ctx.lineTo(x+18,1480-h);ctx.lineTo(x+45,1480-h-20);ctx.lineTo(x+73,1480-h+8);ctx.lineTo(x+100,1480);ctx.closePath();ctx.fill();}
+ for(const p of spaceHellClimbPlatforms){ctx.fillStyle="#18080e";ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle="#8e1c31";ctx.fillRect(p.x,p.y,p.w,5);ctx.fillStyle="#ff5268";ctx.globalAlpha=.65;ctx.fillRect(p.x+8,p.y+5,p.w-16,2);ctx.globalAlpha=1;}
+ ctx.fillStyle="#fff0f2";ctx.font="900 22px sans-serif";ctx.textAlign="center";ctx.fillText("EXIT",520,58);
+ ctx.save();ctx.translate(player.x+player.w/2,player.y);ctx.shadowColor=playerSkin;ctx.shadowBlur=13;ctx.fillStyle=playerSkin;ctx.fillRect(-12,13,24,21);ctx.shadowBlur=0;ctx.fillStyle="#f1c9b6";ctx.fillRect(-10,-3,20,18);ctx.fillStyle="#111827";ctx.fillRect(-12,-7,24,7);ctx.fillStyle="#fff";ctx.fillRect(-7,5,4,3);ctx.fillRect(3,5,4,3);ctx.fillStyle="#142034";ctx.fillRect(-9,34,7,9);ctx.fillRect(2,34,7,9);ctx.restore();
+ const vy=spaceHellVoidY,grad=ctx.createLinearGradient(0,vy-cam,0,H);grad.addColorStop(0,"rgba(255,28,54,.96)");grad.addColorStop(.12,"rgba(90,0,17,.98)");grad.addColorStop(1,"#030205");ctx.fillStyle=grad;ctx.fillRect(0,vy-cam,W,H-(vy-cam));ctx.shadowColor="#ff183d";ctx.shadowBlur=22;ctx.fillStyle="#ff294b";ctx.fillRect(0,vy-cam-5,W,6);ctx.shadowBlur=0;
+ for(let i=0;i<18;i++){const x=(i*61+(spaceHellClimbTime*2.2)%61)%W;ctx.fillStyle="rgba(255,105,120,.65)";ctx.fillRect(x,vy-cam-12-(i%3)*7,3,7);}ctx.restore();
+ ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="900 22px sans-serif";ctx.shadowColor="#ff203e";ctx.shadowBlur=14;ctx.fillText("SPACE HELL",W/2,34);ctx.shadowBlur=0;ctx.font="bold 16px sans-serif";ctx.fillStyle="#ffdce0";ctx.fillText("AREA 2 : THE RISING VOID",W/2,60);ctx.font="13px sans-serif";ctx.fillStyle="#ffc6cc";ctx.fillText("足場をジャンプして上へ！ 黒い虚無に触れるな！",W/2,84);
+ ctx.textAlign="left";ctx.font="bold 14px sans-serif";ctx.fillStyle="#fff";ctx.fillText("HP: "+"♥".repeat(Math.max(0,playerHP)),18,25);ctx.textAlign="right";ctx.fillStyle="#ffd4d9";ctx.fillText("CHECKPOINT 02",W-18,25);
+ if(spaceHellMessageTimer>0&&spaceHellDeathTimer===0){ctx.textAlign="center";ctx.font="900 20px sans-serif";ctx.fillStyle="#fff";ctx.shadowColor="#ff3048";ctx.shadowBlur=15;ctx.fillText(spaceHellMessage,W/2,125);ctx.shadowBlur=0;}
+ if(spaceHellDeathTimer>0){ctx.fillStyle="rgba(0,0,0,.72)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff5267";ctx.font="900 34px sans-serif";ctx.fillText("THE VOID",W/2,H/2-8);ctx.fillStyle="#fff";ctx.font="bold 16px sans-serif";ctx.fillText("CHECKPOINT RESTART",W/2,H/2+28);}
+ if(spaceHellCleared){ctx.fillStyle="rgba(0,0,0,.78)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff8794";ctx.font="900 38px sans-serif";ctx.fillText("AREA 2 CLEAR",W/2,H/2-25);ctx.fillStyle="#fff";ctx.font="bold 18px sans-serif";ctx.fillText("THE RISING VOID CONQUERED",W/2,H/2+15);}
+}
 function drawSpaceHell(){
+ if(spaceHellArea===2){drawSpaceHellClimb();return;}
  ctx.clearRect(0,0,W,H);
  const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#05040a");sky.addColorStop(.48,"#19050d");sky.addColorStop(1,"#31070d");ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
  for(let i=0;i<95;i++){
