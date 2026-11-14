@@ -805,7 +805,7 @@ function loadGame(){
  ownedEquipment=Array.isArray(d.ownedEquipment)?d.ownedEquipment:ownedEquipment;
  equippedEquipment=d.equippedEquipment&&typeof d.equippedEquipment==="object"?{...equippedEquipment,...d.equippedEquipment}:equippedEquipment;
  if(worldNumber===2)loadWorld2();else if(worldNumber===3)loadWorld3();else if(worldNumber===4)loadWorld4();else if(worldNumber===5)loadSpaceHell();
- if(worldNumber===5){spaceHellArea=Number.isInteger(d.spaceHellArea)?Math.max(1,d.spaceHellArea):1;spaceHellRound=Number.isInteger(d.spaceHellRound)?Math.max(0,Math.min(5,d.spaceHellRound)):0;spaceHellPattern=Array.isArray(d.spaceHellPattern)&&d.spaceHellPattern.length===5&&d.spaceHellPattern.every(v=>v===0||v===1)?d.spaceHellPattern.slice():spaceHellPattern;spaceHellCheckpoint=Number.isInteger(d.spaceHellCheckpoint)?Math.max(1,d.spaceHellCheckpoint):1;spaceHellCleared=!!d.spaceHellCleared||spaceHellRound>=5;gameClear=spaceHellCleared;}
+ if(worldNumber===5){spaceHellArea=Number.isInteger(d.spaceHellArea)?Math.max(1,d.spaceHellArea):1;spaceHellRound=Number.isInteger(d.spaceHellRound)?Math.max(0,Math.min(5,d.spaceHellRound)):0;generateSpaceHellPattern();spaceHellCheckpoint=Number.isInteger(d.spaceHellCheckpoint)?Math.max(1,d.spaceHellCheckpoint):1;spaceHellCleared=!!d.spaceHellCleared||spaceHellRound>=5;gameClear=spaceHellCleared;}
  checkpoint4=!!d.checkpoint4;
  if(Array.isArray(d.coins))coins.forEach((c,i)=>{if(i<d.coins.length)c.taken=!!d.coins[i]});
  if(Array.isArray(d.enemyAlive))enemies.forEach((e,i)=>{if(i<d.enemyAlive.length)e.alive=d.enemyAlive[i]!==false});
@@ -1018,7 +1018,8 @@ let spaceHellArea=1,spaceHellRound=0,spaceHellPattern=[],spaceHellCheckpoint=1;
 let spaceHellDeathTimer=0,spaceHellTransitionTimer=0,spaceHellCleared=false;
 let spaceHellMessage="",spaceHellMessageTimer=0;
 function generateSpaceHellPattern(){
- spaceHellPattern=Array.from({length:5},()=>Math.random()<0.5?0:1);
+ // 正解位置は固定。0=A、1=B。再挑戦・再読み込みでも同じ順番。
+ spaceHellPattern=[0,1,0,1,0];
 }
 function loadSpaceHell(){
  worldNumber=5;spaceHellArea=1;spaceHellRound=0;spaceHellCheckpoint=1;
