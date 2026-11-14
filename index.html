@@ -1110,7 +1110,7 @@ function drawSpaceHellPortal(x,label){
 }
 function updateSpaceHellClimb(){
  if(spaceHellDeathTimer>0){spaceHellDeathTimer--;if(spaceHellDeathTimer===0)spaceHellRespawn();return;}
- if(spaceHellMessageTimer>0)spaceHellMessageTimer--;if(invincibleTimer>0)invincibleTimer--;spaceHellClimbTime++;
+ if(spaceHellMessageTimer>0)spaceHellMessageTimer--;if(invincibleTimer>0)invincibleTimer--;spaceHellClimbTime++;if(spaceHellClimbTime%180===0)saveGame();
  const speed=dashTimer>0?player.speed*2:player.speed,left=keys.ArrowLeft||keys.KeyA||touch.left,right=keys.ArrowRight||keys.KeyD||touch.right;
  player.vx=(right?speed:0)-(left?speed:0);if(player.vx)facing=player.vx>0?1:-1;player.x=Math.max(8,Math.min(W-player.w-8,player.x+player.vx));
  const oldY=player.y;player.vy=Math.min(13,player.vy+.48);player.y+=player.vy;player.grounded=false;
@@ -1121,7 +1121,7 @@ function updateSpaceHellClimb(){
 }
 function updateSpaceHellCombo(){
  if(spaceHellDeathTimer>0){spaceHellDeathTimer--;if(spaceHellDeathTimer===0)spaceHellRespawn();return;}
- if(spaceHellMessageTimer>0)spaceHellMessageTimer--;if(invincibleTimer>0)invincibleTimer--;spaceHellComboTime++;
+ if(spaceHellMessageTimer>0)spaceHellMessageTimer--;if(invincibleTimer>0)invincibleTimer--;spaceHellComboTime++;if(spaceHellComboTime%180===0)saveGame();
  const speed=dashTimer>0?player.speed*2:player.speed,left=keys.ArrowLeft||keys.KeyA||touch.left,right=keys.ArrowRight||keys.KeyD||touch.right;
  player.vx=(right?speed:0)-(left?speed:0);if(player.vx)facing=player.vx>0?1:-1;player.x=Math.max(0,Math.min(2600,player.x+player.vx));
  const oldY=player.y;player.vy=Math.min(14,player.vy+.5);player.y+=player.vy;player.grounded=false;
