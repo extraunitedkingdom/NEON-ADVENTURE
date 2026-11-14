@@ -405,13 +405,18 @@ body>h1{display:none}
 #onlinePanel .online-current-room p{white-space:pre-line;overflow-wrap:anywhere;color:#d8edff}
 #onlinePanel .online-current-room button{width:100%;border-color:#ff8d9d;background:#642b4b}
 @media(max-width:480px){#onlinePanel .online-room-actions{grid-template-columns:1fr}#onlinePanel .online-shell{padding:16px}}
+
+/* SPACE HELL secret entrance */
+#home #spaceHellSecret{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:8;display:block;width:16%;height:24%;min-height:0;max-width:170px;margin:0;padding:0;border:1px solid transparent;border-radius:50%;background:transparent;box-shadow:none;opacity:0;letter-spacing:0;cursor:pointer;touch-action:manipulation}
+#home #spaceHellSecret:before{inset:0;border-color:transparent}
+#home #spaceHellSecret:focus-visible{opacity:1;outline:3px solid #ff5267;outline-offset:4px;background:rgba(255,35,55,.12);box-shadow:0 0 24px #ff1d3d}
 </style>
 </head>
 <body>
 <h1>NEON ADVENTURE</h1>
 <div id="home">
 <h2>WELCOME TO THE WORLD</h2>
-<div class="title-lockup adventure-emblem" role="img" aria-label="上部にNEON ADVENTUREのタイトル、中央に主人公、周囲に4つの世界を配置したロゴ">
+<div class="title-lockup adventure-emblem" role="group" aria-label="NEON ADVENTUREのロゴ。中央をタップすると隠しステージへ進みます。">
 <svg class="adventure-logo-art" viewBox="0 0 1536 768" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
 <defs>
  <linearGradient id="nTitle" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#eaffff"/><stop offset=".18" stop-color="#00eaff"/><stop offset=".48" stop-color="#087dff"/><stop offset=".72" stop-color="#a42bff"/><stop offset="1" stop-color="#ff29d8"/></linearGradient>
@@ -538,6 +543,7 @@ body>h1{display:none}
  <path d="M490 526H1046" stroke="#ffbaff" stroke-width="2"/>
 </g>
 </svg>
+<button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
 <p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.28</p>
 <div class="home-buttons">
@@ -775,7 +781,7 @@ document.getElementById("closeEquipment").onclick=closeEquipment;
 document.getElementById("equipmentPanel").addEventListener("click",e=>{if(e.target.id==="equipmentPanel")closeEquipment()});
 
 function saveGame(){
- const data={version:8,gameStats,achievementUnlocked,achievementTotalCoins,achievementEnemyKills,bossDefeatCount,claimedWorldRewards,appearanceBackground,appearanceEmoji,appearanceCharacter,playerName,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
+ const data={version:9,spaceHellArea,spaceHellRound,spaceHellPattern,spaceHellCheckpoint,spaceHellCleared,gameStats,achievementUnlocked,achievementTotalCoins,achievementEnemyKills,bossDefeatCount,claimedWorldRewards,appearanceBackground,appearanceEmoji,appearanceCharacter,playerName,adminUnlocked,adminMode,worldNumber,world2Unlocked,world2Cleared,world3Unlocked,world3Cleared,world4Unlocked,world4Cleared,checkpoint4,coinCount,stageCleared,bestTime,timeRecords,player:{x:player.x,y:player.y},playerHP,playerSkin,ownedSkins,ownedEquipment,equippedEquipment,coins:coins.map(c=>!!c.taken),enemyAlive:enemies.map(e=>!!e.alive),bossHP:boss.hp,bossAlive:boss.alive,bossDefeated,gameClear,currentTime};
  try{localStorage.setItem("gameSave",JSON.stringify(data));return true}catch(e){console.error("セーブに失敗しました",e);return false}
 }
 function loadGame(){
@@ -788,7 +794,7 @@ function loadGame(){
  appearanceBackground=typeof d.appearanceBackground==="string"?d.appearanceBackground:"default";appearanceEmoji=typeof d.appearanceEmoji==="string"?d.appearanceEmoji:"";appearanceCharacter=typeof d.appearanceCharacter==="string"?d.appearanceCharacter:"boy";playerName=typeof d.playerName==="string"&&d.playerName.trim()?Array.from(d.playerName.trim()).slice(0,16).join(""):"PLAYER";
  coinCount=Number.isFinite(d.coinCount)?d.coinCount:coinCount;
  adminUnlocked=!!d.adminUnlocked;adminMode=adminUnlocked&&!!d.adminMode;adminStatsOverride=adminMode?getRealStatisticsValues():null;floatMode=false;
- worldNumber=[1,2,3,4].includes(d.worldNumber)?d.worldNumber:1;
+ worldNumber=[1,2,3,4,5].includes(d.worldNumber)?d.worldNumber:1;
  world2Unlocked=!!d.world2Unlocked;world2Cleared=!!d.world2Cleared;
  world3Unlocked=!!d.world3Unlocked;world3Cleared=!!d.world3Cleared;
  world4Unlocked=!!d.world4Unlocked;world4Cleared=!!d.world4Cleared;
@@ -798,7 +804,8 @@ function loadGame(){
  ownedSkins=Array.isArray(d.ownedSkins)?d.ownedSkins:ownedSkins;
  ownedEquipment=Array.isArray(d.ownedEquipment)?d.ownedEquipment:ownedEquipment;
  equippedEquipment=d.equippedEquipment&&typeof d.equippedEquipment==="object"?{...equippedEquipment,...d.equippedEquipment}:equippedEquipment;
- if(worldNumber===2)loadWorld2();else if(worldNumber===3)loadWorld3();else if(worldNumber===4)loadWorld4();
+ if(worldNumber===2)loadWorld2();else if(worldNumber===3)loadWorld3();else if(worldNumber===4)loadWorld4();else if(worldNumber===5)loadSpaceHell();
+ if(worldNumber===5){spaceHellArea=Number.isInteger(d.spaceHellArea)?Math.max(1,d.spaceHellArea):1;spaceHellRound=Number.isInteger(d.spaceHellRound)?Math.max(0,Math.min(5,d.spaceHellRound)):0;spaceHellPattern=Array.isArray(d.spaceHellPattern)&&d.spaceHellPattern.length===5&&d.spaceHellPattern.every(v=>v===0||v===1)?d.spaceHellPattern.slice():spaceHellPattern;spaceHellCheckpoint=Number.isInteger(d.spaceHellCheckpoint)?Math.max(1,d.spaceHellCheckpoint):1;spaceHellCleared=!!d.spaceHellCleared||spaceHellRound>=5;gameClear=spaceHellCleared;}
  checkpoint4=!!d.checkpoint4;
  if(Array.isArray(d.coins))coins.forEach((c,i)=>{if(i<d.coins.length)c.taken=!!d.coins[i]});
  if(Array.isArray(d.enemyAlive))enemies.forEach((e,i)=>{if(i<d.enemyAlive.length)e.alive=d.enemyAlive[i]!==false});
@@ -1005,7 +1012,120 @@ function finishGame(){
  localStorage.setItem("timeRecords",JSON.stringify(timeRecords));checkAchievements();saveGame();
  saveGame();document.getElementById("clearTitle").textContent="WORLD "+worldNumber+" CLEAR!";document.getElementById("worldRewardText").textContent=claimedWorldRewards.includes(clearedWorld)?"WORLD CLEAR REWARD  +"+reward+" COINS"+(reward===clearedWorld*50?"":""):"";document.getElementById("clearPanel").style.display="block";document.getElementById("nextStageButton").style.display=worldNumber<4?"inline-block":"none";
 }
+
+/* SPACE HELL — hidden stage, first area implementation */
+let spaceHellArea=1,spaceHellRound=0,spaceHellPattern=[],spaceHellCheckpoint=1;
+let spaceHellDeathTimer=0,spaceHellTransitionTimer=0,spaceHellCleared=false;
+let spaceHellMessage="",spaceHellMessageTimer=0;
+function generateSpaceHellPattern(){
+ spaceHellPattern=Array.from({length:5},()=>Math.random()<0.5?0:1);
+}
+function loadSpaceHell(){
+ worldNumber=5;spaceHellArea=1;spaceHellRound=0;spaceHellCheckpoint=1;
+ generateSpaceHellPattern();spaceHellDeathTimer=0;spaceHellTransitionTimer=0;
+ spaceHellCleared=false;spaceHellMessage="";spaceHellMessageTimer=0;
+ projectiles=[];springPads=[];lavaZones=[];stageWalls=[];windZones=[];movingPlatforms=[];vanishPlatforms=[];lightningZones=[];
+ platforms=[];enemies=[];coins=[];goal={x:0,y:0,w:0,h:0};boss={x:0,y:0,w:0,h:0,hp:0,maxHP:0,alive:false};
+ player.x=435;player.y=388;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;
+ playerHP=skinMaxHP();camera=0;bossDefeated=false;gameClear=false;stageCleared=false;currentTime=0;gameStart=Date.now();
+ document.querySelector(".stage-top p").textContent="SPACE HELL : HELL GATE";
+ document.getElementById("world2Hint").textContent="SPACE HELL / HELL GATE：左右に移動して二つの扉から一つを選べ。5回連続で正解すれば突破。";
+}
+function spaceHellRespawn(){
+ spaceHellRound=0;generateSpaceHellPattern();spaceHellDeathTimer=0;spaceHellTransitionTimer=0;
+ player.x=435;player.y=388;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;
+ playerHP=skinMaxHP();invincibleTimer=0;spaceHellMessage="CHECKPOINT 01";spaceHellMessageTimer=85;saveGame();
+}
+function spaceHellWrongChoice(){
+ if(spaceHellDeathTimer>0||spaceHellTransitionTimer>0||spaceHellCleared)return;
+ playerHP=0;spaceHellDeathTimer=55;spaceHellMessage="WRONG CHOICE";spaceHellMessageTimer=55;
+}
+function updateSpaceHell(){
+ if(spaceHellCleared)return;
+ if(spaceHellDeathTimer>0){
+  spaceHellDeathTimer--;
+  if(spaceHellDeathTimer===0)spaceHellRespawn();
+  return;
+ }
+ if(spaceHellTransitionTimer>0){
+  spaceHellTransitionTimer--;
+  if(spaceHellTransitionTimer===0){
+   if(spaceHellRound>=5){
+    spaceHellCleared=true;gameClear=true;currentTime=(Date.now()-gameStart)/1000;saveGame();
+   }else{
+    player.x=435;player.y=388;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;
+    spaceHellMessage="CORRECT";spaceHellMessageTimer=55;
+   }
+  }
+  return;
+ }
+ if(spaceHellMessageTimer>0)spaceHellMessageTimer--;
+ if(invincibleTimer>0)invincibleTimer--;
+ const speed=dashTimer>0?player.speed*2:player.speed;
+ const left=keys.ArrowLeft||keys.KeyA||touch.left,right=keys.ArrowRight||keys.KeyD||touch.right;
+ player.vx=(right?speed:0)-(left?speed:0);
+ if(player.vx!==0)facing=player.vx>0?1:-1;
+ player.x=Math.max(22,Math.min(W-player.w-22,player.x+player.vx));
+ const oldY=player.y;
+ player.vy=Math.min(12,player.vy+0.5);player.y+=player.vy;player.grounded=false;
+ if(player.y+player.h>=430){player.y=430-player.h;player.vy=0;player.grounded=true;player.jumps=0}
+ if(player.y>H+30){spaceHellWrongChoice();return}
+ const gates=[{x:135,w:150},{x:615,w:150}];
+ for(let side=0;side<gates.length;side++){
+  const g=gates[side];
+  if(player.x+player.w>g.x&&player.x<g.x+g.w){
+   if(side===spaceHellPattern[spaceHellRound]){
+    spaceHellRound++;spaceHellTransitionTimer=30;spaceHellMessage="CORRECT";spaceHellMessageTimer=30;saveGame();
+   }else spaceHellWrongChoice();
+   break;
+  }
+ }
+}
+function drawSpaceHellPortal(x,label){
+ const y=276,w=150,h=154,cx=x+w/2,cy=y+h/2;
+ ctx.save();
+ ctx.fillStyle="rgba(28,3,12,.88)";ctx.fillRect(x,y,w,h);
+ ctx.shadowColor="#ff263f";ctx.shadowBlur=24;ctx.strokeStyle="#ff6575";ctx.lineWidth=5;ctx.strokeRect(x+3,y+3,w-6,h-6);ctx.shadowBlur=0;
+ const grad=ctx.createLinearGradient(0,y,0,y+h);grad.addColorStop(0,"rgba(255,50,70,.78)");grad.addColorStop(.5,"rgba(80,0,18,.92)");grad.addColorStop(1,"rgba(255,30,48,.72)");
+ ctx.fillStyle=grad;ctx.fillRect(x+12,y+12,w-24,h-24);
+ ctx.strokeStyle="#ffb2b8";ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(cx,cy,43,62,0,0,Math.PI*2);ctx.stroke();
+ ctx.strokeStyle="rgba(255,105,120,.8)";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(cx,cy,31,51,0,0,Math.PI*2);ctx.stroke();
+ ctx.fillStyle="#fff0f0";ctx.font="900 25px sans-serif";ctx.textAlign="center";ctx.fillText(label,cx,y+h-17);
+ ctx.restore();
+}
+function drawSpaceHell(){
+ ctx.clearRect(0,0,W,H);
+ const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,"#05040a");sky.addColorStop(.48,"#19050d");sky.addColorStop(1,"#31070d");ctx.fillStyle=sky;ctx.fillRect(0,0,W,H);
+ for(let i=0;i<95;i++){
+  const x=(i*97)%W,y=(i*53)%365,r=i%6===0?2:1;
+  ctx.fillStyle=i%5===0?"#ff9aa5":"#d9c6d0";ctx.globalAlpha=.35+(i%4)*.13;ctx.fillRect(x,y,r,r);
+ }
+ ctx.globalAlpha=1;
+ const neb=ctx.createRadialGradient(455,165,10,455,165,390);neb.addColorStop(0,"rgba(190,20,48,.38)");neb.addColorStop(1,"rgba(30,0,10,0)");ctx.fillStyle=neb;ctx.fillRect(50,-120,800,520);
+ ctx.fillStyle="#09060b";ctx.beginPath();ctx.arc(760,115,74,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#a72a43";ctx.lineWidth=5;ctx.beginPath();ctx.ellipse(760,115,112,27,-.25,0,Math.PI*2);ctx.stroke();
+ for(let i=0;i<10;i++){const x=i*105-20,h=55+(i%4)*24;ctx.fillStyle=i%2?"#16080e":"#210910";ctx.beginPath();ctx.moveTo(x,430);ctx.lineTo(x+20,430-h);ctx.lineTo(x+48,430-h-18);ctx.lineTo(x+78,430-h+8);ctx.lineTo(x+100,430);ctx.closePath();ctx.fill();ctx.strokeStyle="rgba(255,55,65,.38)";ctx.lineWidth=2;ctx.stroke()}
+ ctx.fillStyle="#10070b";ctx.fillRect(0,430,W,70);ctx.fillStyle="#6f1420";ctx.fillRect(0,430,W,6);ctx.fillStyle="#d62b3c";ctx.globalAlpha=.65;ctx.fillRect(0,438,W,2);ctx.globalAlpha=1;
+ drawSpaceHellPortal(135,"A");drawSpaceHellPortal(615,"B");
+ ctx.fillStyle="#fff";ctx.textAlign="center";ctx.font="900 24px sans-serif";ctx.shadowColor="#ff273f";ctx.shadowBlur=14;ctx.fillText("SPACE HELL",W/2,42);ctx.shadowBlur=0;
+ ctx.font="bold 16px sans-serif";ctx.fillStyle="#ffdce0";ctx.fillText("HELL GATE  /  AREA 1",W/2,69);
+ ctx.fillStyle="#fff";ctx.font="bold 17px sans-serif";ctx.fillText("TRIAL  "+Math.min(spaceHellRound+1,5)+" / 5",W/2,112);
+ ctx.font="14px sans-serif";ctx.fillStyle="#ffc6cc";ctx.fillText("左右に移動して A または B の扉を選べ",W/2,143);
+ // Player avatar
+ ctx.save();ctx.translate(player.x+player.w/2,player.y);ctx.shadowColor=playerSkin;ctx.shadowBlur=13;ctx.fillStyle=playerSkin;ctx.fillRect(-12,13,24,21);ctx.shadowBlur=0;
+ ctx.fillStyle="#f1c9b6";ctx.fillRect(-10,-3,20,18);ctx.fillStyle="#111827";ctx.fillRect(-12,-7,24,7);ctx.fillStyle="#fff";ctx.fillRect(-7,5,4,3);ctx.fillRect(3,5,4,3);ctx.fillStyle="#142034";ctx.fillRect(-9,34,7,9);ctx.fillRect(2,34,7,9);ctx.restore();
+ ctx.textAlign="left";ctx.font="bold 14px sans-serif";ctx.fillStyle="#fff";ctx.fillText("HP: "+"♥".repeat(Math.max(0,playerHP)),18,28);
+ ctx.textAlign="right";ctx.fillStyle="#ffd4d9";ctx.fillText("CHECKPOINT 01",W-18,28);
+ if(spaceHellMessageTimer>0&&!spaceHellCleared&&spaceHellDeathTimer===0){ctx.textAlign="center";ctx.font="900 22px sans-serif";ctx.fillStyle="#fff";ctx.shadowColor="#ff3048";ctx.shadowBlur=15;ctx.fillText(spaceHellMessage,W/2,210);ctx.shadowBlur=0}
+ if(spaceHellDeathTimer>0){
+  ctx.fillStyle="rgba(0,0,0,.72)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff5267";ctx.font="900 38px sans-serif";ctx.fillText("WRONG CHOICE",W/2,H/2-8);ctx.fillStyle="#fff";ctx.font="bold 17px sans-serif";ctx.fillText("INSTANT DEATH  /  CHECKPOINT RESTART",W/2,H/2+30);
+ }
+ if(spaceHellCleared){
+  ctx.fillStyle="rgba(0,0,0,.78)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff8794";ctx.font="900 40px sans-serif";ctx.fillText("AREA 1 CLEAR",W/2,H/2-28);ctx.fillStyle="#fff";ctx.font="bold 20px sans-serif";ctx.fillText("THE 1 / 32 TRIAL COMPLETE",W/2,H/2+12);ctx.fillStyle="#ffcbd1";ctx.font="15px sans-serif";ctx.fillText("AREA 2  /  COMING NEXT",W/2,H/2+48);
+ }
+}
+
 function update(){
+ if(gameStarted&&worldNumber===5&&!gameClear){updateSpaceHell();draw();requestAnimationFrame(update);return;}
  if(gameStarted&&!gameClear){
   if(worldNumber===4)updateWorld4Combat();
   if(worldNumber===4&&bossDefeated)finishGame();
@@ -1168,6 +1288,7 @@ function drawRemotePlayers(){
  }
 }
 function draw(){
+ if(worldNumber===5){drawSpaceHell();return;}
  ctx.clearRect(0,0,W,H);
  if(worldNumber===4)drawWorld4Background();
  if(worldNumber===1){
@@ -1466,6 +1587,7 @@ function applyPlayerName(){
 document.getElementById("setPlayerName").onclick=applyPlayerName;
 document.getElementById("playerNameInput").addEventListener("keydown",e=>{if(e.key==="Enter")applyPlayerName()});
 function restart(){
+ if(worldNumber===5){loadSpaceHell();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame();return;}
  document.getElementById("clearPanel").style.display="none";
  player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=skinMaxHP();
  coins.forEach(c=>c.taken=false);for(const v of vanishPlatforms){v.timer=0;v.active=true}for(const l of lightningZones){l.phase=l.phase||0} // ギミックも初期状態へ
@@ -1482,6 +1604,7 @@ document.getElementById("onlineToggle").onclick=()=>{document.getElementById("on
 document.getElementById("closeOnlinePanel").onclick=()=>{document.getElementById("onlinePanel").style.display="none";};
 document.getElementById("onlinePanel").addEventListener("click",e=>{if(e.target.id==="onlinePanel")e.currentTarget.style.display="none"});
 document.getElementById("startGame").onclick=()=>{document.getElementById("stageSelect").style.display=document.getElementById("stageSelect").style.display==="block"?"none":"block"};
+document.getElementById("spaceHellSecret").addEventListener("click",()=>{loadSpaceHell();beginSelectedWorld();});
 document.getElementById("world1Select").onclick=()=>{worldNumber=1;springPads=[];lavaZones=[];platforms=[{x:0,y:430,w:500,h:70},{x:560,y:380,w:180,h:25},{x:800,y:330,w:180,h:25},{x:1050,y:390,w:180,h:25},{x:1300,y:330,w:180,h:25},{x:1550,y:280,w:180,h:25},{x:1800,y:350,w:250,h:100},{x:2150,y:300,w:180,h:25},{x:2450,y:350,w:350,h:100}];enemies=[{x:650,y:350,w:30,h:30,min:600,max:700,dir:1,alive:true},{x:1100,y:360,w:30,h:30,min:1050,max:1200,dir:-1,alive:true},{x:1900,y:320,w:30,h:30,min:1850,max:2000,dir:1,alive:true}];coins=[{x:300,y:395,taken:false},{x:650,y:340,taken:false},{x:900,y:290,taken:false},{x:1150,y:350,taken:false},{x:1400,y:290,taken:false},{x:1650,y:240,taken:false},{x:2250,y:260,taken:false}];goal={x:2650,y:270,w:45,h:80};boss={x:2500,y:270,w:80,h:80,hp:10,maxHP:10,alive:true};bossDefeated=false;gameClear=false;stageCleared=false;player.x=80;player.y=200;player.vx=0;player.vy=0;playerHP=3;camera=0;currentTime=0;document.querySelector(".stage-top p").textContent="WORLD 1 : GREEN FOREST";beginSelectedWorld()};
 document.getElementById("world2Select").onclick=()=>{if(!world2Unlocked)return;loadWorld2();beginSelectedWorld()};
 document.getElementById("world3Select").onclick=()=>{if(!world3Unlocked)return;loadWorld3();beginSelectedWorld()};
@@ -1748,7 +1871,7 @@ document.getElementById("exportSaveCode").onclick=()=>{
 document.getElementById("importSaveCode").onclick=()=>{
  try{
   const raw=decodeURIComponent(escape(atob(document.getElementById("saveCodeText").value.trim())));
-  const payload=JSON.parse(raw);const data=payload.gameSave||payload;if(!data||typeof data!=="object"||![1,2,3,4].includes(data.worldNumber))throw new Error("invalid");
+  const payload=JSON.parse(raw);const data=payload.gameSave||payload;if(!data||typeof data!=="object"||![1,2,3,4,5].includes(data.worldNumber))throw new Error("invalid");
   localStorage.setItem("gameSave",JSON.stringify(data));if(Array.isArray(payload.usedSerialCodes))localStorage.setItem("usedSerialCodes",JSON.stringify(payload.usedSerialCodes));if(!loadGame())throw new Error("load");
   updateWorldUnlockButtons();refreshAdminUI();document.getElementById("codeMessage").textContent="セーブデータを読み込みました。ページを再読み込みしてください";
  }catch(e){document.getElementById("codeMessage").textContent="セーブコードが正しくありません";}
