@@ -1110,7 +1110,7 @@ function updateSpaceHellClimb(){
  player.vx=(right?speed:0)-(left?speed:0);if(player.vx)facing=player.vx>0?1:-1;player.x=Math.max(8,Math.min(W-player.w-8,player.x+player.vx));
  const oldY=player.y;player.vy=Math.min(13,player.vy+.48);player.y+=player.vy;player.grounded=false;
  for(const p of spaceHellClimbPlatforms)if(player.vy>=0&&oldY+player.h<=p.y+3&&player.y+player.h>=p.y&&player.x+player.w>p.x&&player.x<p.x+p.w){player.y=p.y-player.h;player.vy=0;player.grounded=true;player.jumps=0;}
- spaceHellVoidY-=.34;if(player.y+player.h>=spaceHellVoidY){spaceHellFall();return;}
+ spaceHellVoidY-=.9;if(player.y+player.h>=spaceHellVoidY){spaceHellFall();return;}
  if(player.y<42){spaceHellCleared=true;gameClear=true;currentTime=(Date.now()-gameStart)/1000;spaceHellMessage="AREA 2 CLEAR";spaceHellMessageTimer=120;saveGame();return;}
  spaceHellClimbCamera=Math.max(0,Math.min(1058,player.y-300));
 }
