@@ -814,7 +814,7 @@ function loadGame(){
  bossDefeated=!!d.bossDefeated;
  if(d.player&&Number.isFinite(d.player.x)&&Number.isFinite(d.player.y)){player.x=Math.max(0,d.player.x);player.y=Math.max(-500,Math.min(H-player.h,d.player.y))}
  if(Number.isFinite(d.playerHP))playerHP=Math.max(1,Math.min(playerMaxHP(),d.playerHP));
- gameClear=!!d.gameClear;currentTime=Number.isFinite(d.currentTime)?d.currentTime:0;
+ gameClear=!!d.gameClear;if(worldNumber===5)gameClear=spaceHellCleared;currentTime=Number.isFinite(d.currentTime)?d.currentTime:0;
  if(gameClear)gameStart=Date.now()-currentTime*1000;
  renderShop();return true;
 }
@@ -1612,7 +1612,7 @@ document.getElementById("world4Select").onclick=()=>{if(!world4Unlocked)return;l
 function beginSelectedWorld(){
  gameStats.playCount++;
  const onlineStatus=window.NEON_ONLINE?.getStatus?.();
- if(onlineStatus?.roomId){
+ if(onlineStatus?.roomId&&worldNumber!==5){
   const members=window.NEON_ONLINE?.getRoomPlayers?.()||[];
   const ordered=members.map(p=>p.uid).filter(Boolean).sort();
   const slot=Math.max(0,ordered.indexOf(onlineStatus.uid));
