@@ -545,7 +545,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.30</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.31</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -719,7 +719,7 @@ let springPads=[];
 let stageWalls=[];
 let windZones=[],movingPlatforms=[],vanishPlatforms=[],lightningZones=[];
 function loadWorld2(){
- worldNumber=2;projectiles=[];springPads=[{x:470,y:410,w:54,h:20,power:17},{x:1320,y:410,w:58,h:20,power:21}];stageWalls=[{x:1700,y:170,w:70,h:260}];player.x=80;player.y=350;player.vx=0;player.vy=0;player.jumps=0;playerHP=skinMaxHP();camera=0;
+ worldNumber=2;projectiles=[];windZones=[];movingPlatforms=[];vanishPlatforms=[];lightningZones=[];springPads=[{x:470,y:410,w:54,h:20,power:17},{x:1320,y:410,w:58,h:20,power:21}];stageWalls=[{x:1700,y:170,w:70,h:260}];player.x=80;player.y=350;player.vx=0;player.vy=0;player.jumps=0;playerHP=skinMaxHP();camera=0;
  // 基本は平地。マグマ溜まりをジャンプパッドで越え、最後は高い壁を飛び乗る構成
  platforms=[{x:0,y:430,w:470,h:70},{x:570,y:430,w:750,h:70},{x:1420,y:430,w:280,h:70},{x:1770,y:170,w:90,h:25},{x:1860,y:300,w:500,h:130},{x:2360,y:430,w:430,h:70}];
  lavaZones=[{x:470,y:455,w:100,h:45},{x:1320,y:455,w:100,h:45},{x:1700,y:455,w:60,h:45},{x:2290,y:455,w:70,h:45}];
@@ -1877,7 +1877,7 @@ document.getElementById("closeOnlinePanel").onclick=()=>{document.getElementById
 document.getElementById("onlinePanel").addEventListener("click",e=>{if(e.target.id==="onlinePanel")e.currentTarget.style.display="none"});
 document.getElementById("startGame").onclick=()=>{document.getElementById("stageSelect").style.display=document.getElementById("stageSelect").style.display==="block"?"none":"block"};
 document.getElementById("spaceHellSecret").addEventListener("click",()=>{loadSpaceHell();beginSelectedWorld();});
-document.getElementById("world1Select").onclick=()=>{worldNumber=1;springPads=[];lavaZones=[];platforms=[{x:0,y:430,w:500,h:70},{x:560,y:380,w:180,h:25},{x:800,y:330,w:180,h:25},{x:1050,y:390,w:180,h:25},{x:1300,y:330,w:180,h:25},{x:1550,y:280,w:180,h:25},{x:1800,y:350,w:250,h:100},{x:2150,y:300,w:180,h:25},{x:2450,y:350,w:350,h:100}];enemies=[{x:650,y:350,w:30,h:30,min:600,max:700,dir:1,alive:true},{x:1100,y:360,w:30,h:30,min:1050,max:1200,dir:-1,alive:true},{x:1900,y:320,w:30,h:30,min:1850,max:2000,dir:1,alive:true}];coins=[{x:300,y:395,taken:false},{x:650,y:340,taken:false},{x:900,y:290,taken:false},{x:1150,y:350,taken:false},{x:1400,y:290,taken:false},{x:1650,y:240,taken:false},{x:2250,y:260,taken:false}];goal={x:2650,y:270,w:45,h:80};boss={x:2500,y:270,w:80,h:80,hp:10,maxHP:10,alive:true};bossDefeated=false;gameClear=false;stageCleared=false;player.x=80;player.y=200;player.vx=0;player.vy=0;playerHP=3;camera=0;currentTime=0;document.querySelector(".stage-top p").textContent="WORLD 1 : GREEN FOREST";beginSelectedWorld()};
+document.getElementById("world1Select").onclick=()=>{worldNumber=1;springPads=[];lavaZones=[];stageWalls=[];windZones=[];movingPlatforms=[];vanishPlatforms=[];lightningZones=[];platforms=[{x:0,y:430,w:500,h:70},{x:560,y:380,w:180,h:25},{x:800,y:330,w:180,h:25},{x:1050,y:390,w:180,h:25},{x:1300,y:330,w:180,h:25},{x:1550,y:280,w:180,h:25},{x:1800,y:350,w:250,h:100},{x:2150,y:300,w:180,h:25},{x:2450,y:350,w:350,h:100}];enemies=[{x:650,y:350,w:30,h:30,min:600,max:700,dir:1,alive:true},{x:1100,y:360,w:30,h:30,min:1050,max:1200,dir:-1,alive:true},{x:1900,y:320,w:30,h:30,min:1850,max:2000,dir:1,alive:true}];coins=[{x:300,y:395,taken:false},{x:650,y:340,taken:false},{x:900,y:290,taken:false},{x:1150,y:350,taken:false},{x:1400,y:290,taken:false},{x:1650,y:240,taken:false},{x:2250,y:260,taken:false}];goal={x:2650,y:270,w:45,h:80};boss={x:2500,y:270,w:80,h:80,hp:10,maxHP:10,alive:true};bossDefeated=false;gameClear=false;stageCleared=false;player.x=80;player.y=200;player.vx=0;player.vy=0;playerHP=3;camera=0;currentTime=0;document.querySelector(".stage-top p").textContent="WORLD 1 : GREEN FOREST";beginSelectedWorld()};
 document.getElementById("world2Select").onclick=()=>{if(!world2Unlocked)return;loadWorld2();beginSelectedWorld()};
 document.getElementById("world3Select").onclick=()=>{if(!world3Unlocked)return;loadWorld3();beginSelectedWorld()};
 document.getElementById("world4Select").onclick=()=>{if(!world4Unlocked)return;loadWorld4();beginSelectedWorld()};
