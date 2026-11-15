@@ -545,7 +545,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.41</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.42</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -1400,9 +1400,8 @@ function drawSpaceHell(){
  ctx.font="bold 16px sans-serif";ctx.fillStyle="#ffdce0";ctx.fillText("HELL GATE  /  AREA 1",W/2,69);
  ctx.fillStyle="#fff";ctx.font="bold 17px sans-serif";ctx.fillText("TRIAL  "+Math.min(spaceHellRound+1,5)+" / 5",W/2,112);
  ctx.font="14px sans-serif";ctx.fillStyle="#ffc6cc";ctx.fillText("左右に移動して A または B の扉を選べ",W/2,143);
- // Player avatar
- ctx.save();ctx.translate(player.x+player.w/2,player.y);ctx.shadowColor=playerSkin;ctx.shadowBlur=13;ctx.fillStyle=playerSkin;ctx.fillRect(-12,13,24,21);ctx.shadowBlur=0;
- ctx.fillStyle="#f1c9b6";ctx.fillRect(-10,-3,20,18);ctx.fillStyle="#111827";ctx.fillRect(-12,-7,24,7);ctx.fillStyle="#fff";ctx.fillRect(-7,5,4,3);ctx.fillRect(3,5,4,3);ctx.fillStyle="#142034";ctx.fillRect(-9,34,7,9);ctx.fillRect(2,34,7,9);ctx.restore();
+ // 選択中のスキン・キャラクターをAREA 1でも共通描画
+ drawSpaceHellFortressPlayer(player.x,player.y);
  ctx.textAlign="left";ctx.font="bold 14px sans-serif";ctx.fillStyle="#fff";ctx.fillText("HP: "+"♥".repeat(Math.max(0,playerHP)),18,28);
  ctx.textAlign="right";ctx.fillStyle="#ffd4d9";ctx.fillText("CHECKPOINT 01",W-18,28);
  if(spaceHellMessageTimer>0&&!spaceHellCleared&&spaceHellDeathTimer===0){ctx.textAlign="center";ctx.font="900 22px sans-serif";ctx.fillStyle="#fff";ctx.shadowColor="#ff3048";ctx.shadowBlur=15;ctx.fillText(spaceHellMessage,W/2,210);ctx.shadowBlur=0}
