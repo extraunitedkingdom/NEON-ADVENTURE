@@ -545,7 +545,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.42</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.43</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -1170,8 +1170,8 @@ function drawSpaceHellClimb(){
  for(const p of spaceHellClimbPlatforms){ctx.fillStyle="#18080e";ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle="#8e1c31";ctx.fillRect(p.x,p.y,p.w,5);ctx.fillStyle="#ff5268";ctx.globalAlpha=.65;ctx.fillRect(p.x+8,p.y+5,p.w-16,2);ctx.globalAlpha=1;}
  ctx.fillStyle="#fff0f2";ctx.font="900 22px sans-serif";ctx.textAlign="center";ctx.fillText("EXIT",520,58);
  drawSpaceHellFortressPlayer(player.x,player.y);
- const vy=spaceHellVoidY,grad=ctx.createLinearGradient(0,vy-cam,0,H);grad.addColorStop(0,"rgba(255,28,54,.96)");grad.addColorStop(.12,"rgba(90,0,17,.98)");grad.addColorStop(1,"#030205");ctx.fillStyle=grad;ctx.fillRect(0,vy-cam,W,H-(vy-cam));ctx.fillStyle="rgba(3,0,8,.88)";ctx.fillRect(0,vy-cam,W,H-(vy-cam));ctx.shadowColor="#ff183d";ctx.shadowBlur=32;ctx.fillStyle="#ff294b";ctx.fillRect(0,vy-cam-9,W,13);ctx.shadowBlur=0;ctx.fillStyle="#fff0f3";ctx.font="900 20px sans-serif";ctx.textAlign="center";ctx.shadowColor="#ff183d";ctx.shadowBlur=16;ctx.fillText("THE VOID",W/2,vy-cam-19);ctx.shadowBlur=0;
- for(let i=0;i<18;i++){const x=(i*61+(spaceHellClimbTime*2.2)%61)%W;ctx.fillStyle="rgba(255,105,120,.65)";ctx.fillRect(x,vy-cam-12-(i%3)*7,3,7);}ctx.restore();
+ const vy=spaceHellVoidY,grad=ctx.createLinearGradient(0,vy,0,H+cam);grad.addColorStop(0,"rgba(255,28,54,.96)");grad.addColorStop(.12,"rgba(90,0,17,.98)");grad.addColorStop(1,"#030205");ctx.fillStyle=grad;ctx.fillRect(0,vy,W,H+cam-vy);ctx.fillStyle="rgba(3,0,8,.88)";ctx.fillRect(0,vy-cam,W,H-(vy-cam));ctx.shadowColor="#ff183d";ctx.shadowBlur=32;ctx.fillStyle="#ff294b";ctx.fillRect(0,vy-9,W,13);ctx.shadowBlur=0;ctx.fillStyle="#fff0f3";ctx.font="900 20px sans-serif";ctx.textAlign="center";ctx.shadowColor="#ff183d";ctx.shadowBlur=16;ctx.fillText("THE VOID",W/2,vy-19);ctx.shadowBlur=0;
+ for(let i=0;i<18;i++){const x=(i*61+(spaceHellClimbTime*2.2)%61)%W;ctx.fillStyle="rgba(255,105,120,.65)";ctx.fillRect(x,vy-12-(i%3)*7,3,7);}ctx.restore();
  ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="900 22px sans-serif";ctx.shadowColor="#ff203e";ctx.shadowBlur=14;ctx.fillText("SPACE HELL",W/2,34);ctx.shadowBlur=0;ctx.font="bold 16px sans-serif";ctx.fillStyle="#ffdce0";ctx.fillText("AREA 2 : THE RISING VOID",W/2,60);ctx.font="13px sans-serif";ctx.fillStyle="#ffc6cc";ctx.fillText("足場をジャンプして上へ！ 黒い虚無に触れるな！",W/2,84);
  ctx.textAlign="left";ctx.font="bold 14px sans-serif";ctx.fillStyle="#fff";ctx.fillText("HP: "+"♥".repeat(Math.max(0,playerHP)),18,25);ctx.textAlign="right";ctx.fillStyle="#ffd4d9";ctx.fillText("CHECKPOINT 02",W-18,25);
  if(spaceHellMessageTimer>0&&spaceHellDeathTimer===0){ctx.textAlign="center";ctx.font="900 20px sans-serif";ctx.fillStyle="#fff";ctx.shadowColor="#ff3048";ctx.shadowBlur=15;ctx.fillText(spaceHellMessage,W/2,125);ctx.shadowBlur=0;}
