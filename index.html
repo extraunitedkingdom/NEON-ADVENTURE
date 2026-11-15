@@ -545,7 +545,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.34</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.35</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -1273,7 +1273,7 @@ function spaceHellFortressHit(){
  const hitX=player.x-70,hitW=player.w+140,hitY=player.y-15,hitH=player.h+30;
  const hit=(x,y,w,h)=>hitX<x+w&&hitX+hitW>x&&hitY<y+h&&hitY+hitH>y;
  for(const e of spaceHellFortressEnemies){if(!e.alive)continue;if(hit(e.x,e.y,36,44)){e.hp--;if(e.hp<=0){e.alive=false;achievementEnemyKills++;checkAchievements();}return;}}
- if(spaceHellFortressDragonAlive&&hit(1840,382,120,48)){spaceHellFortressDragonHP--;if(spaceHellFortressDragonHP<=0){spaceHellFortressDragonAlive=false;spaceHellMessage="DRAGON DEFEATED";spaceHellMessageTimer=90;}}
+ if(spaceHellFortressDragonAlive&&hit(1838,365,128,65)){spaceHellFortressDragonHP--;if(spaceHellFortressDragonHP<=0){spaceHellFortressDragonAlive=false;spaceHellMessage="DRAGON DEFEATED";spaceHellMessageTimer=90;}}
 }
 function spaceHellFortressFire(){
  if(spaceHellArea!==5||spaceHellDeathTimer>0||shotCooldown>0)return;shotCooldown=18;
@@ -1289,10 +1289,10 @@ function updateSpaceHellFortress(){
  const oldY=player.y;player.vy=Math.min(13,player.vy+.52);player.y+=player.vy;player.grounded=false;
  if(oldY+player.h<=430&&player.y+player.h>=430){player.y=430-player.h;player.vy=0;player.grounded=true;player.jumps=0;}
  for(const e of spaceHellFortressEnemies){if(!e.alive)continue;e.x+=e.speed*e.dir;if(e.x<e.baseX-115||e.x>e.baseX+35)e.dir*=-1;if(player.x<e.x+36&&player.x+player.w>e.x&&player.y<e.y+44&&player.y+player.h>e.y&&invincibleTimer===0){playerHP=Math.max(0,playerHP-1);gameStats.totalDamageTaken++;invincibleTimer=70;if(playerHP<=0){spaceHellFall();return;}}}
- const dragonX=1840,dragonY=382;
+ const dragonX=1838,dragonY=365,dragonW=128,dragonH=65;
  for(const b of spaceHellFortressShots){b.x+=b.vx;b.life--;
   for(const e of spaceHellFortressEnemies){if(e.alive&&b.x>=e.x&&b.x<=e.x+36&&b.y>=e.y&&b.y<=e.y+44){e.hp--;b.life=0;if(e.hp<=0){e.alive=false;achievementEnemyKills++;checkAchievements();}break;}}
-  if(b.life>0&&spaceHellFortressDragonAlive&&b.x>=dragonX&&b.x<=dragonX+120&&b.y>=dragonY&&b.y<=dragonY+48){spaceHellFortressDragonHP--;b.life=0;if(spaceHellFortressDragonHP<=0){spaceHellFortressDragonAlive=false;spaceHellMessage="DRAGON DEFEATED";spaceHellMessageTimer=90;}}
+  if(b.life>0&&spaceHellFortressDragonAlive&&b.x>=dragonX&&b.x<=dragonX+dragonW&&b.y>=dragonY&&b.y<=dragonY+dragonH){spaceHellFortressDragonHP--;b.life=0;if(spaceHellFortressDragonHP<=0){spaceHellFortressDragonAlive=false;spaceHellMessage="DRAGON DEFEATED";spaceHellMessageTimer=90;}}
  }
  spaceHellFortressShots=spaceHellFortressShots.filter(b=>b.life>0&&b.x>=0&&b.x<2600);
  if(player.y>H+30){spaceHellFall();return;}
@@ -1335,7 +1335,7 @@ function drawSpaceHellFortress(){
  ctx.fillStyle="#170912";ctx.fillRect(170,175,2180,255);for(let x=180;x<2370;x+=180){ctx.fillStyle="#260b18";ctx.fillRect(x,125,75,305);ctx.beginPath();ctx.moveTo(x-12,125);ctx.lineTo(x+37,65);ctx.lineTo(x+87,125);ctx.fill();ctx.strokeStyle="#a62b43";ctx.lineWidth=3;ctx.strokeRect(x,175,75,255);}
  ctx.fillStyle="#571323";ctx.fillRect(0,430,2500,70);ctx.fillStyle="#e13b53";ctx.fillRect(0,430,2500,5);
  for(const e of spaceHellFortressEnemies){if(!e.alive)continue;ctx.save();ctx.translate(e.x,e.y);ctx.fillStyle="#9d263b";ctx.shadowColor="#ff3155";ctx.shadowBlur=9;ctx.fillRect(3,10,30,30);ctx.fillStyle="#4b101d";ctx.fillRect(0,0,36,18);ctx.fillStyle="#ffe2a0";ctx.fillRect(8,6,5,4);ctx.fillRect(23,6,5,4);ctx.fillStyle="#e5a4a4";ctx.fillRect(4,37,10,7);ctx.fillRect(22,37,10,7);if(e.hp>1){ctx.fillStyle="#ffd6dc";ctx.font="11px sans-serif";ctx.fillText("2",15,-4);}ctx.restore();}
- if(spaceHellFortressDragonAlive){const dx=1900,dy=382;ctx.save();ctx.translate(dx,dy);ctx.shadowColor="#ff315d";ctx.shadowBlur=22;ctx.fillStyle="#5b1428";ctx.fillRect(-43,24,18,20);ctx.fillRect(25,24,18,20);ctx.fillStyle="#8f1937";ctx.beginPath();ctx.moveTo(-55,20);ctx.lineTo(-48,-5);ctx.lineTo(-22,-24);ctx.lineTo(24,-22);ctx.lineTo(49,-5);ctx.lineTo(62,17);ctx.lineTo(42,30);ctx.lineTo(-42,30);ctx.closePath();ctx.fill();ctx.fillStyle="#e85a70";ctx.beginPath();ctx.ellipse(0,2,45,23,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#8f1937";ctx.beginPath();ctx.moveTo(32,-14);ctx.lineTo(55,-31);ctx.lineTo(49,-5);ctx.closePath();ctx.fill();ctx.fillStyle="#ffe49a";ctx.fillRect(25,-8,6,5);ctx.fillRect(37,-8,6,5);ctx.restore();ctx.fillStyle="#fff";ctx.font="bold 13px sans-serif";ctx.fillText("DRAGON  "+spaceHellFortressDragonHP+"/6",dx-35,dy-42);}
+ if(spaceHellFortressDragonAlive){const dx=1900,dy=430;ctx.save();ctx.translate(dx,dy);ctx.shadowColor="#ff315d";ctx.shadowBlur=14;// 地面に接地した四足ドラゴンctx.fillStyle="#4a1020";ctx.fillRect(-42,-18,17,18);ctx.fillRect(24,-18,17,18);ctx.fillRect(-34,-27,12,27);ctx.fillRect(22,-27,12,27);ctx.fillStyle="#8f1937";ctx.beginPath();ctx.moveTo(-56,-30);ctx.lineTo(-70,-18);ctx.lineTo(-54,-15);ctx.lineTo(-43,-21);ctx.lineTo(-34,-40);ctx.lineTo(20,-43);ctx.lineTo(43,-31);ctx.lineTo(55,-18);ctx.lineTo(38,-8);ctx.lineTo(-38,-8);ctx.closePath();ctx.fill();ctx.fillStyle="#e85a70";ctx.beginPath();ctx.ellipse(-2,-30,38,15,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#8f1937";ctx.beginPath();ctx.moveTo(24,-40);ctx.lineTo(40,-51);ctx.lineTo(38,-34);ctx.lineTo(53,-42);ctx.lineTo(47,-25);ctx.lineTo(25,-24);ctx.closePath();ctx.fill();ctx.fillStyle="#ffe49a";ctx.fillRect(34,-36,5,4);ctx.fillRect(45,-33,5,4);ctx.fillStyle="#300914";ctx.fillRect(-51,-10,105,3);ctx.restore();ctx.fillStyle="#fff";ctx.font="bold 13px sans-serif";ctx.fillText("DRAGON  "+spaceHellFortressDragonHP+"/6",dx-35,dy-62);}
  for(const b of spaceHellFortressShots){ctx.fillStyle="#82faff";ctx.shadowColor="#65faff";ctx.shadowBlur=12;ctx.beginPath();ctx.arc(b.x,b.y,6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}
  ctx.restore();
  const px=player.x-spaceHellFortressCamera;drawSpaceHellFortressPlayer(px);
