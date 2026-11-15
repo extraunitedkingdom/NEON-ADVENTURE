@@ -545,7 +545,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.40</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.41</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -1169,7 +1169,7 @@ function drawSpaceHellClimb(){
  for(let i=0;i<12;i++){const x=i*82-20,h=75+(i%4)*28;ctx.fillStyle=i%2?"#16070d":"#21080f";ctx.beginPath();ctx.moveTo(x,1480);ctx.lineTo(x+18,1480-h);ctx.lineTo(x+45,1480-h-20);ctx.lineTo(x+73,1480-h+8);ctx.lineTo(x+100,1480);ctx.closePath();ctx.fill();}
  for(const p of spaceHellClimbPlatforms){ctx.fillStyle="#18080e";ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle="#8e1c31";ctx.fillRect(p.x,p.y,p.w,5);ctx.fillStyle="#ff5268";ctx.globalAlpha=.65;ctx.fillRect(p.x+8,p.y+5,p.w-16,2);ctx.globalAlpha=1;}
  ctx.fillStyle="#fff0f2";ctx.font="900 22px sans-serif";ctx.textAlign="center";ctx.fillText("EXIT",520,58);
- ctx.save();ctx.translate(player.x+player.w/2,player.y);ctx.shadowColor=playerSkin;ctx.shadowBlur=13;ctx.fillStyle=playerSkin;ctx.fillRect(-12,13,24,21);ctx.shadowBlur=0;ctx.fillStyle="#f1c9b6";ctx.fillRect(-10,-3,20,18);ctx.fillStyle="#111827";ctx.fillRect(-12,-7,24,7);ctx.fillStyle="#fff";ctx.fillRect(-7,5,4,3);ctx.fillRect(3,5,4,3);ctx.fillStyle="#142034";ctx.fillRect(-9,34,7,9);ctx.fillRect(2,34,7,9);ctx.restore();
+ drawSpaceHellFortressPlayer(player.x,player.y);
  const vy=spaceHellVoidY,grad=ctx.createLinearGradient(0,vy-cam,0,H);grad.addColorStop(0,"rgba(255,28,54,.96)");grad.addColorStop(.12,"rgba(90,0,17,.98)");grad.addColorStop(1,"#030205");ctx.fillStyle=grad;ctx.fillRect(0,vy-cam,W,H-(vy-cam));ctx.fillStyle="rgba(3,0,8,.88)";ctx.fillRect(0,vy-cam,W,H-(vy-cam));ctx.shadowColor="#ff183d";ctx.shadowBlur=32;ctx.fillStyle="#ff294b";ctx.fillRect(0,vy-cam-9,W,13);ctx.shadowBlur=0;ctx.fillStyle="#fff0f3";ctx.font="900 20px sans-serif";ctx.textAlign="center";ctx.shadowColor="#ff183d";ctx.shadowBlur=16;ctx.fillText("THE VOID",W/2,vy-cam-19);ctx.shadowBlur=0;
  for(let i=0;i<18;i++){const x=(i*61+(spaceHellClimbTime*2.2)%61)%W;ctx.fillStyle="rgba(255,105,120,.65)";ctx.fillRect(x,vy-cam-12-(i%3)*7,3,7);}ctx.restore();
  ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="900 22px sans-serif";ctx.shadowColor="#ff203e";ctx.shadowBlur=14;ctx.fillText("SPACE HELL",W/2,34);ctx.shadowBlur=0;ctx.font="bold 16px sans-serif";ctx.fillStyle="#ffdce0";ctx.fillText("AREA 2 : THE RISING VOID",W/2,60);ctx.font="13px sans-serif";ctx.fillStyle="#ffc6cc";ctx.fillText("足場をジャンプして上へ！ 黒い虚無に触れるな！",W/2,84);
@@ -1185,7 +1185,7 @@ function drawSpaceHellCombo(){
  for(const p of spaceHellComboPlatforms){if(p.hidden)continue;ctx.fillStyle=p.crumble?"#32101a":"#16080e";ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle=p.crumble?"#ff9a58":"#9d2037";ctx.fillRect(p.x,p.y,p.w,5);}
  for(const z of spaceHellComboLasers){const active=((spaceHellComboTime+z.phase)%z.period)<z.on;ctx.fillStyle=active?"rgba(255,25,65,.92)":"rgba(255,90,120,.13)";ctx.fillRect(z.x-5,82,10,348);if(active){ctx.shadowColor="#ff244d";ctx.shadowBlur=18;ctx.fillStyle="#ff8191";ctx.fillRect(z.x-2,82,4,348);ctx.shadowBlur=0;}ctx.fillStyle="#5c1a2a";ctx.fillRect(z.x-14,75,28,10);ctx.fillRect(z.x-14,430,28,10);}
  ctx.fillStyle="#ffecf0";ctx.font="900 24px sans-serif";ctx.textAlign="center";ctx.fillText("EXIT",2570,405);
- ctx.save();ctx.translate(player.x+player.w/2,player.y);ctx.shadowColor=playerSkin;ctx.shadowBlur=13;ctx.fillStyle=playerSkin;ctx.fillRect(-12,13,24,21);ctx.shadowBlur=0;ctx.fillStyle="#f1c9b6";ctx.fillRect(-10,-3,20,18);ctx.fillStyle="#111827";ctx.fillRect(-12,-7,24,7);ctx.fillStyle="#fff";ctx.fillRect(-7,5,4,3);ctx.fillRect(3,5,4,3);ctx.fillStyle="#142034";ctx.fillRect(-9,34,7,9);ctx.fillRect(2,34,7,9);ctx.restore();ctx.restore();
+ drawSpaceHellFortressPlayer(player.x,player.y);ctx.restore();
  const abyss=ctx.createLinearGradient(0,430,0,H);abyss.addColorStop(0,"#ff2748");abyss.addColorStop(.15,"#5c0719");abyss.addColorStop(1,"#030205");ctx.fillStyle=abyss;ctx.fillRect(0,430,W,H-430);
  ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="900 22px sans-serif";ctx.shadowColor="#ff203e";ctx.shadowBlur=14;ctx.fillText("SPACE HELL",W/2,32);ctx.shadowBlur=0;ctx.font="bold 16px sans-serif";ctx.fillStyle="#ffdce0";ctx.fillText("AREA 3 : HELL COMBINATION",W/2,58);ctx.font="12px sans-serif";ctx.fillStyle="#ffc6cc";ctx.fillText("崩れる足場・点滅レーザー・奈落を突破しろ",W/2,80);
  ctx.textAlign="left";ctx.font="bold 14px sans-serif";ctx.fillStyle="#fff";ctx.fillText("HP: "+"♥".repeat(Math.max(0,playerHP)),18,24);ctx.textAlign="right";ctx.fillStyle="#ffd4d9";ctx.fillText("CHECKPOINT 03",W-18,24);
@@ -1261,11 +1261,7 @@ function drawSpaceHellShooting(){
  }
  for(const b of spaceHellShootShots){const y=screenY(b.z);ctx.fillStyle="#7dfaff";ctx.shadowColor="#54edff";ctx.shadowBlur=16;ctx.beginPath();ctx.ellipse(b.x,y,4,9,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}
  const px=player.x+player.w/2,py=screenY(spaceHellShootAimZ);
- ctx.save();ctx.translate(px,py);ctx.shadowColor=playerSkin;ctx.shadowBlur=15;ctx.fillStyle=playerSkin;ctx.fillRect(-15,-17,30,34);ctx.shadowBlur=0;
- ctx.fillStyle="#18243b";ctx.fillRect(-11,-22,22,10);ctx.fillStyle="#a8faff";ctx.fillRect(-7,-20,14,3);
- ctx.fillStyle="#253c5c";ctx.fillRect(-22,-9,8,22);ctx.fillRect(14,-9,8,22);
- ctx.fillStyle="#b7c8db";ctx.fillRect(-5,-28,10,12);ctx.fillStyle="#d9faff";ctx.fillRect(-2,-39,4,17);
- ctx.fillStyle="#0c1527";ctx.fillRect(-9,15,7,17);ctx.fillRect(2,15,7,17);ctx.restore();
+ drawSpaceHellFortressPlayer(px-player.w/2,py,.42+spaceHellShootAimZ*.78);
  ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="900 22px sans-serif";ctx.shadowColor="#ff315e";ctx.shadowBlur=14;ctx.fillText("SPACE HELL",W/2,28);ctx.shadowBlur=0;
  ctx.font="bold 16px sans-serif";ctx.fillStyle="#ffdce8";ctx.fillText("AREA 4 : HELL SHOOTING",W/2,53);
  ctx.font="13px sans-serif";ctx.fillText("背中を向けて奥へ射撃！ ←→で左右、↑↓で前後移動",W/2,75);
@@ -1309,9 +1305,9 @@ function updateSpaceHellFortress(){
  if(!spaceHellFortressDragonAlive&&player.x>=2380){spaceHellFortressCleared=true;spaceHellFortressClearTimer=0;spaceHellMessage="DEMON FORTRESS CLEAR";spaceHellMessageTimer=150;saveGame();return;}
  spaceHellFortressCamera=Math.max(0,Math.min(1700,player.x-280));
 }
-function drawSpaceHellFortressPlayer(px){
+function drawSpaceHellFortressPlayer(px,y=player.y,scale=1){
  const sk=skins.find(v=>v.color===playerSkin)||{design:"standard"},d=sk.design,g=playerSkin;
- ctx.save();ctx.translate(px+player.w/2,player.y);ctx.scale(facing||1,1);
+ ctx.save();ctx.translate(px+player.w/2,y);ctx.scale((facing||1)*scale,scale);
  ctx.shadowColor=g;ctx.shadowBlur=d==="standard"?8:14;
  ctx.fillStyle=d==="emperor"?"#171329":d==="celestial"?"#e8eaff":d==="knight"?"#26334d":d==="assassin"?"#17182d":d==="commander"?"#172d50":g;
  ctx.fillRect(-12,15,24,15);ctx.shadowBlur=0;
@@ -1348,7 +1344,7 @@ function drawSpaceHellFortress(){
  if(spaceHellFortressDragonAlive){const dx=1900,dy=430;ctx.save();ctx.translate(dx,dy);ctx.shadowColor="#ff315d";ctx.shadowBlur=14;/* 地面に接地した四足ドラゴン */ctx.fillStyle="#4a1020";ctx.fillRect(-42,-18,17,18);ctx.fillRect(24,-18,17,18);ctx.fillRect(-34,-27,12,27);ctx.fillRect(22,-27,12,27);ctx.fillStyle="#8f1937";ctx.beginPath();ctx.moveTo(-56,-30);ctx.lineTo(-70,-18);ctx.lineTo(-54,-15);ctx.lineTo(-43,-21);ctx.lineTo(-34,-40);ctx.lineTo(20,-43);ctx.lineTo(43,-31);ctx.lineTo(55,-18);ctx.lineTo(38,-8);ctx.lineTo(-38,-8);ctx.closePath();ctx.fill();ctx.fillStyle="#e85a70";ctx.beginPath();ctx.ellipse(-2,-30,38,15,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#8f1937";ctx.beginPath();ctx.moveTo(24,-40);ctx.lineTo(40,-51);ctx.lineTo(38,-34);ctx.lineTo(53,-42);ctx.lineTo(47,-25);ctx.lineTo(25,-24);ctx.closePath();ctx.fill();ctx.fillStyle="#ffe49a";ctx.fillRect(34,-36,5,4);ctx.fillRect(45,-33,5,4);ctx.fillStyle="#300914";ctx.fillRect(-51,-10,105,3);ctx.restore();ctx.fillStyle="#fff";ctx.font="bold 13px sans-serif";ctx.fillText("DRAGON  "+spaceHellFortressDragonHP+"/6",dx-35,dy-62);}
  for(const b of spaceHellFortressShots){ctx.fillStyle="#82faff";ctx.shadowColor="#65faff";ctx.shadowBlur=12;ctx.beginPath();ctx.arc(b.x,b.y,6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}
  ctx.restore();
- const px=player.x-spaceHellFortressCamera;drawSpaceHellFortressPlayer(px);
+ const px=player.x-spaceHellFortressCamera;drawSpaceHellFortressPlayer(px,player.y);
  ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="900 22px sans-serif";ctx.fillText("AREA 5 : DEMON FORTRESS",W/2,30);ctx.font="13px sans-serif";ctx.fillText("鬼もドラゴンもATTACK / SHOTで倒せ！",W/2,55);ctx.textAlign="left";ctx.font="bold 14px sans-serif";ctx.fillText("HP: "+"♥".repeat(Math.max(0,playerHP)),18,24);ctx.textAlign="right";ctx.fillText("CHECKPOINT 05",W-18,24);
  if(spaceHellDeathTimer>0){ctx.fillStyle="rgba(0,0,0,.7)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff536d";ctx.font="900 34px sans-serif";ctx.fillText("RETRY",W/2,H/2);}
  if(spaceHellFortressCleared){ctx.fillStyle="rgba(0,0,0,.8)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff8794";ctx.font="900 34px sans-serif";ctx.fillText("AREA 5 CLEAR",W/2,H/2);ctx.fillStyle="#fff";ctx.font="bold 16px sans-serif";ctx.fillText("THE DRAGON HAS FALLEN",W/2,H/2+30);}
@@ -1381,7 +1377,7 @@ function drawSpaceHellBoss(){
  if(spaceHellBoss&&spaceHellBoss.alive){ctx.save();ctx.translate(spaceHellBoss.x,spaceHellBoss.y);ctx.shadowColor="#ff183e";ctx.shadowBlur=28;ctx.fillStyle="#4a0a1d";ctx.beginPath();ctx.ellipse(0,8,66,74,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#9e1c39";ctx.beginPath();ctx.moveTo(-48,-44);ctx.lineTo(-78,-112);ctx.lineTo(-20,-68);ctx.lineTo(0,-78);ctx.lineTo(22,-68);ctx.lineTo(78,-112);ctx.lineTo(48,-42);ctx.closePath();ctx.fill();ctx.fillStyle="#d34b62";ctx.beginPath();ctx.ellipse(0,-5,48,40,0,0,Math.PI*2);ctx.fill();for(let n=-1;n<=1;n++){ctx.fillStyle=spaceHellBossEyeBomb&&spaceHellBossEyeBomb.timer>0?"#fff":"#ffe28a";ctx.beginPath();ctx.ellipse(n*24,-13,7,10,0,0,Math.PI*2);ctx.fill();}ctx.restore();}
  for(const p of spaceHellBossPlayerShots){ctx.fillStyle="#82faff";ctx.shadowColor="#65faff";ctx.shadowBlur=14;ctx.beginPath();ctx.arc(p.x,p.y,6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}for(const b of spaceHellBossShots){ctx.fillStyle="#ff782f";ctx.shadowColor="#ff4a27";ctx.shadowBlur=20;ctx.beginPath();ctx.ellipse(b.x,b.y,58,28,0,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}for(const p of spaceHellBossSpikes){if(p.active){ctx.fillStyle="#ff526b";ctx.beginPath();ctx.moveTo(p.x-18,430);ctx.lineTo(p.x,370);ctx.lineTo(p.x+18,430);ctx.fill();}}
  if(spaceHellBossEyeBomb){const b=spaceHellBossEyeBomb;ctx.strokeStyle=b.timer>0?"#ffe58a":"#ff304e";ctx.lineWidth=4;ctx.setLineDash([8,6]);ctx.beginPath();ctx.arc(b.x,b.y,spaceHellBoss.radius*2,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle=b.timer>0?"rgba(255,230,120,.12)":"rgba(255,25,55,.32)";ctx.beginPath();ctx.arc(b.x,b.y,spaceHellBoss.radius*2,0,Math.PI*2);ctx.fill();ctx.fillStyle="#fff";ctx.font="900 18px sans-serif";ctx.fillText(b.timer>0?"EYE BOMB "+Math.ceil(b.timer/60*10)/10+"s":"BOOM!",b.x,b.y-90);}
- ctx.fillStyle=playerSkin;ctx.fillRect(player.x,player.y,player.w,player.h);ctx.fillStyle="#f1c9b6";ctx.fillRect(player.x+5,player.y-12,20,16);ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="900 21px sans-serif";ctx.fillText("AREA 6 : THE BOSS FLOOR",W/2,28);ctx.font="12px sans-serif";ctx.fillText(spaceHellBossStarted?"剣100回 / SHOT300回で撃破。60秒ごとにHP10%回復":"門へ近づけ。ここが最終チェックポイント。",W/2,51);ctx.textAlign="left";ctx.font="bold 14px sans-serif";ctx.fillText("HP: "+"♥".repeat(Math.max(0,playerHP)),18,24);ctx.textAlign="right";ctx.fillText("CHECKPOINT 06 : BOSS GATE",W-18,24);
+ drawSpaceHellFortressPlayer(player.x,player.y);ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="900 21px sans-serif";ctx.fillText("AREA 6 : THE BOSS FLOOR",W/2,28);ctx.font="12px sans-serif";ctx.fillText(spaceHellBossStarted?"剣100回 / SHOT300回で撃破。60秒ごとにHP10%回復":"門へ近づけ。ここが最終チェックポイント。",W/2,51);ctx.textAlign="left";ctx.font="bold 14px sans-serif";ctx.fillText("HP: "+"♥".repeat(Math.max(0,playerHP)),18,24);ctx.textAlign="right";ctx.fillText("CHECKPOINT 06 : BOSS GATE",W-18,24);
  if(spaceHellBossStarted){ctx.textAlign="center";ctx.fillText("FINAL BOSS",spaceHellBoss.x,130);ctx.fillStyle="#260814";ctx.fillRect(W/2-190,75,380,15);ctx.fillStyle="#ff3455";ctx.fillRect(W/2-190,75,380*spaceHellBoss.hp/spaceHellBoss.maxHP,15);ctx.strokeStyle="#ffd1d8";ctx.strokeRect(W/2-190,75,380,15);ctx.fillStyle="#fff";ctx.fillText(Math.ceil(spaceHellBoss.hp)+" / "+spaceHellBoss.maxHP+" • RECOVERY "+spaceHellBossRecoveryCount,W/2,108);}
  if(spaceHellMessageTimer>0){ctx.textAlign="center";ctx.font="900 20px sans-serif";ctx.fillStyle="#fff";ctx.fillText(spaceHellMessage,W/2,160);}if(spaceHellDeathTimer>0){ctx.fillStyle="rgba(0,0,0,.76)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff536d";ctx.font="900 34px sans-serif";ctx.fillText("BOSS FLOOR FAILED",W/2,H/2);ctx.fillStyle="#fff";ctx.font="bold 16px sans-serif";ctx.fillText("RESTART FROM BOSS GATE",W/2,H/2+28);}if(spaceHellBossCleared){ctx.fillStyle="rgba(0,0,0,.82)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff9cac";ctx.font="900 36px sans-serif";ctx.fillText("SPACE HELL CONQUERED",W/2,H/2-20);ctx.fillStyle="#fff";ctx.font="bold 17px sans-serif";ctx.fillText("THE FINAL BOSS HAS FALLEN",W/2,H/2+20);}
 }
