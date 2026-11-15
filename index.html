@@ -545,7 +545,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.33</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.34</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -923,7 +923,7 @@ document.getElementById("kamehameha").addEventListener("pointerdown",e=>{e.preve
 
 window.addEventListener("keydown",e=>{keys[e.code]=true;if(e.code==="Space"&&!e.repeat){e.preventDefault();jump()}if(e.code==="ControlLeft"&&!e.repeat){e.preventDefault();useDash()}});
 window.addEventListener("keyup",e=>keys[e.code]=false);
-canvas.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button===0)attack();else if(e.pointerType==="mouse"&&e.button===2)shootProjectile()});
+canvas.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse"&&e.button===0){if(worldNumber===5&&spaceHellArea===5)spaceHellFortressHit();else if(worldNumber===5&&spaceHellArea===6)spaceHellBossSword();else attack()}else if(e.pointerType==="mouse"&&e.button===2){if(worldNumber===5&&spaceHellArea===5)spaceHellFortressFire();else if(worldNumber===5&&spaceHellArea===6)spaceHellBossShoot();else shootProjectile()}});
 canvas.addEventListener("contextmenu",e=>e.preventDefault());
 
 function formatStatTime(seconds){const n=Math.floor(Math.max(0,seconds)),h=Math.floor(n/3600),m=Math.floor(n%3600/60),s=n%60;return h+"時間 "+m+"分 "+s+"秒"}
@@ -1270,7 +1270,7 @@ function resetSpaceHellFortress(){spaceHellFortressTime=0;spaceHellFortressCamer
 function startSpaceHellArea5(){document.getElementById("depthUp").style.display="none";document.getElementById("depthDown").style.display="none";spaceHellArea=5;spaceHellCheckpoint=5;spaceHellDeathTimer=0;spaceHellTransitionTimer=0;resetSpaceHellFortress();player.x=65;player.y=388;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;playerHP=skinMaxHP();spaceHellMessage="AREA 5 : DEMON FORTRESS";spaceHellMessageTimer=140;saveGame();}
 function spaceHellFortressHit(){
  if(spaceHellArea!==5||spaceHellDeathTimer>0||attackCooldown>0)return;attackCooldown=20;attackTimer=12;
- const hitX=facing>=0?player.x+player.w:player.x-92,hitW=92,hitY=player.y-10,hitH=player.h+20;
+ const hitX=player.x-70,hitW=player.w+140,hitY=player.y-15,hitH=player.h+30;
  const hit=(x,y,w,h)=>hitX<x+w&&hitX+hitW>x&&hitY<y+h&&hitY+hitH>y;
  for(const e of spaceHellFortressEnemies){if(!e.alive)continue;if(hit(e.x,e.y,36,44)){e.hp--;if(e.hp<=0){e.alive=false;achievementEnemyKills++;checkAchievements();}return;}}
  if(spaceHellFortressDragonAlive&&hit(1840,382,120,48)){spaceHellFortressDragonHP--;if(spaceHellFortressDragonHP<=0){spaceHellFortressDragonAlive=false;spaceHellMessage="DRAGON DEFEATED";spaceHellMessageTimer=90;}}
