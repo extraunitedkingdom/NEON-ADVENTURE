@@ -545,7 +545,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.32</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.33</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -1270,13 +1270,14 @@ function resetSpaceHellFortress(){spaceHellFortressTime=0;spaceHellFortressCamer
 function startSpaceHellArea5(){document.getElementById("depthUp").style.display="none";document.getElementById("depthDown").style.display="none";spaceHellArea=5;spaceHellCheckpoint=5;spaceHellDeathTimer=0;spaceHellTransitionTimer=0;resetSpaceHellFortress();player.x=65;player.y=388;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;playerHP=skinMaxHP();spaceHellMessage="AREA 5 : DEMON FORTRESS";spaceHellMessageTimer=140;saveGame();}
 function spaceHellFortressHit(){
  if(spaceHellArea!==5||spaceHellDeathTimer>0||attackCooldown>0)return;attackCooldown=20;attackTimer=12;
- const px=player.x+player.w/2,py=player.y+player.h/2;
- for(const e of spaceHellFortressEnemies){if(!e.alive)continue;if(Math.hypot(px-(e.x+18),py-(e.y+20))<78){e.hp--;if(e.hp<=0){e.alive=false;achievementEnemyKills++;checkAchievements();}return;}}
- // 飛行ドラゴンは近接攻撃の対象外
+ const hitX=facing>=0?player.x+player.w:player.x-92,hitW=92,hitY=player.y-10,hitH=player.h+20;
+ const hit=(x,y,w,h)=>hitX<x+w&&hitX+hitW>x&&hitY<y+h&&hitY+hitH>y;
+ for(const e of spaceHellFortressEnemies){if(!e.alive)continue;if(hit(e.x,e.y,36,44)){e.hp--;if(e.hp<=0){e.alive=false;achievementEnemyKills++;checkAchievements();}return;}}
+ if(spaceHellFortressDragonAlive&&hit(1840,382,120,48)){spaceHellFortressDragonHP--;if(spaceHellFortressDragonHP<=0){spaceHellFortressDragonAlive=false;spaceHellMessage="DRAGON DEFEATED";spaceHellMessageTimer=90;}}
 }
 function spaceHellFortressFire(){
  if(spaceHellArea!==5||spaceHellDeathTimer>0||shotCooldown>0)return;shotCooldown=18;
- spaceHellFortressShots.push({x:player.x+player.w+8,y:player.y+player.h/2,life:110});
+ spaceHellFortressShots.push({x:player.x+(facing>=0?player.w+8:-8),y:player.y+player.h/2,vx:(facing>=0?1:-1)*12,life:110});
 }
 function updateSpaceHellFortress(){
  if(spaceHellFortressCleared){spaceHellFortressClearTimer++;if(spaceHellFortressClearTimer>=150)startSpaceHellArea6();return;}
@@ -1287,9 +1288,13 @@ function updateSpaceHellFortress(){
  player.vx=(right?speed:0)-(left?speed:0);if(player.vx)facing=player.vx>0?1:-1;player.x=Math.max(20,Math.min(2450,player.x+player.vx));
  const oldY=player.y;player.vy=Math.min(13,player.vy+.52);player.y+=player.vy;player.grounded=false;
  if(oldY+player.h<=430&&player.y+player.h>=430){player.y=430-player.h;player.vy=0;player.grounded=true;player.jumps=0;}
- for(const e of spaceHellFortressEnemies){if(!e.alive)continue;e.x+=e.speed*e.dir;if(e.x<e.baseX-115||e.x>e.baseX+35)e.dir*=-1;if(Math.abs(player.x-e.x)<34&&Math.abs(player.y-e.y)<42&&invincibleTimer===0){playerHP=Math.max(0,playerHP-1);gameStats.totalDamageTaken++;invincibleTimer=70;if(playerHP<=0){spaceHellFall();return;}}}
- for(const b of spaceHellFortressShots){b.x+=12;b.life--;if(spaceHellFortressDragonAlive&&Math.abs(b.x-(1900+Math.sin(spaceHellFortressTime*.035)*110))<34&&Math.abs(b.y-(155+Math.sin(spaceHellFortressTime*.05)*35))<42){spaceHellFortressDragonHP--;b.life=0;if(spaceHellFortressDragonHP<=0){spaceHellFortressDragonAlive=false;spaceHellMessage="DRAGON DEFEATED";spaceHellMessageTimer=90;}}}
- spaceHellFortressShots=spaceHellFortressShots.filter(b=>b.life>0&&b.x<2600);
+ for(const e of spaceHellFortressEnemies){if(!e.alive)continue;e.x+=e.speed*e.dir;if(e.x<e.baseX-115||e.x>e.baseX+35)e.dir*=-1;if(player.x<e.x+36&&player.x+player.w>e.x&&player.y<e.y+44&&player.y+player.h>e.y&&invincibleTimer===0){playerHP=Math.max(0,playerHP-1);gameStats.totalDamageTaken++;invincibleTimer=70;if(playerHP<=0){spaceHellFall();return;}}}
+ const dragonX=1840,dragonY=382;
+ for(const b of spaceHellFortressShots){b.x+=b.vx;b.life--;
+  for(const e of spaceHellFortressEnemies){if(e.alive&&b.x>=e.x&&b.x<=e.x+36&&b.y>=e.y&&b.y<=e.y+44){e.hp--;b.life=0;if(e.hp<=0){e.alive=false;achievementEnemyKills++;checkAchievements();}break;}}
+  if(b.life>0&&spaceHellFortressDragonAlive&&b.x>=dragonX&&b.x<=dragonX+120&&b.y>=dragonY&&b.y<=dragonY+48){spaceHellFortressDragonHP--;b.life=0;if(spaceHellFortressDragonHP<=0){spaceHellFortressDragonAlive=false;spaceHellMessage="DRAGON DEFEATED";spaceHellMessageTimer=90;}}
+ }
+ spaceHellFortressShots=spaceHellFortressShots.filter(b=>b.life>0&&b.x>=0&&b.x<2600);
  if(player.y>H+30){spaceHellFall();return;}
  if(!spaceHellFortressDragonAlive&&player.x>=2380){spaceHellFortressCleared=true;spaceHellFortressClearTimer=0;spaceHellMessage="DEMON FORTRESS CLEAR";spaceHellMessageTimer=150;saveGame();return;}
  spaceHellFortressCamera=Math.max(0,Math.min(1700,player.x-280));
@@ -1330,11 +1335,11 @@ function drawSpaceHellFortress(){
  ctx.fillStyle="#170912";ctx.fillRect(170,175,2180,255);for(let x=180;x<2370;x+=180){ctx.fillStyle="#260b18";ctx.fillRect(x,125,75,305);ctx.beginPath();ctx.moveTo(x-12,125);ctx.lineTo(x+37,65);ctx.lineTo(x+87,125);ctx.fill();ctx.strokeStyle="#a62b43";ctx.lineWidth=3;ctx.strokeRect(x,175,75,255);}
  ctx.fillStyle="#571323";ctx.fillRect(0,430,2500,70);ctx.fillStyle="#e13b53";ctx.fillRect(0,430,2500,5);
  for(const e of spaceHellFortressEnemies){if(!e.alive)continue;ctx.save();ctx.translate(e.x,e.y);ctx.fillStyle="#9d263b";ctx.shadowColor="#ff3155";ctx.shadowBlur=9;ctx.fillRect(3,10,30,30);ctx.fillStyle="#4b101d";ctx.fillRect(0,0,36,18);ctx.fillStyle="#ffe2a0";ctx.fillRect(8,6,5,4);ctx.fillRect(23,6,5,4);ctx.fillStyle="#e5a4a4";ctx.fillRect(4,37,10,7);ctx.fillRect(22,37,10,7);if(e.hp>1){ctx.fillStyle="#ffd6dc";ctx.font="11px sans-serif";ctx.fillText("2",15,-4);}ctx.restore();}
- if(spaceHellFortressDragonAlive){const dx=1900+Math.sin(spaceHellFortressTime*.035)*110,dy=155+Math.sin(spaceHellFortressTime*.05)*35;ctx.save();ctx.translate(dx,dy);ctx.shadowColor="#ff315d";ctx.shadowBlur=22;ctx.fillStyle="#8f1937";ctx.beginPath();ctx.moveTo(-48,0);ctx.lineTo(-115,-65);ctx.lineTo(-92,15);ctx.lineTo(-48,22);ctx.lineTo(45,10);ctx.lineTo(105,-52);ctx.lineTo(80,35);ctx.lineTo(25,45);ctx.lineTo(-30,36);ctx.closePath();ctx.fill();ctx.fillStyle="#e85a70";ctx.beginPath();ctx.ellipse(0,0,46,25,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#ffe49a";ctx.fillRect(20,-7,6,5);ctx.fillRect(32,-7,6,5);ctx.restore();ctx.fillStyle="#fff";ctx.font="bold 13px sans-serif";ctx.fillText("DRAGON  "+spaceHellFortressDragonHP+"/6",dx-35,dy-50);}
+ if(spaceHellFortressDragonAlive){const dx=1900,dy=382;ctx.save();ctx.translate(dx,dy);ctx.shadowColor="#ff315d";ctx.shadowBlur=22;ctx.fillStyle="#5b1428";ctx.fillRect(-43,24,18,20);ctx.fillRect(25,24,18,20);ctx.fillStyle="#8f1937";ctx.beginPath();ctx.moveTo(-55,20);ctx.lineTo(-48,-5);ctx.lineTo(-22,-24);ctx.lineTo(24,-22);ctx.lineTo(49,-5);ctx.lineTo(62,17);ctx.lineTo(42,30);ctx.lineTo(-42,30);ctx.closePath();ctx.fill();ctx.fillStyle="#e85a70";ctx.beginPath();ctx.ellipse(0,2,45,23,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#8f1937";ctx.beginPath();ctx.moveTo(32,-14);ctx.lineTo(55,-31);ctx.lineTo(49,-5);ctx.closePath();ctx.fill();ctx.fillStyle="#ffe49a";ctx.fillRect(25,-8,6,5);ctx.fillRect(37,-8,6,5);ctx.restore();ctx.fillStyle="#fff";ctx.font="bold 13px sans-serif";ctx.fillText("DRAGON  "+spaceHellFortressDragonHP+"/6",dx-35,dy-42);}
  for(const b of spaceHellFortressShots){ctx.fillStyle="#82faff";ctx.shadowColor="#65faff";ctx.shadowBlur=12;ctx.beginPath();ctx.arc(b.x,b.y,6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}
  ctx.restore();
  const px=player.x-spaceHellFortressCamera;drawSpaceHellFortressPlayer(px);
- ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="900 22px sans-serif";ctx.fillText("AREA 5 : DEMON FORTRESS",W/2,30);ctx.font="13px sans-serif";ctx.fillText("鬼はATTACK、空中のドラゴンはSHOTで倒せ！",W/2,55);ctx.textAlign="left";ctx.font="bold 14px sans-serif";ctx.fillText("HP: "+"♥".repeat(Math.max(0,playerHP)),18,24);ctx.textAlign="right";ctx.fillText("CHECKPOINT 05",W-18,24);
+ ctx.textAlign="center";ctx.fillStyle="#fff";ctx.font="900 22px sans-serif";ctx.fillText("AREA 5 : DEMON FORTRESS",W/2,30);ctx.font="13px sans-serif";ctx.fillText("鬼もドラゴンもATTACK / SHOTで倒せ！",W/2,55);ctx.textAlign="left";ctx.font="bold 14px sans-serif";ctx.fillText("HP: "+"♥".repeat(Math.max(0,playerHP)),18,24);ctx.textAlign="right";ctx.fillText("CHECKPOINT 05",W-18,24);
  if(spaceHellDeathTimer>0){ctx.fillStyle="rgba(0,0,0,.7)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff536d";ctx.font="900 34px sans-serif";ctx.fillText("RETRY",W/2,H/2);}
  if(spaceHellFortressCleared){ctx.fillStyle="rgba(0,0,0,.8)";ctx.fillRect(0,0,W,H);ctx.textAlign="center";ctx.fillStyle="#ff8794";ctx.font="900 34px sans-serif";ctx.fillText("AREA 5 CLEAR",W/2,H/2);ctx.fillStyle="#fff";ctx.font="bold 16px sans-serif";ctx.fillText("THE DRAGON HAS FALLEN",W/2,H/2+30);}
 }
