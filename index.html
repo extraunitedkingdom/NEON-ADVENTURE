@@ -545,7 +545,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.39</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.40</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -1062,7 +1062,7 @@ function spaceHellRespawn(){
  else if(spaceHellArea===3){resetSpaceHellComboPlatforms();player.x=65;player.y=388;spaceHellComboCamera=0;spaceHellComboTime=0;spaceHellMessage="CHECKPOINT 03";}
  else if(spaceHellArea===4){resetSpaceHellShooting();player.x=W/2-player.w/2;player.y=410;spaceHellShootAimZ=.12;spaceHellShootCamera=0;spaceHellShootTime=0;spaceHellMessage="CHECKPOINT 04";}
  else if(spaceHellArea===5){resetSpaceHellFortress();player.x=65;player.y=388;spaceHellMessage="CHECKPOINT 05";}
- else{const remainingBossHP=spaceHellBoss?spaceHellBoss.hp:300;const recoveryCount=spaceHellBossRecoveryCount;resetSpaceHellBoss(true);spaceHellBoss.hp=remainingBossHP;spaceHellBossStarted=true;spaceHellBossRecoveryCount=recoveryCount;player.x=72;player.y=388;spaceHellMessage="CHECKPOINT 06 : BOSS GATE";}
+ else{const remainingBossHP=spaceHellBoss?Math.max(0,Math.min(spaceHellBoss.maxHP,spaceHellBoss.hp)):300;const recoveryCount=spaceHellBossRecoveryCount;resetSpaceHellBoss(true);spaceHellBoss.hp=remainingBossHP;spaceHellBoss.alive=remainingBossHP>0;spaceHellBossStarted=true;spaceHellBossRecoveryCount=recoveryCount;player.x=72;player.y=388;spaceHellMessage="CHECKPOINT 06 : BOSS GATE";}
  spaceHellMessageTimer=85;saveGame();
 }
 function startSpaceHellArea2(){
@@ -1356,7 +1356,7 @@ function drawSpaceHellFortress(){
 
 function startSpaceHellArea6(){spaceHellArea=6;spaceHellCheckpoint=6;spaceHellDeathTimer=0;spaceHellTransitionTimer=0;resetSpaceHellBoss(true);player.x=72;player.y=388;player.vx=0;player.vy=0;player.jumps=0;player.grounded=true;playerHP=skinMaxHP();spaceHellMessage="AREA 6 : THE BOSS FLOOR";spaceHellMessageTimer=150;document.querySelector(".stage-top p").textContent="SPACE HELL : THE BOSS FLOOR";document.getElementById("world2Hint").textContent="THE BOSS FLOOR：門の奥にいるラスボスを倒せ。剣とSHOTを使い分けろ。";saveGame();}
 function resetSpaceHellBoss(full){spaceHellBoss={x:610,y:300,radius:70,maxHP:300,hp:300,alive:true,face:-1};spaceHellBossStarted=false;spaceHellBossCleared=false;spaceHellBossShots=[];spaceHellBossPlayerShots=[];spaceHellBossSpikes=[];spaceHellBossEyeBomb=null;spaceHellBossTime=0;spaceHellBossAttackTimer=150;spaceHellBossAttackType=0;spaceHellBossRecoveryCount=0;if(full)spaceHellMessage="BOSS GATE CHECKPOINT";}
-function spaceHellBossBegin(){if(spaceHellBossStarted||spaceHellBossCleared)return;spaceHellBossStarted=true;spaceHellBossTime=0;spaceHellBossAttackTimer=130;spaceHellBoss.hp=spaceHellBoss.maxHP;spaceHellMessage="THE FINAL DEMON AWAKENS";spaceHellMessageTimer=100;saveGame();}
+function spaceHellBossBegin(){if(spaceHellBossStarted||spaceHellBossCleared)return;spaceHellBossStarted=true;spaceHellBossTime=0;spaceHellBossAttackTimer=130;spaceHellBoss.hp=Math.min(spaceHellBoss.maxHP,Math.max(0,spaceHellBoss.hp??spaceHellBoss.maxHP));spaceHellMessage="THE FINAL DEMON AWAKENS";spaceHellMessageTimer=100;saveGame();}
 function spaceHellBossSword(){if(spaceHellArea!==6||!spaceHellBossStarted||spaceHellBossCleared||spaceHellDeathTimer>0||attackCooldown>0)return;attackCooldown=24;attackTimer=12;if(Math.hypot(player.x+player.w/2-spaceHellBoss.x,player.y+player.h/2-spaceHellBoss.y)<spaceHellBoss.radius+72){spaceHellBoss.hp=Math.max(0,spaceHellBoss.hp-3);if(!spaceHellBoss.hp)spaceHellBossDefeat();}}
 function spaceHellBossShoot(){if(spaceHellArea!==6||!spaceHellBossStarted||spaceHellBossCleared||spaceHellDeathTimer>0||shotCooldown>0)return;shotCooldown=17;spaceHellBossPlayerShots.push({x:player.x+player.w/2+facing*22,y:player.y+player.h/2,vx:facing*10,life:100});}
 function spaceHellBossDefeat(){if(spaceHellBossCleared)return;spaceHellBoss.hp=0;spaceHellBoss.alive=false;spaceHellBossCleared=true;spaceHellBossShots=[];spaceHellBossPlayerShots=[];spaceHellBossSpikes=[];spaceHellBossEyeBomb=null;spaceHellMessage="SPACE HELL CONQUERED";spaceHellMessageTimer=240;spaceHellCleared=true;gameClear=true;stageCleared=true;currentTime=(Date.now()-gameStart)/1000;if(bestTime===null||currentTime<bestTime){bestTime=currentTime;localStorage.setItem("bestTime",String(bestTime))}checkAchievements();saveGame();}
