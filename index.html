@@ -555,7 +555,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.49</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.50</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -684,15 +684,17 @@ body>h1{display:none}
   <div class="editor-head"><h2 id="stageEditorTitle">🧩 STAGE EDITOR</h2><button id="stageEditorClose">閉じる</button></div>
   <p class="editor-note">配置モードを選んでキャンバスをタップ。選択モードではドラッグで移動できます。</p>
   <div class="editor-tools" id="editorToolBar">
-   <button data-editor-tool="select" class="active">選択・移動</button><button data-editor-tool="platform">足場</button><button data-editor-tool="wall">壁</button><button data-editor-tool="enemy">敵</button><button data-editor-tool="coin">コイン</button><button data-editor-tool="goal">ゴール</button>
+   <button data-editor-tool="select" class="active">選択・移動</button><button data-editor-tool="platform">足場</button><button data-editor-tool="wall">壁</button><button data-editor-tool="enemy">敵</button><button data-editor-tool="coin">コイン</button><button data-editor-tool="heal">回復</button><button data-editor-tool="goal">ゴール</button>
   </div>
   <canvas id="stageEditorCanvas" width="900" height="500"></canvas>
   <div class="editor-tools">
-   <button id="editorDelete">選択を削除</button><button id="editorDuplicate">複製</button><button id="editorClear">全消去</button>
+   <button id="editorDelete">選択を削除</button><button id="editorDuplicate">複製</button><button id="editorSmaller">サイズ −</button><button id="editorLarger">サイズ ＋</button><button id="editorClear">全消去</button>
   </div>
   <div class="editor-tools">
-   <button id="editorSave">保存</button><button id="editorLoad">読み込み</button><button id="editorExport">データをコピー</button>
+   <input id="editorStageName" maxlength="24" placeholder="ステージ名" aria-label="ステージ名" style="width:150px;padding:9px;border-radius:8px">
+   <button id="editorSaveNamed">名前を付けて保存</button><button id="editorLoadNamed">保存一覧から読み込み</button><button id="editorTestPlay">▶ テストプレイ</button>
   </div>
+  <div class="editor-tools"><button id="editorSave">クイック保存</button><button id="editorLoad">クイック読み込み</button><button id="editorImport">JSON読み込み</button><button id="editorExport">JSONコピー</button></div>
   <p id="editorMessage" class="editor-note" aria-live="polite">新しいステージを作成できます。</p>
  </div>
 </div>
@@ -712,6 +714,7 @@ let worldNumber=1,world2Unlocked=false,world2Cleared=false,world3Unlocked=false,
 let facing=1,attackTimer=0,gameStarted=false;
 let playerSkin="#9b8aff",coinCount=0,camera=0,gameClear=false,bossDefeated=false,stageCleared=false;
 let achievementUnlocked=[],achievementTotalCoins=0,achievementEnemyKills=0,bossDefeatCount=0;
+let customStageTestMode=false,customStageHealItems=[];
 let claimedWorldRewards=[];
 let gameStats={totalPlaySeconds:0,playCount:0,stageClears:0,worldClears:[0,0,0,0],totalDamageTaken:0,totalCoinsEarned:0,totalCoinsSpent:0};
 let adminStatsOverride=null;
@@ -1494,9 +1497,9 @@ function update(){
     else if(!adminMode&&invincibleTimer===0){playerHP--;gameStats.totalDamageTaken++;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}
    }
   }
-  for(const c of coins){if(!c.taken&&player.x<c.x+15&&player.x+player.w>c.x-15&&player.y<c.y+15&&player.y+player.h>c.y-15){c.taken=true;if(!adminMode){coinCount++;gameStats.totalCoinsEarned++;achievementTotalCoins++;checkAchievements()}}}
+  for(const c of coins){if(!c.taken&&player.x<c.x+15&&player.x+player.w>c.x-15&&player.y<c.y+15&&player.y+player.h>c.y-15){c.taken=true;if(!adminMode){coinCount++;gameStats.totalCoinsEarned++;achievementTotalCoins++;checkAchievements()}}}if(customStageTestMode){for(const h of customStageHealItems){if(!h.used&&player.x<h.x+h.w&&player.x+player.w>h.x&&player.y<h.y+h.h&&player.y+player.h>h.y){h.used=true;playerHP=Math.min(skinMaxHP(),playerHP+1)}}}
   if(!adminMode&&boss.alive&&player.x<boss.x+boss.w&&player.x+player.w>boss.x&&player.y<boss.y+boss.h&&player.y+player.h>boss.y&&invincibleTimer===0){if(worldNumber===4)damagePlayer();else{playerHP--;gameStats.totalDamageTaken++;invincibleTimer=60;player.vy=-5;if(playerHP<=0){playerHP=3;player.x=80;player.y=200;player.vy=0;player.jumps=0}}}
-  if(bossDefeated&&player.x<goal.x+goal.w&&player.x+player.w>goal.x&&player.y<goal.y+goal.h&&player.y+player.h>goal.y)finishGame();
+  if(bossDefeated&&player.x<goal.x+goal.w&&player.x+player.w>goal.x&&player.y<goal.y+goal.h&&player.y+player.h>goal.y){if(customStageTestMode){gameClear=true;gameStarted=false;document.getElementById("clearTitle").textContent="CUSTOM STAGE CLEAR!";document.getElementById("worldRewardText").textContent="テストプレイ完了";document.getElementById("nextStageButton").style.display="none";document.getElementById("clearPanel").style.display="block"}else finishGame()}
   camera=Math.max(0,Math.min(worldNumber===3?2500:worldNumber===4?2800:1900,player.x-250));
   if(window.NEON_ONLINE?.publishPosition){
    window.NEON_ONLINE.publishPosition({x:player.x,y:player.y,facing,world:worldNumber,skin:playerSkin,character:appearanceCharacter,admin:!!window.NEON_GAME_ADMIN?.()});
@@ -1921,7 +1924,8 @@ function restart(){
  gameClear=false;gameStarted=true;currentTime=0;gameStart=Date.now();camera=0;dashTimer=0;shieldTimer=0;invincibleTimer=0;attackTimer=0;saveGame();
 }
 document.getElementById("restart").onclick=()=>{restart()};
-function returnHome(){saveGame();floatMode=false;refreshAdminUI();document.getElementById("codePanel").style.display="none";document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";document.getElementById("world3Select").disabled=!world3Unlocked;document.getElementById("world3Select").textContent=world3Unlocked?"☁️ WORLD 3 : SKY KINGDOM":"☁️ WORLD 3 : SKY KINGDOM 🔒";document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
+function returnToStageEditor(){customStageTestMode=false;gameStarted=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block";document.getElementById("stageEditorPanel").style.display="block";document.getElementById("stageEditorTestReturn").style.display="none";document.getElementById("clearPanel").style.display="none"}
+function returnHome(){if(customStageTestMode){returnToStageEditor();return}saveGame();floatMode=false;refreshAdminUI();document.getElementById("codePanel").style.display="none";document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("world2Select").disabled=!world2Unlocked;document.getElementById("world2Select").textContent=world2Unlocked?"🌋 WORLD 2 : LAVA LAND":"🌋 WORLD 2 : LAVA LAND 🔒";document.getElementById("world3Select").disabled=!world3Unlocked;document.getElementById("world3Select").textContent=world3Unlocked?"☁️ WORLD 3 : SKY KINGDOM":"☁️ WORLD 3 : SKY KINGDOM 🔒";document.getElementById("world4Select").disabled=!world4Unlocked;document.getElementById("world4Select").textContent=world4Unlocked?"🌌 WORLD 4 : COSMIC ABYSS":"🌌 WORLD 4 : COSMIC ABYSS 🔒";document.getElementById("clearPanel").style.display="none";gameStarted=false;touch.left=false;touch.right=false;keys.ArrowLeft=keys.ArrowRight=keys.KeyA=keys.KeyD=false;document.getElementById("stage").style.display="none";document.getElementById("home").style.display="block"}
 document.getElementById("homeButton").onclick=returnHome;
 document.getElementById("clearHomeButton").onclick=returnHome;
 document.getElementById("clearRestartButton").onclick=restart;
@@ -2252,55 +2256,44 @@ window.addEventListener("beforeunload",()=>saveGame());
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")saveGame()});
 setInterval(()=>{if(gameStarted&&!gameClear){gameStats.totalPlaySeconds++;saveGame()}else if(gameStarted)saveGame()},1000);setInterval(()=>{if(gameStarted)saveGame()},5000);update();
 
-/* STAGE EDITOR / PHASE 1 */
+/* STAGE EDITOR / PHASE 2 + TEST PLAY */
 (()=>{
  const panel=document.getElementById("stageEditorPanel"),canvas=document.getElementById("stageEditorCanvas"),c=canvas.getContext("2d"),msg=document.getElementById("editorMessage");
  if(!panel||!canvas)return;
  let items=[],tool="select",selected=-1,dragging=false,dragOffset={x:0,y:0};
- const colors={platform:"#36d6ff",wall:"#b38cff",enemy:"#ff5c8a",coin:"#ffd85a",goal:"#5affb8"};
- function say(t){msg.textContent=t}
- function setTool(t){tool=t;document.querySelectorAll("[data-editor-tool]").forEach(b=>b.classList.toggle("active",b.dataset.editorTool===t));}
- function bounds(o){return {x:o.x,y:o.y,w:o.w,h:o.h}}
- function point(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}}
+ const colors={platform:"#36d6ff",wall:"#b38cff",enemy:"#ff5c8a",coin:"#ffd85a",heal:"#65ff9b",goal:"#5affb8"},types=Object.keys(colors);
+ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+ const say=t=>msg.textContent=t;
+ function setTool(t){tool=t;document.querySelectorAll("[data-editor-tool]").forEach(b=>b.classList.toggle("active",b.dataset.editorTool===t))}
+ function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*900/r.width,y:(e.clientY-r.top)*500/r.height}}
  function hit(p,o){return p.x>=o.x&&p.x<=o.x+o.w&&p.y>=o.y&&p.y<=o.y+o.h}
  function draw(){
-  c.clearRect(0,0,900,500);c.fillStyle="#101a38";c.fillRect(0,0,900,500);
-  c.strokeStyle="rgba(100,190,255,.13)";c.lineWidth=1;
-  for(let x=0;x<=900;x+=30){c.beginPath();c.moveTo(x,0);c.lineTo(x,500);c.stroke()}
-  for(let y=0;y<=500;y+=30){c.beginPath();c.moveTo(0,y);c.lineTo(900,y);c.stroke()}
+  c.clearRect(0,0,900,500);c.fillStyle="#101a38";c.fillRect(0,0,900,500);c.strokeStyle="rgba(100,190,255,.13)";
+  for(let x=0;x<=900;x+=30){c.beginPath();c.moveTo(x,0);c.lineTo(x,500);c.stroke()}for(let y=0;y<=500;y+=30){c.beginPath();c.moveTo(0,y);c.lineTo(900,y);c.stroke()}
   c.fillStyle="#304568";c.fillRect(0,455,900,45);
-  items.forEach((o,i)=>{c.save();c.fillStyle=colors[o.type]||"#fff";c.globalAlpha=o.type==="coin"?.9:.72;
-   if(o.type==="coin"){c.beginPath();c.arc(o.x+o.w/2,o.y+o.h/2,o.w/2,0,Math.PI*2);c.fill()}
-   else if(o.type==="enemy"){c.fillRect(o.x,o.y,o.w,o.h);c.fillStyle="#fff";c.fillRect(o.x+7,o.y+8,5,5);c.fillRect(o.x+o.w-12,o.y+8,5,5)}
-   else if(o.type==="goal"){c.fillRect(o.x,o.y,o.w,o.h);c.fillStyle="#fff";c.fillRect(o.x+o.w/2-3,o.y+8,6,o.h-16)}
-   else c.fillRect(o.x,o.y,o.w,o.h);
-   c.globalAlpha=1;if(i===selected){c.strokeStyle="#fff";c.lineWidth=3;c.setLineDash([7,4]);c.strokeRect(o.x-3,o.y-3,o.w+6,o.h+6)}c.restore();
-  });
-  c.fillStyle="#c9edff";c.font="12px sans-serif";c.fillText("EDITOR AREA  /  900 × 500",12,20);
+  items.forEach((o,i)=>{c.save();c.fillStyle=colors[o.type];c.globalAlpha=.82;if(o.type==="coin"||o.type==="heal"){c.beginPath();c.arc(o.x+o.w/2,o.y+o.h/2,Math.min(o.w,o.h)/2,0,Math.PI*2);c.fill();if(o.type==="heal"){c.fillStyle="#073c27";c.fillRect(o.x+o.w/2-3,o.y+4,6,o.h-8);c.fillRect(o.x+4,o.y+o.h/2-3,o.w-8,6)}}else{c.fillRect(o.x,o.y,o.w,o.h);if(o.type==="goal"){c.fillStyle="#fff";c.fillRect(o.x+o.w/2-3,o.y+8,6,o.h-16)}}c.globalAlpha=1;if(i===selected){c.strokeStyle="#fff";c.lineWidth=3;c.setLineDash([7,4]);c.strokeRect(o.x-3,o.y-3,o.w+6,o.h+6);c.setLineDash([]);c.fillStyle="#fff";c.fillRect(o.x+o.w-5,o.y+o.h-5,10,10)}c.restore()});
+  c.fillStyle="#c9edff";c.font="12px sans-serif";c.fillText("EDITOR AREA / 900 × 500",12,20)
  }
- function add(type,x,y){
-  const sizes={platform:[120,18],wall:[24,100],enemy:[34,38],coin:[22,22],goal:[35,75]},[w,h]=sizes[type];
-  items.push({type,x:Math.max(0,Math.min(900-w,x-w/2)),y:Math.max(25,Math.min(455-h,y-h/2)),w,h});selected=items.length-1;draw();
- }
- document.getElementById("stageEditorOpen").onclick=()=>{panel.style.display="block";draw()};
- document.getElementById("stageEditorClose").onclick=()=>panel.style.display="none";
- panel.addEventListener("click",e=>{if(e.target===panel)panel.style.display="none"});
+ function add(type,x,y){const z={platform:[120,18],wall:[24,100],enemy:[34,38],coin:[22,22],heal:[24,24],goal:[35,75]}[type],[w,h]=z;items.push({type,x:clamp(x-w/2,0,900-w),y:clamp(y-h/2,25,455-h),w,h});selected=items.length-1;draw()}
+ function clean(v){return(Array.isArray(v)?v:[]).filter(o=>o&&types.includes(o.type)&&[o.x,o.y,o.w,o.h].every(Number.isFinite)&&o.w>=8&&o.h>=8).map(o=>({type:o.type,x:clamp(o.x,0,899),y:clamp(o.y,20,499),w:clamp(o.w,8,900),h:clamp(o.h,8,480)}))}
+ function named(){try{return JSON.parse(localStorage.getItem("neonStageEditorStagesV2")||"{}")}catch(e){return{}}}
+ document.getElementById("stageEditorOpen").onclick=()=>{panel.style.display="block";draw()};document.getElementById("stageEditorClose").onclick=()=>panel.style.display="none";panel.addEventListener("click",e=>{if(e.target===panel)panel.style.display="none"});
  document.querySelectorAll("[data-editor-tool]").forEach(b=>b.onclick=()=>setTool(b.dataset.editorTool));
- canvas.addEventListener("pointerdown",e=>{
-  const p=point(e);
-  if(tool!=="select"){add(tool,p.x,p.y);say("配置しました。続けて配置できます。");return}
-  selected=-1;for(let i=items.length-1;i>=0;i--)if(hit(p,items[i])){selected=i;dragging=true;dragOffset={x:p.x-items[i].x,y:p.y-items[i].y};break}
-  canvas.setPointerCapture(e.pointerId);draw();
- });
- canvas.addEventListener("pointermove",e=>{if(!dragging||selected<0)return;const p=point(e),o=items[selected];o.x=Math.max(0,Math.min(900-o.w,p.x-dragOffset.x));o.y=Math.max(24,Math.min(500-o.h,p.y-dragOffset.y));draw()});
- const stop=()=>{dragging=false};canvas.addEventListener("pointerup",stop);canvas.addEventListener("pointercancel",stop);
- document.getElementById("editorDelete").onclick=()=>{if(selected>=0){items.splice(selected,1);selected=-1;draw();say("選択したオブジェクトを削除しました。")}};
- document.getElementById("editorDuplicate").onclick=()=>{if(selected>=0){const o=items[selected];items.push({...o,x:Math.min(900-o.w,o.x+24),y:Math.min(500-o.h,o.y+24)});selected=items.length-1;draw();say("複製しました。")}};
- document.getElementById("editorClear").onclick=()=>{if(confirm("配置したオブジェクトをすべて消去しますか？")){items=[];selected=-1;draw();say("キャンバスを空にしました。")}};
- document.getElementById("editorSave").onclick=()=>{localStorage.setItem("neonStageEditorV1",JSON.stringify(items));say("この端末にステージを保存しました。")};
- document.getElementById("editorLoad").onclick=()=>{try{const v=JSON.parse(localStorage.getItem("neonStageEditorV1")||"[]");if(!Array.isArray(v))throw 0;items=v.filter(o=>o&&["platform","wall","enemy","coin","goal"].includes(o.type)&&[o.x,o.y,o.w,o.h].every(Number.isFinite));selected=-1;draw();say("保存データを読み込みました。")}catch(e){say("保存データを読み込めませんでした。")}};
- document.getElementById("editorExport").onclick=()=>{const data=JSON.stringify(items);if(navigator.clipboard?.writeText){navigator.clipboard.writeText(data).then(()=>say("ステージデータをコピーしました。")).catch(()=>say("コピーできませんでした。"))}else say("この端末ではコピー機能を利用できません。")};
- draw();
+ canvas.addEventListener("pointerdown",e=>{const p=point(e);if(tool!=="select"){add(tool,p.x,p.y);say("配置しました。");return}selected=-1;for(let i=items.length-1;i>=0;i--)if(hit(p,items[i])){selected=i;dragging=true;dragOffset={x:p.x-items[i].x,y:p.y-items[i].y};break}canvas.setPointerCapture(e.pointerId);draw()});
+ canvas.addEventListener("pointermove",e=>{if(!dragging||selected<0)return;const p=point(e),o=items[selected];o.x=clamp(p.x-dragOffset.x,0,900-o.w);o.y=clamp(p.y-dragOffset.y,20,500-o.h);draw()});const stop=()=>dragging=false;canvas.addEventListener("pointerup",stop);canvas.addEventListener("pointercancel",stop);
+ document.getElementById("editorDelete").onclick=()=>{if(selected>=0){items.splice(selected,1);selected=-1;draw();say("削除しました。")}};
+ document.getElementById("editorDuplicate").onclick=()=>{if(selected>=0){const o=items[selected];items.push({...o,x:clamp(o.x+24,0,900-o.w),y:clamp(o.y+24,20,500-o.h)});selected=items.length-1;draw()}};
+ function resize(f){if(selected<0)return;const o=items[selected],w=clamp(o.w*f,8,900),h=clamp(o.h*f,8,480);o.x=clamp(o.x-(w-o.w)/2,0,900-w);o.y=clamp(o.y-(h-o.h)/2,20,500-h);o.w=w;o.h=h;draw()}
+ document.getElementById("editorSmaller").onclick=()=>resize(.85);document.getElementById("editorLarger").onclick=()=>resize(1.18);
+ document.getElementById("editorClear").onclick=()=>{if(confirm("すべて消去しますか？")){items=[];selected=-1;draw()}};
+ document.getElementById("editorSave").onclick=()=>{localStorage.setItem("neonStageEditorV1",JSON.stringify(items));say("クイック保存しました。")};
+ document.getElementById("editorLoad").onclick=()=>{try{items=clean(JSON.parse(localStorage.getItem("neonStageEditorV1")||"[]"));selected=-1;draw();say("クイック保存を読み込みました。")}catch(e){say("読み込みに失敗しました。")}};
+ document.getElementById("editorSaveNamed").onclick=()=>{const name=document.getElementById("editorStageName").value.trim();if(!name){say("ステージ名を入力してください。");return}const all=named();all[name]=items.map(o=>({...o}));localStorage.setItem("neonStageEditorStagesV2",JSON.stringify(all));say("「"+name+"」を保存しました。")};
+ document.getElementById("editorLoadNamed").onclick=()=>{const all=named(),names=Object.keys(all);if(!names.length){say("保存済みステージはありません。");return}const name=prompt("読み込むステージ名：\n"+names.join("\n"),names[0]);if(name===null)return;if(!all[name]){say("その名前は見つかりません。");return}items=clean(all[name]);document.getElementById("editorStageName").value=name;selected=-1;draw();say("「"+name+"」を読み込みました。")};
+ document.getElementById("editorExport").onclick=()=>{const raw=JSON.stringify({format:"NEON_STAGE_V2",items});if(navigator.clipboard?.writeText)navigator.clipboard.writeText(raw).then(()=>say("JSONをコピーしました。")).catch(()=>say("コピーに失敗しました。"));else{const a=document.createElement("textarea");a.value=raw;panel.appendChild(a);a.select();try{document.execCommand("copy");say("JSONをコピーしました。")}catch(e){say("コピーできませんでした。")}a.remove()}};
+ document.getElementById("editorImport").onclick=()=>{const raw=prompt("ステージJSONを貼り付けてください：");if(raw===null)return;try{const v=JSON.parse(raw);items=clean(v.items||v);selected=-1;draw();say("JSONを読み込みました。")}catch(e){say("JSONの形式が正しくありません。")}};
+ document.getElementById("editorTestPlay").onclick=()=>{const ps=items.filter(o=>o.type==="platform").map(o=>({x:o.x,y:o.y,w:o.w,h:o.h}));if(!ps.length){say("足場を1つ以上配置してください。");return}const g=items.find(o=>o.type==="goal")||{x:820,y:350,w:45,h:80};customStageTestMode=true;customStageHealItems=items.filter(o=>o.type==="heal").map(o=>({...o,used:false}));worldNumber=1;platforms=ps;stageWalls=items.filter(o=>o.type==="wall").map(o=>({x:o.x,y:o.y,w:o.w,h:o.h}));enemies=items.filter(o=>o.type==="enemy").map(o=>({x:o.x,y:o.y,w:o.w,h:o.h,min:o.x-40,max:o.x+40,dir:1,alive:true}));coins=items.filter(o=>o.type==="coin").map(o=>({x:o.x+o.w/2,y:o.y+o.h/2,taken:false}));goal={...g};boss={x:-500,y:-500,w:1,h:1,hp:0,maxHP:0,alive:false};bossDefeated=true;gameClear=false;stageCleared=false;player.x=80;player.y=200;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;camera=0;currentTime=0;panel.style.display="none";document.getElementById("stageEditorTestReturn").style.display="inline-block";beginSelectedWorld()};
+ draw()
 })();
 
 </script>
