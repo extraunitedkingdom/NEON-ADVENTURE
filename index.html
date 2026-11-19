@@ -545,7 +545,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.45</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.46</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -2074,7 +2074,7 @@ function drawWorld4Background(){
  ctx.fillStyle="#18172c";ctx.beginPath();ctx.ellipse(640,385,280,70,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#31234c";ctx.beginPath();ctx.ellipse(640,370,260,58,0,0,Math.PI*2);ctx.fill();
 }
 function drawWorld4Actors(){
- for(const e of enemies){if(!e.alive)continue;ctx.save();ctx.translate(e.x-camera,e.y);
+ for(const e of enemies){if(!e.alive)continue;ctx.save();ctx.translate(e.x,e.y);
   if(e.type==="melee"){
    ctx.fillStyle="#17243a";ctx.fillRect(7,10,29,29);ctx.fillStyle="#405b79";ctx.fillRect(2,15,12,22);ctx.fillRect(29,14,13,23);ctx.fillStyle="#9bf5ff";ctx.fillRect(16,17,5,4);ctx.fillRect(25,17,5,4);ctx.fillStyle="#83eaff";ctx.fillRect(36,25,23,5);ctx.fillStyle="#d8fbff";ctx.fillRect(55,22,5,11);
   }else if(e.type==="ranged"){
@@ -2083,26 +2083,26 @@ function drawWorld4Actors(){
    ctx.fillStyle="#30264d";ctx.beginPath();ctx.ellipse(23,30,22,25,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#b9a2ff";ctx.beginPath();ctx.arc(23,10,11,0,Math.PI*2);ctx.fill();ctx.fillStyle="#eee7ff";ctx.fillRect(18,8,3,3);ctx.fillRect(25,8,3,3);
    ctx.fillStyle="#4a3a72";ctx.beginPath();ctx.ellipse(23,62,30,8,0,0,Math.PI*2);ctx.fill();ctx.fillStyle="#a78bfa";ctx.beginPath();ctx.ellipse(23,58,27,6,0,0,Math.PI*2);ctx.fill();
   }ctx.restore()}
- for(const b of w4Shots){ctx.fillStyle="#ff65da";ctx.shadowColor="#ff65da";ctx.shadowBlur=12;ctx.beginPath();ctx.arc(b.x-camera,b.y,6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0}
- for(const m of w4Magic){ctx.fillStyle="rgba(172,95,255,.35)";ctx.strokeStyle="#d7b6ff";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(m.x-camera+m.w/2,423,m.w/2,13,0,0,Math.PI*2);ctx.fill();ctx.stroke()}
- if(w4Laser){ctx.fillStyle="rgba(190,110,255,.25)";ctx.fillRect((w4Laser.dir>0?w4Laser.x:w4Laser.x-w4Laser.w)-camera,380,w4Laser.w,15);ctx.fillStyle="#e7caff";ctx.fillRect((w4Laser.dir>0?w4Laser.x:w4Laser.x-w4Laser.w)-camera,385,w4Laser.w,5)}
- if(boss.alive){ctx.save();ctx.translate(boss.x-camera,boss.y);ctx.fillStyle="#080711";ctx.beginPath();ctx.moveTo(25,10);ctx.lineTo(105,10);ctx.lineTo(125,90);ctx.lineTo(4,90);ctx.closePath();ctx.fill();ctx.fillStyle="#29243d";ctx.fillRect(38,4,48,65);ctx.fillStyle="#bda9d8";ctx.fillRect(46,0,32,14);ctx.fillStyle="#080711";ctx.beginPath();ctx.moveTo(37,5);ctx.lineTo(13,85);ctx.lineTo(42,72);ctx.fill();ctx.beginPath();ctx.moveTo(86,5);ctx.lineTo(116,85);ctx.lineTo(83,72);ctx.fill();ctx.shadowColor="#b44cff";ctx.shadowBlur=25;ctx.fillStyle="#c65cff";ctx.beginPath();ctx.arc(62,39,12,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle="#f0d7ff";ctx.fillRect(56,36,12,5);ctx.restore()}
+ for(const b of w4Shots){ctx.fillStyle="#ff65da";ctx.shadowColor="#ff65da";ctx.shadowBlur=12;ctx.beginPath();ctx.arc(b.x,b.y,6,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0}
+ for(const m of w4Magic){ctx.fillStyle="rgba(172,95,255,.35)";ctx.strokeStyle="#d7b6ff";ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(m.x+m.w/2,423,m.w/2,13,0,0,Math.PI*2);ctx.fill();ctx.stroke()}
+ if(w4Laser){ctx.fillStyle="rgba(190,110,255,.25)";ctx.fillRect((w4Laser.dir>0?w4Laser.x:w4Laser.x-w4Laser.w),380,w4Laser.w,15);ctx.fillStyle="#e7caff";ctx.fillRect((w4Laser.dir>0?w4Laser.x:w4Laser.x-w4Laser.w),385,w4Laser.w,5)}
+ if(boss.alive){ctx.save();ctx.translate(boss.x,boss.y);ctx.fillStyle="#080711";ctx.beginPath();ctx.moveTo(25,10);ctx.lineTo(105,10);ctx.lineTo(125,90);ctx.lineTo(4,90);ctx.closePath();ctx.fill();ctx.fillStyle="#29243d";ctx.fillRect(38,4,48,65);ctx.fillStyle="#bda9d8";ctx.fillRect(46,0,32,14);ctx.fillStyle="#080711";ctx.beginPath();ctx.moveTo(37,5);ctx.lineTo(13,85);ctx.lineTo(42,72);ctx.fill();ctx.beginPath();ctx.moveTo(86,5);ctx.lineTo(116,85);ctx.lineTo(83,72);ctx.fill();ctx.shadowColor="#b44cff";ctx.shadowBlur=25;ctx.fillStyle="#c65cff";ctx.beginPath();ctx.arc(62,39,12,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;ctx.fillStyle="#f0d7ff";ctx.fillRect(56,36,12,5);ctx.restore()}
  // 攻撃予告は色・形・文字を統一して視認性を上げる
  const pulse=.55+.45*Math.sin(Date.now()*.018);
  for(const e of enemies){
   if(!e.alive)continue;
   if(e.type==="ranged"&&e.cool<55){
-   const sx=e.x+e.w/2-camera,sy=e.y+24,tx=player.x+player.w/2-camera,ty=player.y+player.h/2;
+   const sx=e.x+e.w/2,sy=e.y+24,tx=player.x+player.w/2,ty=player.y+player.h/2;
    ctx.save();ctx.strokeStyle="#ff4fba";ctx.lineWidth=3+2*pulse;ctx.setLineDash([10,7]);ctx.globalAlpha=.45+.45*pulse;ctx.beginPath();ctx.moveTo(sx,sy);ctx.lineTo(tx,ty);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#ff4fba";ctx.beginPath();ctx.arc(tx,ty,18+5*pulse,0,Math.PI*2);ctx.stroke();ctx.font="bold 13px sans-serif";ctx.fillText("狙われている！",tx-43,ty-25);ctx.restore();
   }
   if(e.type==="mage"&&e.cool<65){
-   ctx.save();ctx.globalAlpha=.65+.35*pulse;ctx.strokeStyle="#d9a5ff";ctx.lineWidth=4;ctx.setLineDash([7,5]);ctx.beginPath();ctx.ellipse(e.x+e.w/2-camera,423,55+8*pulse,18+3*pulse,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#f2dfff";ctx.font="bold 13px sans-serif";ctx.fillText("魔法攻撃！",e.x+e.w/2-camera-35,395);ctx.restore();
+   ctx.save();ctx.globalAlpha=.65+.35*pulse;ctx.strokeStyle="#d9a5ff";ctx.lineWidth=4;ctx.setLineDash([7,5]);ctx.beginPath();ctx.ellipse(e.x+e.w/2,423,55+8*pulse,18+3*pulse,0,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle="#f2dfff";ctx.font="bold 13px sans-serif";ctx.fillText("魔法攻撃！",e.x+e.w/2-35,395);ctx.restore();
   }
  }
  if(w4BossState!=="idle"&&w4BossState!=="recovery"&&boss.alive){
   const labels={melee:"ボス：近接攻撃！",shot:"ボス：弾攻撃！",magic:"ボス：魔法攻撃！",area:"ボス：範囲攻撃！"};
   ctx.save();ctx.fillStyle="rgba(10,5,28,.82)";ctx.fillRect(250,12,400,42);ctx.strokeStyle="#ff65d8";ctx.lineWidth=3;ctx.strokeRect(250,12,400,42);ctx.fillStyle="#fff";ctx.font="bold 22px sans-serif";ctx.textAlign="center";ctx.fillText(labels[w4BossState]||"危険！",450,41);ctx.textAlign="left";
-  if(w4BossState==="area"){ctx.strokeStyle="#ff3c76";ctx.lineWidth=5;ctx.globalAlpha=.35+.55*pulse;ctx.beginPath();ctx.ellipse(boss.x+boss.w/2-camera,boss.y+boss.h/2,250,100,0,0,Math.PI*2);ctx.stroke()}
+  if(w4BossState==="area"){ctx.strokeStyle="#ff3c76";ctx.lineWidth=5;ctx.globalAlpha=.35+.55*pulse;ctx.beginPath();ctx.ellipse(boss.x+boss.w/2,boss.y+boss.h/2,250,100,0,0,Math.PI*2);ctx.stroke()}
   ctx.restore();
  }
 }
