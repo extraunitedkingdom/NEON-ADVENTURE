@@ -410,6 +410,16 @@ body>h1{display:none}
 #home #spaceHellSecret{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:8;display:block;width:16%;height:24%;min-height:0;max-width:170px;margin:0;padding:0;border:1px solid transparent;border-radius:50%;background:transparent;box-shadow:none;opacity:0;letter-spacing:0;cursor:pointer;touch-action:manipulation}
 #home #spaceHellSecret:before{inset:0;border-color:transparent}
 #home #spaceHellSecret:focus-visible{opacity:1;outline:3px solid #ff5267;outline-offset:4px;background:rgba(255,35,55,.12);box-shadow:0 0 24px #ff1d3d}
+
+#stageEditorPanel{display:none;position:fixed;z-index:80;inset:0;overflow:auto;padding:12px;background:radial-gradient(ellipse at 50% 0%,#18366d,#070b20 75%);color:#fff}
+.editor-shell{width:min(100%,980px);margin:0 auto;padding:14px;border:2px solid #36eaff;border-radius:16px;background:#0b1534;box-shadow:0 0 24px #00dfff55;text-align:center}
+.editor-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}.editor-head h2{margin:4px;color:#9ffaff;letter-spacing:2px}
+.editor-tools{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0}
+.editor-tools button{margin:0;padding:9px 12px;font-size:13px}
+.editor-tools button.active{background:#087eaa;border-color:#7dfaff;box-shadow:0 0 12px #00dfff88}
+#stageEditorCanvas{display:block;width:100%;height:auto;margin:10px auto;border:2px solid #45dfff;border-radius:10px;background:#111a36;touch-action:none}
+.editor-note{font-size:12px;color:#bcd8ff;margin:6px}
+
 </style>
 </head>
 <body>
@@ -545,11 +555,11 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.48</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.49</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
-<button id="profileToggle">▣　CHARACTER FILE</button>
+<button id="stageEditorOpen">🧩　STAGE EDITOR</button><button id="profileToggle">▣　CHARACTER FILE</button>
 <button id="achievementToggle">🏅　ACHIEVEMENTS</button>
 <button id="statisticsToggle">📊　STATISTICS</button>
 <button id="shopToggle">🛒　SKIN SHOP</button>
@@ -668,6 +678,24 @@ body>h1{display:none}
 <p class="small">敵は踏んで倒すか、ATTACKで倒そう。ボスを倒すとゴールできるよ。</p><p class="small" id="world2Hint">WORLD 2：水色のジャンプパッドでマグマを飛び越えよう。2つ目は高い壁の上へ飛び乗るためのパッド！</p>
 </div>
 <script src="./online.js?v=20261107-7"></script>
+
+<div id="stageEditorPanel" role="dialog" aria-modal="true" aria-labelledby="stageEditorTitle">
+ <div class="editor-shell">
+  <div class="editor-head"><h2 id="stageEditorTitle">🧩 STAGE EDITOR</h2><button id="stageEditorClose">閉じる</button></div>
+  <p class="editor-note">配置モードを選んでキャンバスをタップ。選択モードではドラッグで移動できます。</p>
+  <div class="editor-tools" id="editorToolBar">
+   <button data-editor-tool="select" class="active">選択・移動</button><button data-editor-tool="platform">足場</button><button data-editor-tool="wall">壁</button><button data-editor-tool="enemy">敵</button><button data-editor-tool="coin">コイン</button><button data-editor-tool="goal">ゴール</button>
+  </div>
+  <canvas id="stageEditorCanvas" width="900" height="500"></canvas>
+  <div class="editor-tools">
+   <button id="editorDelete">選択を削除</button><button id="editorDuplicate">複製</button><button id="editorClear">全消去</button>
+  </div>
+  <div class="editor-tools">
+   <button id="editorSave">保存</button><button id="editorLoad">読み込み</button><button id="editorExport">データをコピー</button>
+  </div>
+  <p id="editorMessage" class="editor-note" aria-live="polite">新しいステージを作成できます。</p>
+ </div>
+</div>
 <script>
 "use strict";
 const canvas=document.getElementById("game"),ctx=canvas.getContext("2d");
@@ -2223,6 +2251,58 @@ else if(world2Unlocked&&worldNumber!==5)document.getElementById("startGame").tex
 window.addEventListener("beforeunload",()=>saveGame());
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")saveGame()});
 setInterval(()=>{if(gameStarted&&!gameClear){gameStats.totalPlaySeconds++;saveGame()}else if(gameStarted)saveGame()},1000);setInterval(()=>{if(gameStarted)saveGame()},5000);update();
+
+/* STAGE EDITOR / PHASE 1 */
+(()=>{
+ const panel=document.getElementById("stageEditorPanel"),canvas=document.getElementById("stageEditorCanvas"),c=canvas.getContext("2d"),msg=document.getElementById("editorMessage");
+ if(!panel||!canvas)return;
+ let items=[],tool="select",selected=-1,dragging=false,dragOffset={x:0,y:0};
+ const colors={platform:"#36d6ff",wall:"#b38cff",enemy:"#ff5c8a",coin:"#ffd85a",goal:"#5affb8"};
+ function say(t){msg.textContent=t}
+ function setTool(t){tool=t;document.querySelectorAll("[data-editor-tool]").forEach(b=>b.classList.toggle("active",b.dataset.editorTool===t));}
+ function bounds(o){return {x:o.x,y:o.y,w:o.w,h:o.h}}
+ function point(e){const r=canvas.getBoundingClientRect();return {x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height}}
+ function hit(p,o){return p.x>=o.x&&p.x<=o.x+o.w&&p.y>=o.y&&p.y<=o.y+o.h}
+ function draw(){
+  c.clearRect(0,0,900,500);c.fillStyle="#101a38";c.fillRect(0,0,900,500);
+  c.strokeStyle="rgba(100,190,255,.13)";c.lineWidth=1;
+  for(let x=0;x<=900;x+=30){c.beginPath();c.moveTo(x,0);c.lineTo(x,500);c.stroke()}
+  for(let y=0;y<=500;y+=30){c.beginPath();c.moveTo(0,y);c.lineTo(900,y);c.stroke()}
+  c.fillStyle="#304568";c.fillRect(0,455,900,45);
+  items.forEach((o,i)=>{c.save();c.fillStyle=colors[o.type]||"#fff";c.globalAlpha=o.type==="coin"?.9:.72;
+   if(o.type==="coin"){c.beginPath();c.arc(o.x+o.w/2,o.y+o.h/2,o.w/2,0,Math.PI*2);c.fill()}
+   else if(o.type==="enemy"){c.fillRect(o.x,o.y,o.w,o.h);c.fillStyle="#fff";c.fillRect(o.x+7,o.y+8,5,5);c.fillRect(o.x+o.w-12,o.y+8,5,5)}
+   else if(o.type==="goal"){c.fillRect(o.x,o.y,o.w,o.h);c.fillStyle="#fff";c.fillRect(o.x+o.w/2-3,o.y+8,6,o.h-16)}
+   else c.fillRect(o.x,o.y,o.w,o.h);
+   c.globalAlpha=1;if(i===selected){c.strokeStyle="#fff";c.lineWidth=3;c.setLineDash([7,4]);c.strokeRect(o.x-3,o.y-3,o.w+6,o.h+6)}c.restore();
+  });
+  c.fillStyle="#c9edff";c.font="12px sans-serif";c.fillText("EDITOR AREA  /  900 × 500",12,20);
+ }
+ function add(type,x,y){
+  const sizes={platform:[120,18],wall:[24,100],enemy:[34,38],coin:[22,22],goal:[35,75]},[w,h]=sizes[type];
+  items.push({type,x:Math.max(0,Math.min(900-w,x-w/2)),y:Math.max(25,Math.min(455-h,y-h/2)),w,h});selected=items.length-1;draw();
+ }
+ document.getElementById("stageEditorOpen").onclick=()=>{panel.style.display="block";draw()};
+ document.getElementById("stageEditorClose").onclick=()=>panel.style.display="none";
+ panel.addEventListener("click",e=>{if(e.target===panel)panel.style.display="none"});
+ document.querySelectorAll("[data-editor-tool]").forEach(b=>b.onclick=()=>setTool(b.dataset.editorTool));
+ canvas.addEventListener("pointerdown",e=>{
+  const p=point(e);
+  if(tool!=="select"){add(tool,p.x,p.y);say("配置しました。続けて配置できます。");return}
+  selected=-1;for(let i=items.length-1;i>=0;i--)if(hit(p,items[i])){selected=i;dragging=true;dragOffset={x:p.x-items[i].x,y:p.y-items[i].y};break}
+  canvas.setPointerCapture(e.pointerId);draw();
+ });
+ canvas.addEventListener("pointermove",e=>{if(!dragging||selected<0)return;const p=point(e),o=items[selected];o.x=Math.max(0,Math.min(900-o.w,p.x-dragOffset.x));o.y=Math.max(24,Math.min(500-o.h,p.y-dragOffset.y));draw()});
+ const stop=()=>{dragging=false};canvas.addEventListener("pointerup",stop);canvas.addEventListener("pointercancel",stop);
+ document.getElementById("editorDelete").onclick=()=>{if(selected>=0){items.splice(selected,1);selected=-1;draw();say("選択したオブジェクトを削除しました。")}};
+ document.getElementById("editorDuplicate").onclick=()=>{if(selected>=0){const o=items[selected];items.push({...o,x:Math.min(900-o.w,o.x+24),y:Math.min(500-o.h,o.y+24)});selected=items.length-1;draw();say("複製しました。")}};
+ document.getElementById("editorClear").onclick=()=>{if(confirm("配置したオブジェクトをすべて消去しますか？")){items=[];selected=-1;draw();say("キャンバスを空にしました。")}};
+ document.getElementById("editorSave").onclick=()=>{localStorage.setItem("neonStageEditorV1",JSON.stringify(items));say("この端末にステージを保存しました。")};
+ document.getElementById("editorLoad").onclick=()=>{try{const v=JSON.parse(localStorage.getItem("neonStageEditorV1")||"[]");if(!Array.isArray(v))throw 0;items=v.filter(o=>o&&["platform","wall","enemy","coin","goal"].includes(o.type)&&[o.x,o.y,o.w,o.h].every(Number.isFinite));selected=-1;draw();say("保存データを読み込みました。")}catch(e){say("保存データを読み込めませんでした。")}};
+ document.getElementById("editorExport").onclick=()=>{const data=JSON.stringify(items);if(navigator.clipboard?.writeText){navigator.clipboard.writeText(data).then(()=>say("ステージデータをコピーしました。")).catch(()=>say("コピーできませんでした。"))}else say("この端末ではコピー機能を利用できません。")};
+ draw();
+})();
+
 </script>
 </body>
 </html>
