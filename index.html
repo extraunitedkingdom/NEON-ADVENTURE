@@ -418,7 +418,7 @@ body>h1{display:none}
 .editor-tools button{margin:0;padding:9px 12px;font-size:13px;min-height:38px}
 .editor-tools button.active{background:linear-gradient(135deg,#087eaa,#1748a0);border-color:#7dfaff;box-shadow:0 0 12px #00dfff88}
 .editor-tools button:disabled{opacity:.35;filter:grayscale(1)}
-#stageEditorCanvas{display:block;width:100%;height:auto;margin:10px auto;border:1px solid #55eaff;border-radius:12px;background:#111a36;touch-action:none;box-shadow:0 8px 26px #0008}
+#stageEditorCanvas{display:block;width:100%;height:auto;margin:10px auto;touch-action:none;user-select:none;-webkit-user-select:none;border:1px solid #55eaff;border-radius:12px;background:#111a36;touch-action:none;box-shadow:0 8px 26px #0008}
 .editor-note{font-size:12px;color:#bcd8ff;margin:6px}
 .editor-toolbar-label{width:100%;font-size:10px;font-weight:900;letter-spacing:1.5px;color:#65dfff;text-align:left}
 .editor-status{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:8px 11px;border:1px solid #31598c;border-radius:9px;background:#07132b;color:#bfeaff;font:12px monospace;text-align:left}
@@ -560,7 +560,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.51</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.52</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -2270,7 +2270,7 @@ function drawCustomStageHeals(){for(const h of customStageHealItems){if(h.used)c
 (()=>{
  const panel=document.getElementById("stageEditorPanel"),canvas=document.getElementById("stageEditorCanvas"),c=canvas.getContext("2d"),msg=document.getElementById("editorMessage");
  if(!panel||!canvas)return;
- let items=[],tool="select",selected=-1,dragging=false,dragOffset={x:0,y:0},gridOn=true,history=[],historyIndex=-1;
+ let items=[],tool="select",selected=-1,dragging=false,panning=false,dragOffset={x:0,y:0},panStart={x:0,camera:0},cameraX=0,gridOn=true,history=[],historyIndex=-1;
  const undoBtn=document.getElementById("editorUndo"),redoBtn=document.getElementById("editorRedo"),selectionInfo=document.getElementById("editorSelectionInfo"),objectCount=document.getElementById("editorObjectCount");
  function snapshot(){const state=JSON.stringify(items);if(history[historyIndex]===state)return;history=history.slice(0,historyIndex+1);history.push(state);if(history.length>60)history.shift();historyIndex=history.length-1;syncHistory()}
  function syncHistory(){undoBtn.disabled=historyIndex<=0;redoBtn.disabled=historyIndex>=history.length-1}
@@ -2280,14 +2280,14 @@ function drawCustomStageHeals(){for(const h of customStageHealItems){if(h.used)c
  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
  const say=t=>msg.textContent=t;
  function setTool(t){tool=t;document.querySelectorAll("[data-editor-tool]").forEach(b=>b.classList.toggle("active",b.dataset.editorTool===t))}
- function point(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*900/r.width,y:(e.clientY-r.top)*500/r.height}}
+ function point(e){const r=canvas.getBoundingClientRect();return{x:cameraX+(e.clientX-r.left)*900/r.width,y:(e.clientY-r.top)*500/r.height}}
  function hit(p,o){return p.x>=o.x&&p.x<=o.x+o.w&&p.y>=o.y&&p.y<=o.y+o.h}
  function draw(){
-  c.clearRect(0,0,900,500);c.fillStyle="#101a38";c.fillRect(0,0,900,500);c.strokeStyle="rgba(100,190,255,.13)";
+  c.clearRect(0,0,900,500);c.fillStyle="#101a38";c.fillRect(0,0,900,500);c.save();c.translate(-cameraX,0);c.strokeStyle="rgba(100,190,255,.13)";
   if(gridOn){for(let x=0;x<=900;x+=30){c.beginPath();c.moveTo(x,0);c.lineTo(x,500);c.stroke()}for(let y=0;y<=500;y+=30){c.beginPath();c.moveTo(0,y);c.lineTo(900,y);c.stroke()}}
-  c.fillStyle="#304568";c.fillRect(0,455,900,45);
+  c.fillStyle="#304568";c.fillRect(0,455,2700,45);
   items.forEach((o,i)=>{c.save();c.fillStyle=colors[o.type];c.globalAlpha=.82;if(o.type==="coin"||o.type==="heal"){c.beginPath();c.arc(o.x+o.w/2,o.y+o.h/2,Math.min(o.w,o.h)/2,0,Math.PI*2);c.fill();if(o.type==="heal"){c.fillStyle="#073c27";c.fillRect(o.x+o.w/2-3,o.y+4,6,o.h-8);c.fillRect(o.x+4,o.y+o.h/2-3,o.w-8,6)}}else{c.fillRect(o.x,o.y,o.w,o.h);if(o.type==="goal"){c.fillStyle="#fff";c.fillRect(o.x+o.w/2-3,o.y+8,6,o.h-16)}}c.globalAlpha=1;if(i===selected){c.strokeStyle="#fff";c.lineWidth=3;c.setLineDash([7,4]);c.strokeRect(o.x-3,o.y-3,o.w+6,o.h+6);c.setLineDash([]);c.fillStyle="#fff";c.fillRect(o.x+o.w-5,o.y+o.h-5,10,10)}c.restore()});
-  c.fillStyle="#c9edff";c.font="bold 12px sans-serif";c.fillText("EDITOR AREA / 900 × 500",12,20);
+  c.fillStyle="#c9edff";c.font="bold 12px sans-serif";c.fillText("EDITOR AREA / 2700 × 500  |  X:"+Math.round(cameraX),cameraX+12,20);c.restore();
   objectCount.textContent="オブジェクト："+items.length;
   selectionInfo.textContent=selected>=0&&items[selected]?"選択："+({platform:"足場",wall:"壁",enemy:"敵",coin:"コイン",heal:"回復",goal:"ゴール"}[items[selected].type])+" / X:"+Math.round(items[selected].x)+" Y:"+Math.round(items[selected].y)+" / "+Math.round(items[selected].w)+"×"+Math.round(items[selected].h):"選択：なし";
  }
@@ -2296,11 +2296,11 @@ function drawCustomStageHeals(){for(const h of customStageHealItems){if(h.used)c
  function named(){try{return JSON.parse(localStorage.getItem("neonStageEditorStagesV2")||"{}")}catch(e){return{}}}
  document.getElementById("stageEditorOpen").onclick=()=>{panel.style.display="block";draw()};document.getElementById("stageEditorClose").onclick=()=>panel.style.display="none";panel.addEventListener("click",e=>{if(e.target===panel)panel.style.display="none"});
  document.querySelectorAll("[data-editor-tool]").forEach(b=>b.onclick=()=>setTool(b.dataset.editorTool));
- canvas.addEventListener("pointerdown",e=>{const p=point(e);if(tool!=="select"){add(tool,p.x,p.y);say("配置しました。");return}selected=-1;for(let i=items.length-1;i>=0;i--)if(hit(p,items[i])){selected=i;snapshot();dragging=true;dragOffset={x:p.x-items[i].x,y:p.y-items[i].y};break}canvas.setPointerCapture(e.pointerId);draw()});
- canvas.addEventListener("pointermove",e=>{if(!dragging||selected<0)return;const p=point(e),o=items[selected];o.x=clamp(p.x-dragOffset.x,0,900-o.w);o.y=clamp(p.y-dragOffset.y,20,500-o.h);draw()});const stop=()=>{if(dragging){dragging=false;snapshot();syncHistory()}};canvas.addEventListener("pointerup",stop);canvas.addEventListener("pointercancel",stop);
+ canvas.addEventListener("pointerdown",e=>{const p=point(e);if(tool!=="select"){add(tool,p.x,p.y);say("配置しました。");return}selected=-1;for(let i=items.length-1;i>=0;i--)if(hit(p,items[i])){selected=i;snapshot();dragging=true;dragOffset={x:p.x-items[i].x,y:p.y-items[i].y};break}if(!dragging){panning=true;panStart={x:e.clientX,camera:cameraX}}canvas.setPointerCapture(e.pointerId);draw()});
+ canvas.addEventListener("pointermove",e=>{if(dragging&&selected>=0){const p=point(e),o=items[selected];o.x=clamp(p.x-dragOffset.x,0,2700-o.w);o.y=clamp(p.y-dragOffset.y,20,500-o.h);draw()}else if(panning){const r=canvas.getBoundingClientRect();cameraX=clamp(panStart.camera-(e.clientX-panStart.x)*900/r.width,0,1800);draw()}});const stop=()=>{if(dragging){dragging=false;snapshot();syncHistory()}panning=false};canvas.addEventListener("pointerup",stop);canvas.addEventListener("pointercancel",stop);
  document.getElementById("editorDelete").onclick=()=>{if(selected>=0){snapshot();items.splice(selected,1);selected=-1;snapshot();draw();say("削除しました。")}};
- document.getElementById("editorDuplicate").onclick=()=>{if(selected>=0){snapshot();const o=items[selected];items.push({...o,x:clamp(o.x+24,0,900-o.w),y:clamp(o.y+24,20,500-o.h)});selected=items.length-1;snapshot();draw()}};
- function resize(f){if(selected<0)return;snapshot();const o=items[selected],w=clamp(o.w*f,8,900),h=clamp(o.h*f,8,480);o.x=clamp(o.x-(w-o.w)/2,0,900-w);o.y=clamp(o.y-(h-o.h)/2,20,500-h);o.w=w;o.h=h;snapshot();draw()}
+ document.getElementById("editorDuplicate").onclick=()=>{if(selected>=0){snapshot();const o=items[selected];items.push({...o,x:clamp(o.x+24,0,2700-o.w),y:clamp(o.y+24,20,500-o.h)});selected=items.length-1;snapshot();draw()}};
+ function resize(f){if(selected<0)return;snapshot();const o=items[selected],w=clamp(o.w*f,8,900),h=clamp(o.h*f,8,480);o.x=clamp(o.x-(w-o.w)/2,0,2700-w);o.y=clamp(o.y-(h-o.h)/2,20,500-h);o.w=w;o.h=h;snapshot();draw()}
  document.getElementById("editorSmaller").onclick=()=>resize(.85);document.getElementById("editorLarger").onclick=()=>resize(1.18);
  document.getElementById("editorClear").onclick=()=>{if(confirm("すべて消去しますか？")){snapshot();items=[];selected=-1;snapshot();draw()}};
  document.getElementById("editorGrid").onclick=e=>{gridOn=!gridOn;e.currentTarget.classList.toggle("active",gridOn);e.currentTarget.textContent=gridOn?"▦ グリッド ON":"▦ グリッド OFF";draw()};
