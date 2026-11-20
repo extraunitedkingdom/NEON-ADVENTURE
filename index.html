@@ -560,10 +560,10 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.58</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.59</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
-<div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
+<div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button><div id="customStageMenu" style="margin-top:12px;padding-top:10px;border-top:1px solid #48dfff66"><b>🧩 MY STAGES</b><div id="customStageButtons"></div></div></div>
 <button id="stageEditorOpen">🧩　STAGE EDITOR</button><button id="profileToggle">▣　CHARACTER FILE</button>
 <button id="achievementToggle">🏅　ACHIEVEMENTS</button>
 <button id="statisticsToggle">📊　STATISTICS</button>
@@ -2344,6 +2344,18 @@ function drawCustomStageHeals(){for(const h of customStageHealItems){if(h.used)c
  function add(type,x,y){snapshot();const z={platform:[120,18],wall:[24,100],enemy:[34,38],coin:[22,22],heal:[24,24],goal:[35,75],slope:[150,90],start:[30,42],spring:[58,20],warp:[42,42],moving:[110,18],spike:[90,24],deco:[100,80]}[type],[w,h]=z;const o={type,x:clamp(x-w/2,0,2700-w),y:clamp(y-h/2,25,455-h),w,h};if(type==="enemy"){o.hp=3;o.speed=1.5;o.range=120}if(type==="moving"){o.axis="x";o.range=140;o.speed=1.5;o.phase=0;o.path=[{x:o.x,y:o.y}]}if(type==="warp")o.pair="A";if(type==="platform")o.shape="rect";items.push(o);selected=items.length-1;snapshot();draw()}
  function clean(v){return(Array.isArray(v)?v:[]).filter(o=>o&&types.includes(o.type)&&[o.x,o.y,o.w,o.h].every(Number.isFinite)&&o.w>=8&&o.h>=8).map(o=>({...o,type:o.type,x:clamp(o.x,0,2699),y:clamp(o.y,20,499),w:clamp(o.w,8,2700),h:clamp(o.h,8,480)}))}
  function named(){try{return JSON.parse(localStorage.getItem("neonStageEditorStagesV2")||"{}")}catch(e){return{}}}
+ function renderCustomStageMenu(){
+  const host=document.getElementById("customStageButtons");if(!host)return;host.innerHTML="";
+  const all=named(),names=Object.keys(all);
+  if(!names.length){const note=document.createElement("p");note.className="small";note.textContent="保存したステージはここに表示されます。";host.appendChild(note);return}
+  names.forEach(name=>{
+   const row=document.createElement("div");row.style.cssText="display:grid;grid-template-columns:1fr 1fr;gap:6px";
+   const play=document.createElement("button");play.type="button";play.textContent="▶ "+name;play.title="このステージをプレイ";
+   play.onclick=()=>{items=clean(all[name]);document.getElementById("editorStageName").value=name;selected=-1;draw();panel.style.display="block";document.getElementById("editorTestPlay").click()};
+   const edit=document.createElement("button");edit.type="button";edit.textContent="✎ 編集";edit.onclick=()=>{items=clean(all[name]);document.getElementById("editorStageName").value=name;selected=-1;history=[];historyIndex=-1;snapshot();panel.style.display="block";draw();say("「"+name+"」を編集しています。")};
+   row.appendChild(play);row.appendChild(edit);host.appendChild(row);
+  });
+ }
  document.getElementById("stageEditorOpen").onclick=()=>{panel.style.display="block";draw()};document.getElementById("stageEditorClose").onclick=()=>panel.style.display="none";panel.addEventListener("click",e=>{if(e.target===panel)panel.style.display="none"});
  document.querySelectorAll("[data-editor-tool]").forEach(b=>b.onclick=()=>setTool(b.dataset.editorTool));
  canvas.addEventListener("pointerdown",e=>{const p=point(e);if(tool!=="select"){add(tool,p.x,p.y);if(tool==="moving"){const o=items[selected];o.path=[{x:o.x,y:o.y}];pathDrawing=true;canvas.setPointerCapture(e.pointerId);say("足場を置いた位置から、動かしたいルートを指でなぞってください。")}else say("配置しました。");draw();return}selected=-1;for(let i=items.length-1;i>=0;i--)if(hit(p,items[i])){selected=i;snapshot();dragging=true;dragOffset={x:p.x-items[i].x,y:p.y-items[i].y};break}if(!dragging){panning=true;panStart={x:e.clientX,camera:cameraX}}canvas.setPointerCapture(e.pointerId);draw()});
@@ -2357,7 +2369,7 @@ function drawCustomStageHeals(){for(const h of customStageHealItems){if(h.used)c
  window.addEventListener("keydown",e=>{if(panel.style.display!=="block")return;const tag=document.activeElement?.tagName;if(tag==="INPUT"||tag==="TEXTAREA")return;if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="z"){e.preventDefault();restoreHistory(historyIndex-1)}else if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==="y"){e.preventDefault();restoreHistory(historyIndex+1)}else if((e.key==="Delete"||e.key==="Backspace")&&selected>=0){e.preventDefault();document.getElementById("editorDelete").click()}});
  document.getElementById("editorSave").onclick=()=>{localStorage.setItem("neonStageEditorV1",JSON.stringify(items));say("クイック保存しました。")};
  document.getElementById("editorLoad").onclick=()=>{try{items=clean(JSON.parse(localStorage.getItem("neonStageEditorV1")||"[]"));selected=-1;draw();say("クイック保存を読み込みました。")}catch(e){say("読み込みに失敗しました。")}};
- document.getElementById("editorSaveNamed").onclick=()=>{const name=document.getElementById("editorStageName").value.trim();if(!name){say("ステージ名を入力してください。");return}const all=named();all[name]=items.map(o=>({...o}));localStorage.setItem("neonStageEditorStagesV2",JSON.stringify(all));say("「"+name+"」を保存しました。")};
+ document.getElementById("editorSaveNamed").onclick=()=>{const name=document.getElementById("editorStageName").value.trim();if(!name){say("ステージ名を入力してください。");return}const all=named();all[name]=items.map(o=>({...o}));localStorage.setItem("neonStageEditorStagesV2",JSON.stringify(all));renderCustomStageMenu();say("「"+name+"」を保存しました。")};
  document.getElementById("editorLoadNamed").onclick=()=>{const all=named(),names=Object.keys(all);if(!names.length){say("保存済みステージはありません。");return}const name=prompt("読み込むステージ名：\n"+names.join("\n"),names[0]);if(name===null)return;if(!all[name]){say("その名前は見つかりません。");return}items=clean(all[name]);document.getElementById("editorStageName").value=name;selected=-1;draw();say("「"+name+"」を読み込みました。")};
  document.getElementById("editorExport").onclick=()=>{const raw=JSON.stringify({format:"NEON_STAGE_V2",items});if(navigator.clipboard?.writeText)navigator.clipboard.writeText(raw).then(()=>say("JSONをコピーしました。")).catch(()=>say("コピーに失敗しました。"));else{const a=document.createElement("textarea");a.value=raw;panel.appendChild(a);a.select();try{document.execCommand("copy");say("JSONをコピーしました。")}catch(e){say("コピーできませんでした。")}a.remove()}};
  document.getElementById("editorImport").onclick=()=>{const raw=prompt("ステージJSONを貼り付けてください：");if(raw===null)return;try{const v=JSON.parse(raw);items=clean(v.items||v);selected=-1;draw();say("JSONを読み込みました。")}catch(e){say("JSONの形式が正しくありません。")}};
@@ -2369,7 +2381,7 @@ function drawCustomStageHeals(){for(const h of customStageHealItems){if(h.used)c
  document.getElementById("editorWarpSettings").onclick=()=>{if(selected<0||items[selected].type!=="warp"){say("ワープ装置を選択してください。");return}const o=items[selected],pair=prompt("同じ文字のワープ装置同士がつながります（A〜Z）",o.pair||"A");if(pair===null)return;snapshot();o.pair=(pair.trim().toUpperCase()||"A").slice(0,1);snapshot();draw();say("ワープ接続先を設定しました。")};
 
 
- snapshot();draw()
+ renderCustomStageMenu();snapshot();draw()
 })();
 
 </script>
