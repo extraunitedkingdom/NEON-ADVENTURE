@@ -560,7 +560,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.57</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.58</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button></div>
@@ -1518,8 +1518,21 @@ function update(){
   if(customStageTestMode){
    // Custom stage platforms also block side entry instead of allowing the player to slip through.
    if(player.vx!==0){for(const p of [...platforms,...movingPlatforms]){if(player.y+player.h>p.y+3&&player.y<p.y+p.h-2&&player.x+player.w>p.x&&player.x<p.x+p.w){if(oldX+player.w<=p.x)player.x=p.x-player.w;else if(oldX>=p.x+p.w)player.x=p.x+p.w;player.vx=0}}}
-   // Continuous slope surface collision (not staircase blocks).
-   for(const sl of customStageSlopes){const center=player.x+player.w*.5;if(center>=sl.x&&center<=sl.x+sl.w){const surface=sl.y+sl.h-(center-sl.x)/sl.w*sl.h;if(player.vy>=0&&oldY+player.h<=surface+12&&player.y+player.h>=surface-2){player.y=surface-player.h;player.vy=0;player.grounded=true;player.jumps=0}}}
+   // Continuous slope collision: land on the ramp surface and prevent entering its solid side.
+   for(const sl of customStageSlopes){
+    const center=player.x+player.w*.5;
+    if(center>=sl.x&&center<=sl.x+sl.w){
+     const surface=sl.y+sl.h-(center-sl.x)/sl.w*sl.h;
+     const crossedFromAbove=oldY+player.h<=surface+14&&player.y+player.h>=surface-2;
+     const standingOnRamp=player.grounded&&player.y+player.h>=surface-3&&player.y+player.h<=surface+14;
+     if(player.vy>=0&&(crossedFromAbove||standingOnRamp)){
+      player.y=surface-player.h;player.vy=0;player.grounded=true;player.jumps=0;
+     }else if(player.y<sl.y+sl.h&&player.y+player.h>surface+2){
+      if(player.vx>0&&oldX+player.w<=sl.x+player.w*.5){player.x=sl.x-player.w;player.vx=0}
+      else if(player.vx<0&&oldX>=sl.x+sl.w*.5){player.x=sl.x+sl.w;player.vx=0}
+     }
+    }
+   }
    for(const sp of customStageSpikes){if(player.x<sp.x+sp.w&&player.x+player.w>sp.x&&player.y<sp.y+sp.h&&player.y+player.h>sp.y&&!adminMode&&invincibleTimer===0){damagePlayer()}}
    for(const w of customStageWarps){if(!w.used&&player.x<w.x+w.w&&player.x+player.w>w.x&&player.y<w.y+w.h&&player.y+player.h>w.y){const pair=customStageWarps.filter(v=>v!==w&&v.pair===w.pair);if(pair.length){const dest=pair[0];player.x=dest.x;player.y=dest.y-player.h;player.vx=0;player.vy=0;w.used=true;dest.used=true;setTimeout(()=>{w.used=false;dest.used=false},700)}}}
   }
@@ -1800,7 +1813,14 @@ function draw(){
  for(const wall of stageWalls){ctx.fillStyle="#493c59";ctx.fillRect(wall.x,wall.y,wall.w,wall.h);ctx.fillStyle="#b58aff";ctx.fillRect(wall.x,wall.y,wall.w,9);for(let yy=wall.y+25;yy<wall.y+wall.h;yy+=28){ctx.fillStyle="#6b587b";ctx.fillRect(wall.x+8,yy,wall.w-16,4)}}
  for(const z of lavaZones){ctx.fillStyle="#ff4b16";ctx.fillRect(z.x,z.y,z.w,z.h);ctx.fillStyle="#ffd34e";ctx.fillRect(z.x,z.y,z.w,7)}
  for(const p of [...platforms,...movingPlatforms]){ctx.fillStyle=movingPlatforms.includes(p)?"#ffad55":worldNumber===4?"#34304a":worldNumber===2?"#514044":"#294b3c";ctx.fillRect(p.x,p.y,p.w,p.h);ctx.fillStyle=worldNumber===4?"#9a6bd6":worldNumber===2?"#ff8a36":"#42d68b";ctx.fillRect(p.x,p.y,p.w,6)}
- if(customStageTestMode){for(const sl of customStageSlopes){ctx.fillStyle="#46e6d0";ctx.beginPath();ctx.moveTo(sl.x-camera,sl.y+sl.h);ctx.lineTo(sl.x+sl.w-camera,sl.y);ctx.lineTo(sl.x+sl.w-camera,sl.y+sl.h);ctx.closePath();ctx.fill()}for(const sp of customStageSpikes){ctx.fillStyle="#ff5267";ctx.beginPath();ctx.moveTo(sp.x-camera,sp.y+sp.h);ctx.lineTo(sp.x+sp.w/2-camera,sp.y);ctx.lineTo(sp.x+sp.w-camera,sp.y+sp.h);ctx.fill()}for(const w of customStageWarps){ctx.strokeStyle="#d77aff";ctx.lineWidth=5;ctx.beginPath();ctx.arc(w.x+w.w/2-camera,w.y+w.h/2,w.w/2,0,Math.PI*2);ctx.stroke()}for(const d of customStageDecos){ctx.fillStyle="rgba(155,180,216,.55)";ctx.fillRect(d.x-camera,d.y,d.w,d.h)}}
+ if(customStageTestMode){
+  for(const sl of customStageSlopes){ctx.fillStyle="#46e6d0";ctx.beginPath();ctx.moveTo(sl.x-camera,sl.y+sl.h);ctx.lineTo(sl.x+sl.w-camera,sl.y);ctx.lineTo(sl.x+sl.w-camera,sl.y+sl.h);ctx.closePath();ctx.fill();ctx.strokeStyle="#bafff2";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(sl.x-camera,sl.y+sl.h);ctx.lineTo(sl.x+sl.w-camera,sl.y);ctx.stroke()}
+  for(const sp of customStageSpikes){ctx.fillStyle="#ff5267";ctx.beginPath();ctx.moveTo(sp.x-camera,sp.y+sp.h);ctx.lineTo(sp.x+sp.w/2-camera,sp.y);ctx.lineTo(sp.x+sp.w-camera,sp.y+sp.h);ctx.fill()}
+  for(const w of customStageWarps){ctx.strokeStyle="#d77aff";ctx.lineWidth=5;ctx.beginPath();ctx.arc(w.x+w.w/2-camera,w.y+w.h/2,w.w/2,0,Math.PI*2);ctx.stroke();ctx.fillStyle="#f5d7ff";ctx.font="bold 12px sans-serif";ctx.textAlign="center";ctx.fillText(w.pair||"A",w.x+w.w/2-camera,w.y+w.h/2+4)}
+  for(const d of customStageDecos){ctx.fillStyle="rgba(155,180,216,.55)";ctx.fillRect(d.x-camera,d.y,d.w,d.h)}
+  for(const pad of springPads){ctx.fillStyle="#277fc0";ctx.fillRect(pad.x-camera,pad.y+8,pad.w,pad.h-8);ctx.strokeStyle="#8ce8ff";ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(pad.x-camera+5,pad.y+8);for(let x=0;x<4;x++){ctx.lineTo(pad.x-camera+pad.w*(x+.5)/4,pad.y-5);ctx.lineTo(pad.x-camera+pad.w*(x+1)/4,pad.y+8)}ctx.stroke()}
+  const sx=customStageStartPoint.x-camera,sy=customStageStartPoint.y;ctx.fillStyle="#fff";ctx.fillRect(sx+12,sy-20,4,20);ctx.fillStyle="#5affb8";ctx.beginPath();ctx.moveTo(sx+16,sy-20);ctx.lineTo(sx+35,sy-14);ctx.lineTo(sx+16,sy-8);ctx.closePath();ctx.fill();ctx.textAlign="left";
+ }
  for(const c of coins){if(c.taken)continue;ctx.fillStyle="#ffd700";ctx.beginPath();ctx.arc(c.x,c.y,9,0,Math.PI*2);ctx.fill();ctx.strokeStyle="#fff0a0";ctx.stroke()}
  if(worldNumber===4)drawWorld4Actors();else for(let i=0;i<enemies.length;i++){const e=enemies[i];if(e.alive)drawDetailedEnemy(e,i,false)}
  if(adminBeamTimer>0&&adminMode){const bx=(player.x+player.w/2-camera)+(facing>0?14:-14),by=player.y+player.h/2;ctx.save();ctx.globalAlpha=Math.min(1,adminBeamTimer/8);ctx.shadowColor="#32eaff";ctx.shadowBlur=28;ctx.fillStyle="#19cfff";ctx.fillRect(facing>0?bx:0,by-17,facing>0?W-bx:bx,34);ctx.shadowBlur=10;ctx.fillStyle="#eaffff";ctx.fillRect(facing>0?bx:0,by-6,facing>0?W-bx:bx,12);ctx.restore()}
