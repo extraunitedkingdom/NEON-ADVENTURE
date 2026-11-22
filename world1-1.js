@@ -65,16 +65,16 @@
   for(const n of npcs){c.save();c.translate(n.x,0);c.fillStyle="rgba(0,0,0,.18)";c.beginPath();c.ellipse(0,426,19,5,0,0,Math.PI*2);c.fill();c.fillStyle=n.color;c.fillRect(-13,382,26,38);c.fillStyle="#f1c49b";c.beginPath();c.arc(0,370,13,0,Math.PI*2);c.fill();c.fillStyle="#5a3828";c.fillRect(-13,357,26,8);c.fillStyle="#fff";c.font="bold 12px sans-serif";c.textAlign="center";c.fillText(n.name,0,350);if(Math.abs(player.x+player.w/2-n.x)<105){c.fillStyle="#fff4a8";c.font="bold 22px sans-serif";c.fillText("!",0,335)}c.restore()}
   // Player: reuse the game's official avatar renderer so the selected profile,
   // skin design, and selected boy/girl appearance remain consistent everywhere.
-  c.fillStyle="rgba(0,0,0,.2)";c.beginPath();c.ellipse(player.x+player.w/2,430,18,5,0,0,Math.PI*2);c.fill();
+  c.fillStyle="rgba(0,0,0,.2)";c.beginPath();c.ellipse(player.x-camera+player.w/2,430,18,5,0,0,Math.PI*2);c.fill();
   if(typeof drawSpaceHellFortressPlayer==="function"){
-   drawSpaceHellFortressPlayer(player.x,player.y,1);
+   drawSpaceHellFortressPlayer(player.x-camera,player.y,1);
   }else{
    // Safe fallback if the main avatar renderer is unavailable.
    c.fillStyle=playerSkin||"#9b8aff";c.fillRect(player.x,player.y+12,player.w,player.h-12);
    c.fillStyle="#f1c9b6";c.fillRect(player.x+5,player.y+2,20,18);
   }
   c.fillStyle="#fff";c.font="bold 12px sans-serif";c.textAlign="center";
-  c.fillText(typeof playerName==="string"&&playerName.trim()?playerName:"PLAYER",player.x+player.w/2,player.y-9);
+  c.fillText(typeof playerName==="string"&&playerName.trim()?playerName:"PLAYER",player.x-camera+player.w/2,player.y-9);
   c.restore();
   // HUD
   c.fillStyle="rgba(5,17,38,.78)";c.fillRect(16,14,340,58);c.strokeStyle="#83f3d0";c.strokeRect(16,14,340,58);c.fillStyle="#d9fff1";c.font="bold 17px sans-serif";c.textAlign="left";c.fillText("WORLD 1-1  草原の町",29,38);c.font="12px sans-serif";c.fillStyle="#fff";c.fillText("町の人と話そう　"+metVillagers.size+"/2",29,58);
