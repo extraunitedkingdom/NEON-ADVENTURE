@@ -21,7 +21,7 @@
   }
   active=true;dialogue=null;dialogueIndex=0;metVillagers=new Set();notice="町の人たちから話を聞こう。";noticeTimer=240;
   worldNumber=1;customStageTestMode=false;springPads=[];lavaZones=[];stageWalls=[];windZones=[];movingPlatforms=[];vanishPlatforms=[];lightningZones=[];
-  platforms=[{x:0,y:430,w:1450,h:70}];enemies=[];coins=[];goal={x:gateX,y:340,w:45,h:90};
+  platforms=[{x:0,y:430,w:1450,h:70}];enemies=[];coins=[];goal={x:5000,y:340,w:45,h:90};
   boss={x:-500,y:-500,w:1,h:1,hp:0,maxHP:0,alive:false};bossDefeated=true;gameClear=false;stageCleared=false;
   player.x=75;player.y=388;player.vx=0;player.vy=0;player.jumps=0;playerHP=3;camera=0;currentTime=0;
   document.querySelector(".stage-top p").textContent="WORLD 1-1 : GRASSLAND TOWN";
