@@ -577,7 +577,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.61</p><p style="margin:4px auto 10px;color:#ffd66b;font-size:13px;font-weight:800">STORY DEVELOPMENT / ADMIN TEST ONLY</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.62</p><p style="margin:4px auto 10px;color:#ffd66b;font-size:13px;font-weight:800">STORY DEVELOPMENT / ADMIN TEST ONLY</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button><div id="customStageMenu" style="margin-top:12px;padding-top:10px;border-top:1px solid #48dfff66"><b>🧩 MY STAGES</b><div id="customStageButtons"></div></div></div>
@@ -601,9 +601,9 @@ body>h1{display:none}
    <div class="story-world-label">WORLD 1 / GREEN GRASSLAND</div>
    <h3>🌿 草原地方</h3>
    <p>草原の奥で自然や魔物に異変が発生。古代遺跡の研究者を助け、遺跡の謎を追う。</p>
-   <div class="story-progress"><span>STORY PROGRESS</span><strong>準備中</strong></div>
-   <div class="story-progress-track"><span></span></div>
-   <button id="storyStartButton" type="button" disabled>COMING SOON　/　WORLD 1 制作中</button>
+   <div class="story-progress"><span>STORY PROGRESS</span><strong>1-1 実装済み / 開発中</strong></div>
+   <div class="story-progress-track"><span style="width:20%"></span></div>
+   <button id="storyStartButton" type="button">▶ PLAY　/　1-1 草原の町</button>
   </div>
   <p class="story-footnote">ストーリーはWORLDごとに順番に実装します。開発中はアドミンのみテストプレイできます。</p>
   <button id="closeStoryPanel" type="button">CLOSE</button>
@@ -704,6 +704,7 @@ body>h1{display:none}
 <div class="controls">
 <button id="left" class="direction-key" aria-label="左へ移動">◀</button><button id="depthUp" class="direction-key depth-key" aria-label="奥へ移動" style="display:none;border-color:#ffca68;background:linear-gradient(90deg,#754314,#a56a1d)">▲</button><button id="jump">JUMP ▲</button><button id="depthDown" class="direction-key depth-key" aria-label="手前へ移動" style="display:none;border-color:#ffca68;background:linear-gradient(90deg,#754314,#a56a1d)">▼</button><button id="right" class="direction-key" aria-label="右へ移動">▶</button>
 </div>
+<div id="storyInteractControls" style="display:flex;justify-content:center;margin:6px auto;max-width:900px"><button id="storyInteractButton" type="button" style="display:none;min-width:180px;border-color:#83f3d0;background:linear-gradient(90deg,#124d48,#176b65)">💬 話す / 次へ（E）</button></div>
 <div id="equipmentPanel" role="dialog" aria-modal="true" aria-label="装備・ステータス">
  <div class="equipment-shell">
   <h2>⚔ EQUIPMENT & STATUS</h2>
@@ -2429,5 +2430,6 @@ function drawCustomStageHeals(){for(const h of customStageHealItems){if(h.used)c
 })();
 
 </script>
+<script src="world1-1.js"></script>
 </body>
 </html>
