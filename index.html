@@ -369,6 +369,23 @@ body>h1{display:none}
 #achievementToast .toast-name{font-size:19px;font-weight:900;margin:3px 0;text-shadow:0 0 10px #25dfff77}
 #achievementToast .toast-desc{font-size:12px;color:#c8e5ff}
 
+/* STORY MODE menu */
+#home #storyToggle{border-color:#7df3c8;background:linear-gradient(110deg,#124d48,#176b65);box-shadow:inset 0 1px #ffffff33,0 4px 0 #082f2b,0 0 16px #4bffd044}
+#storyPanel{display:none;position:fixed;inset:0;z-index:1250;background:rgba(3,7,24,.9);backdrop-filter:blur(9px);padding:18px;overflow:auto}
+#storyPanel .story-shell{width:min(100%,560px);margin:7vh auto;padding:22px;border:1px solid #6df5d0;border-radius:18px;background:linear-gradient(145deg,#102b3d,#10152f 70%,#241642);box-shadow:0 0 30px #35ffd044;color:#effcff;text-align:left}
+#storyPanel .story-kicker{font:800 10px monospace;letter-spacing:2px;color:#7df3c8}
+#storyPanel h2{margin:8px 0;color:#c1ffe9;letter-spacing:3px}
+#storyPanel .story-intro,#storyPanel .story-footnote{color:#c6dce8;font-size:13px;line-height:1.75}
+#storyPanel .story-world-card{margin:16px 0;padding:16px;border:1px solid #64eac488;border-radius:13px;background:linear-gradient(135deg,#123d3a,#142b42 65%,#20234a);box-shadow:inset 0 0 22px #4bffd018}
+#storyPanel .story-world-label{font:800 10px monospace;letter-spacing:1.5px;color:#8fffe0}
+#storyPanel .story-world-card h3{margin:8px 0;color:#fff;font-size:21px}
+#storyPanel .story-world-card p{color:#d2e9e5;font-size:13px;line-height:1.7}
+#storyPanel .story-progress{display:flex;justify-content:space-between;gap:10px;margin-top:14px;color:#a9c9d0;font-size:11px;font-weight:800}
+#storyPanel .story-progress strong{color:#ffd77c}
+#storyPanel .story-progress-track{height:7px;margin:7px 0 12px;border-radius:9px;background:#071827;overflow:hidden}
+#storyPanel .story-progress-track span{display:block;width:0;height:100%;background:linear-gradient(90deg,#43e9bd,#65cfff)}
+#storyPanel button{width:100%;margin-top:10px}
+#storyPanel button:disabled{opacity:.65;cursor:not-allowed;filter:saturate(.65)}
 /* NEON ADVENTURE ONLINE foundation */
 #onlinePanel{display:none;position:fixed;inset:0;z-index:1200;background:rgba(3,7,24,.88);backdrop-filter:blur(8px);padding:18px;overflow:auto}
 #onlinePanel .online-shell{width:min(100%,560px);margin:8vh auto;padding:22px;border:1px solid #32eaff;border-radius:18px;background:linear-gradient(145deg,#101d43,#090d25);box-shadow:0 0 28px #00dfff55;color:#effcff;text-align:left}
@@ -560,7 +577,7 @@ body>h1{display:none}
 </svg>
 <button id="spaceHellSecret" type="button" aria-label="隠しステージ SPACE HELL に入る" title="秘密の入口"></button>
 </div>
-<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.60</p><p style="margin:4px auto 10px;color:#ffd66b;font-size:13px;font-weight:800">STORY DEVELOPMENT / ADMIN TEST ONLY</p>
+<p class="hero-subtitle">✦ EXPLORE THE UNKNOWN ✦</p><p class="game-version">VER 2.61</p><p style="margin:4px auto 10px;color:#ffd66b;font-size:13px;font-weight:800">STORY DEVELOPMENT / ADMIN TEST ONLY</p>
 <div class="home-buttons">
 <button id="startGame">▶　STAGE SELECT</button>
 <div id="stageSelect"><b>SELECT WORLD</b><button id="world1Select">🌿 WORLD 1 : GREEN FOREST</button><button id="world2Select" disabled>🌋 WORLD 2 : LAVA LAND 🔒</button><button id="world3Select" disabled>☁️ WORLD 3 : SKY KINGDOM 🔒</button><button id="world4Select" disabled>🌌 WORLD 4 : COSMIC ABYSS 🔒</button><div id="customStageMenu" style="margin-top:12px;padding-top:10px;border-top:1px solid #48dfff66"><b>🧩 MY STAGES</b><div id="customStageButtons"></div></div></div>
@@ -569,9 +586,28 @@ body>h1{display:none}
 <button id="statisticsToggle">📊　STATISTICS</button>
 <button id="shopToggle">🛒　SKIN SHOP</button>
 <button id="save">▣　SAVE</button>
+<button id="storyToggle" type="button">📖　STORY</button>
 <button id="ranking">🏆　RANKING</button>
 <button id="onlineToggle" type="button">🌐　ONLINE</button>
 <button id="codeToggle">⌨️　CODE</button>
+</div>
+
+<div id="storyPanel" role="dialog" aria-modal="true" aria-labelledby="storyTitle">
+ <div class="story-shell">
+  <div class="story-kicker">NEON ADVENTURE / STORY MODE</div>
+  <h2 id="storyTitle">📖 STORY</h2>
+  <p class="story-intro">世界に起き始めた異変を追い、各地に散らばる5つのカケラを集める長編アドベンチャー。</p>
+  <div class="story-world-card">
+   <div class="story-world-label">WORLD 1 / GREEN GRASSLAND</div>
+   <h3>🌿 草原地方</h3>
+   <p>草原の奥で自然や魔物に異変が発生。古代遺跡の研究者を助け、遺跡の謎を追う。</p>
+   <div class="story-progress"><span>STORY PROGRESS</span><strong>準備中</strong></div>
+   <div class="story-progress-track"><span></span></div>
+   <button id="storyStartButton" type="button" disabled>COMING SOON　/　WORLD 1 制作中</button>
+  </div>
+  <p class="story-footnote">ストーリーはWORLDごとに順番に実装します。開発中はアドミンのみテストプレイできます。</p>
+  <button id="closeStoryPanel" type="button">CLOSE</button>
+ </div>
 </div>
 
 <div id="onlinePanel" role="dialog" aria-modal="true" aria-labelledby="onlineTitle">
@@ -1989,6 +2025,9 @@ document.getElementById("homeButton").onclick=returnHome;
 document.getElementById("clearHomeButton").onclick=returnHome;
 document.getElementById("clearRestartButton").onclick=restart;
 document.getElementById("nextStageButton").onclick=()=>{if(worldNumber===1&&world2Unlocked){loadWorld2();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}else if(worldNumber===2&&world3Unlocked){loadWorld3();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}else if(worldNumber===3&&world4Unlocked){loadWorld4();gameStarted=true;document.getElementById("clearPanel").style.display="none";saveGame()}};
+document.getElementById("storyToggle").onclick=()=>{document.getElementById("storyPanel").style.display="block";};
+document.getElementById("closeStoryPanel").onclick=()=>{document.getElementById("storyPanel").style.display="none";};
+document.getElementById("storyPanel").addEventListener("click",e=>{if(e.target.id==="storyPanel")e.currentTarget.style.display="none"});
 document.getElementById("onlineToggle").onclick=()=>{document.getElementById("onlinePanel").style.display="block";};
 document.getElementById("closeOnlinePanel").onclick=()=>{document.getElementById("onlinePanel").style.display="none";};
 document.getElementById("onlinePanel").addEventListener("click",e=>{if(e.target.id==="onlinePanel")e.currentTarget.style.display="none"});
